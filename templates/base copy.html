@@ -1,0 +1,289 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}موقع التعليم{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- الخط العربي -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        body {
+            background-color: #f8fafc;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .link-delay-container {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <!-- شريط التنقل -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- الشعار -->
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-xl"></i>
+                    </div>
+                    <a href="{% url 'home' %}" class="text-2xl font-bold text-gray-800">موقع التعليم</a>
+                </div>
+                
+                <!-- روابط التنقل -->
+                <div class="hidden md:flex space-x-8 space-x-reverse">
+                    <a href="{% url 'home' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if request.path == '/' %}text-blue-600{% endif %}">
+                        <i class="fas fa-home mr-1"></i> الرئيسية
+                    </a>
+                    <a href="{% url 'courses' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if '/courses/' in request.path %}text-blue-600{% endif %}">
+                        <i class="fas fa-video mr-1"></i> الكورسات
+                    </a>
+                    <a href="{% url 'articles' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if '/articles/' in request.path %}text-blue-600{% endif %}">
+                        <i class="fas fa-newspaper mr-1"></i> المقالات
+                    </a>
+                    <a href="{% url 'grants' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if '/grants/' in request.path %}text-blue-600{% endif %}">
+                        <i class="fas fa-award mr-1"></i> المنح والتدريبات
+                    </a>
+                    <a href="{% url 'books' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if '/books/' in request.path %}text-blue-600{% endif %}">
+                        <i class="fas fa-book mr-1"></i> الكتب والملخصات
+                    </a>
+                </div>
+                
+                <!-- أزرار المستخدم -->
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <!-- زر البحث -->
+                    <a href="{% url 'search' %}" class="text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-search"></i>
+                    </a>
+                    
+                    {% if user.is_authenticated %}
+                        <!-- قائمة المستخدم -->
+                        <div class="relative group">
+                            <button class="flex items-center space-x-2 space-x-reverse focus:outline-none">
+                                <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                    {{ user.first_name|default:user.username|first|upper }}
+                                </div>
+                                <span class="text-gray-700 hidden md:inline">{{ user.first_name|default:user.username }}</span>
+                                <i class="fas fa-chevron-down text-gray-500 text-sm"></i>
+                            </button>
+                            
+                            <!-- القائمة المنسدلة -->
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 hidden group-hover:block z-50">
+                                <a href="{% url 'dashboard' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-tachometer-alt mr-2"></i> لوحة التحكم
+                                </a>
+                                <a href="{% url 'profile' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user mr-2"></i> الملف الشخصي
+                                </a>
+                                
+                                {% if user.is_staff or user.profile.is_content_editor %}
+                                <a href="{% url 'create_post' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-plus-circle mr-2"></i> إنشاء منشور
+                                </a>
+                                {% endif %}
+                                
+                                {% if user.is_staff %}
+                                <a href="/admin/" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-cog mr-2"></i> الإدارة
+                                </a>
+                                {% endif %}
+                                
+                                <div class="border-t my-1"></div>
+                                <a href="{% url 'logout' %}" class="block px-4 py-2 text-red-600 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> تسجيل الخروج
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- أزرار تسجيل الدخول والتسجيل -->
+                        <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600 font-medium">
+                            <i class="fas fa-sign-in-alt mr-1"></i> تسجيل الدخول
+                        </a>
+                        <a href="{% url 'register' %}" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
+                            <i class="fas fa-user-plus mr-1"></i> إنشاء حساب
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- الرسائل -->
+    {% if messages %}
+    <div class="container mx-auto px-4 mt-4">
+        {% for message in messages %}
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-2" role="alert">
+            <span class="block sm:inline">{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- المحتوى الرئيسي -->
+    <main class="min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- التذييل -->
+    <footer class="bg-gray-900 text-white py-12 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- معلومات الموقع -->
+                <div>
+                    <div class="flex items-center space-x-2 space-x-reverse mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold">موقع التعليم</h3>
+                    </div>
+                    <p class="text-gray-300">
+                        منصة تعليمية عربية شاملة تقدم كورسات، مقالات، منح تدريبية، كتب وملخصات لمساعدة الطلاب والباحثين.
+                    </p>
+                </div>
+                
+                <!-- روابط سريعة -->
+                <div>
+                    <h4 class="text-xl font-bold mb-4">روابط سريعة</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'home' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> الرئيسية</a></li>
+                        <li><a href="{% url 'courses' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> الكورسات</a></li>
+                        <li><a href="{% url 'articles' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> المقالات</a></li>
+                        <li><a href="{% url 'grants' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> المنح والتدريبات</a></li>
+                        <li><a href="{% url 'books' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> الكتب والملخصات</a></li>
+                    </ul>
+                </div>
+                
+                <!-- سياسات -->
+                <div>
+                    <h4 class="text-xl font-bold mb-4">سياسات</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> سياسة الخصوصية</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> شروط الاستخدام</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> الأسئلة الشائعة</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> اتصل بنا</a></li>
+                    </ul>
+                </div>
+                
+                <!-- وسائل التواصل -->
+                <div>
+                    <h4 class="text-xl font-bold mb-4">تابعنا</h4>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <a href="#" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                    <p class="mt-4 text-gray-300">
+                        اشترك في نشرتنا البريدية للحصول على آخر التحديثات
+                    </p>
+                    <div class="mt-2 flex">
+                        <input type="email" placeholder="بريدك الإلكتروني" class="flex-grow px-3 py-2 rounded-r-lg border border-gray-700 bg-gray-800 text-white focus:outline-none">
+                        <button class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2 rounded-l-lg hover:opacity-90">
+                            اشتراك
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- حقوق النشر -->
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>© {% now "Y" %} موقع التعليم. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- ملفات JavaScript -->
+    <script>
+        // إعدادات Tailwind CSS
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+        
+        // GSAP Animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحريك العناصر عند التحميل
+            gsap.from("nav", {duration: 0.8, y: -50, opacity: 0});
+            
+            // تحريك البطاقات عند التمرير
+            gsap.utils.toArray(".animate-card").forEach(card => {
+                gsap.from(card, {
+                    duration: 0.8,
+                    y: 50,
+                    opacity: 0,
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 80%",
+                    }
+                });
+            });
+        });
+        
+        // إظهار/إخفاء القائمة المنسدلة للمستخدم
+        document.addEventListener('click', function(e) {
+            const userDropdown = document.querySelector('.group');
+            if (userDropdown && !userDropdown.contains(e.target)) {
+                const dropdown = userDropdown.querySelector('.hidden');
+                if (dropdown) dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

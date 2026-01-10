@@ -1,0 +1,141 @@
+<!-- templates/courses.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - موقع التعليم{% endblock %}
+
+{% block content %}
+<!-- الهيرو -->
+<section class="bg-gradient-to-r from-blue-500 to-blue-700 text-white py-16">
+    <div class="container mx-auto px-4">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">الكورسات التعليمية</h1>
+        <p class="text-xl opacity-90">دروس تعليمية متخصصة تغطي مختلف المجالات والموضوعات</p>
+    </div>
+</section>
+
+<!-- فلترة البحث -->
+<section class="py-8 bg-white shadow-sm">
+    <div class="container mx-auto px-4">
+        <form method="get" action="{% url 'search' %}" class="flex flex-col md:flex-row gap-4">
+            <input type="text" name="q" placeholder="ابحث عن كورس..." class="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select class="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">جميع التصنيفات</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
+                <i class="fas fa-search mr-2"></i> بحث
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- قائمة الكورسات -->
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        {% if posts %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for post in posts %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden card-hover animate-card">
+                {% if post.image %}
+                <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-56 object-cover">
+                {% else %}
+                <div class="w-full h-56 bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center">
+                    <i class="fas fa-video text-white text-5xl"></i>
+                </div>
+                {% endif %}
+                
+                <div class="p-6">
+                    <!-- فئة الكورس -->
+                    <div class="mb-3">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
+                            {{ post.category.name }}
+                        </span>
+                    </div>
+                    
+                    <!-- عنوان الكورس -->
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">{{ post.title }}</h3>
+                    
+                    <!-- محتوى مختصر -->
+                    <p class="text-gray-600 mb-4">{{ post.content|truncatechars:120 }}</p>
+                    
+                    <!-- معلومات إضافية -->
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center text-gray-500">
+                            <i class="fas fa-user ml-2"></i>
+                            <span>{{ post.author.get_full_name|default:post.author.username }}</span>
+                        </div>
+                        <div class="flex items-center text-gray-500">
+                            <i class="fas fa-calendar ml-2"></i>
+                            <span>{{ post.publish_date|date:"Y/m/d" }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- الإحصائيات -->
+                    <div class="flex justify-between items-center border-t border-gray-100 pt-4">
+                        <div class="flex items-center text-gray-500">
+                            <i class="fas fa-eye ml-2"></i>
+                            <span>{{ post.views }} مشاهدة</span>
+                        </div>
+                        <div class="flex items-center text-gray-500">
+                            <i class="fas fa-comment ml-2"></i>
+                            <span>{{ post.comments.count }} تعليق</span>
+                        </div>
+                    </div>
+                    
+                    <!-- رابط الكورس -->
+                    <div class="mt-6">
+                        <a href="{% url 'post_detail' post.slug %}" class="block w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-center py-3 rounded-lg hover:opacity-90 font-medium">
+                            <i class="fas fa-play-circle mr-2"></i> ابدأ الكورس الآن
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- الترقيم -->
+        {% if posts.has_other_pages %}
+        <div class="mt-12 flex justify-center">
+            <nav class="flex items-center space-x-2 space-x-reverse">
+                {% if posts.has_previous %}
+                <a href="?page={{ posts.previous_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in posts.paginator.page_range %}
+                    {% if posts.number == num %}
+                    <span class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">{{ num }}</span>
+                    {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+                    <a href="?page={{ num }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if posts.has_next %}
+                <a href="?page={{ posts.next_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-12">
+            <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-video text-gray-400 text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-700 mb-2">لا توجد كورسات حالياً</h3>
+            <p class="text-gray-600 mb-6">سيتم إضافة كورسات جديدة قريباً</p>
+            
+            {% if user.is_authenticated and user.profile.is_content_editor %}
+            <a href="{% url 'create_post' %}" class="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
+                <i class="fas fa-plus-circle mr-2"></i> أضف كورس جديد
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

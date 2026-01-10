@@ -1,0 +1,247 @@
+<!-- templates/dashboard.html -->
+{% extends 'base.html' %}
+
+{% block title %}لوحة التحكم - موقع التعليم{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- عنوان الصفحة -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">
+            <i class="fas fa-tachometer-alt mr-2"></i> لوحة التحكم
+        </h1>
+        <p class="text-gray-600">مرحباً {{ user.first_name|default:user.username }}، هذه نظرة عامة على حسابك</p>
+    </div>
+    
+    <!-- الإحصائيات -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500">إجمالي المنشورات</p>
+                    <h3 class="text-3xl font-bold text-blue-600">{{ total_posts }}</h3>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500">المنشورات المنشورة</p>
+                    <h3 class="text-3xl font-bold text-green-600">{{ published_posts }}</h3>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500">عدد المشاهدات</p>
+                    <h3 class="text-3xl font-bold text-purple-600">
+                        {% with total_views=user.posts.all|dictsort:"views"|last %}
+                        {{ total_views.views|default:"0" }}
+                        {% endwith %}
+                    </h3>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-eye text-purple-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500">الدور</p>
+                    <h3 class="text-xl font-bold text-yellow-600">
+                        {{ user.profile.role|default:"مستخدم" }}
+                    </h3>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user-tag text-yellow-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- المنشورات الأخيرة -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-800">منشوراتك الأخيرة</h2>
+                </div>
+                
+                <div class="divide-y divide-gray-100">
+                    {% if posts %}
+                        {% for post in posts %}
+                        <div class="p-6 hover:bg-gray-50">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-gray-800">{{ post.title }}</h3>
+                                <span class="text-sm px-2 py-1 rounded-full 
+                                    {% if post.status == 'published' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ post.get_status_display }}
+                                </span>
+                            </div>
+                            
+                            <p class="text-gray-600 mb-4 text-sm">{{ post.content|truncatechars:100 }}</p>
+                            
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center text-gray-500 text-sm">
+                                    <i class="fas fa-calendar ml-2"></i>
+                                    <span>{{ post.publish_date|date:"Y/m/d" }}</span>
+                                    <i class="fas fa-eye mr-2 ml-4"></i>
+                                    <span>{{ post.views }} مشاهدة</span>
+                                </div>
+                                
+                                <div class="flex space-x-2 space-x-reverse">
+                                    <a href="{% url 'post_detail' post.slug %}" class="text-blue-600 hover:text-blue-800 text-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if user == post.author or user.is_staff %}
+                                    <a href="{% url 'edit_post' post.id %}" class="text-green-600 hover:text-green-800 text-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="p-6 text-center">
+                        <i class="fas fa-file-alt text-gray-300 text-4xl mb-4"></i>
+                        <p class="text-gray-600 mb-4">لا توجد منشورات حتى الآن</p>
+                        
+                        {% if user.profile.is_content_editor or user.is_staff %}
+                        <a href="{% url 'create_post' %}" class="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+                            <i class="fas fa-plus-circle mr-2"></i> إنشاء منشور جديد
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if posts %}
+                <div class="px-6 py-4 border-t border-gray-200">
+                    <a href="{% url 'create_post' %}" class="text-blue-600 hover:text-blue-800 font-medium">
+                        <i class="fas fa-plus-circle mr-2"></i> إنشاء منشور جديد
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- القائمة الجانبية -->
+        <div class="space-y-6">
+            <!-- الملف الشخصي -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center mb-4">
+                    {% if user.profile.profile_picture %}
+                    <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="w-16 h-16 rounded-full object-cover ml-4">
+                    {% else %}
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl ml-4">
+                        {{ user.first_name|default:user.username|first|upper }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h3 class="font-bold text-gray-800">{{ user.get_full_name|default:user.username }}</h3>
+                        <p class="text-gray-600 text-sm">{{ user.email }}</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <a href="{% url 'profile' %}" class="flex items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-user-edit ml-2"></i>
+                        <span>تعديل الملف الشخصي</span>
+                    </a>
+                    
+                    {% if user.profile.is_content_editor or user.is_staff %}
+                    <a href="{% url 'create_post' %}" class="flex items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-plus-circle ml-2"></i>
+                        <span>إنشاء منشور جديد</span>
+                    </a>
+                    {% endif %}
+                    
+                    {% if user.is_staff %}
+                    <a href="/admin/" class="flex items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-cog ml-2"></i>
+                        <span>لوحة الإدارة</span>
+                    </a>
+                    {% endif %}
+                    
+                    <a href="{% url 'logout' %}" class="flex items-center text-red-600 hover:text-red-800">
+                        <i class="fas fa-sign-out-alt ml-2"></i>
+                        <span>تسجيل الخروج</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- روابط سريعة -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="font-bold text-gray-800 mb-4">روابط سريعة</h3>
+                <div class="space-y-3">
+                    <a href="{% url 'courses' %}" class="flex items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-video ml-2"></i>
+                        <span>الكورسات</span>
+                    </a>
+                    <a href="{% url 'articles' %}" class="flex items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-newspaper ml-2"></i>
+                        <span>المقالات</span>
+                    </a>
+                    <a href="{% url 'grants' %}" class="flex items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-award ml-2"></i>
+                        <span>المنح والتدريبات</span>
+                    </a>
+                    <a href="{% url 'books' %}" class="flex items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-book ml-2"></i>
+                        <span>الكتب والملخصات</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- الإحصائيات -->
+            <div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl shadow-md p-6">
+                <h3 class="font-bold mb-4">نشاطك</h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>نسبة النشر</span>
+                            <span>
+                                {% if total_posts > 0 %}
+                                {{ published_posts|floatformat:0 }}/{{ total_posts }}
+                                {% else %}0/0{% endif %}
+                            </span>
+                        </div>
+                        <div class="w-full bg-blue-400 rounded-full h-2">
+                            <div class="bg-white h-2 rounded-full" 
+                                 style="width: {% if total_posts > 0 %}{{ published_posts|divisibleby:total_posts|floatformat:0 }}{% else %}0{% endif %}%">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span>نسبة التفاعل</span>
+                            <span>
+                                {% with total_comments=user.posts.all.comments.count %}
+                                {{ total_comments|default:"0" }}
+                                {% endwith %}
+                            </span>
+                        </div>
+                        <div class="w-full bg-blue-400 rounded-full h-2">
+                            <div class="bg-green-300 h-2 rounded-full" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

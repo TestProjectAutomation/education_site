@@ -1,0 +1,234 @@
+<!-- templates/post_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - موقع التعليم{% endblock %}
+
+{% block content %}
+<!-- رابط العودة -->
+<div class="container mx-auto px-4 py-6">
+    <a href="{% url 'home' %}" class="text-blue-600 hover:text-blue-800 font-medium">
+        <i class="fas fa-arrow-right mr-2"></i> العودة للرئيسية
+    </a>
+</div>
+
+<!-- المقال الرئيسي -->
+<article class="py-8">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <!-- العنوان -->
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ post.title }}</h1>
+        
+        <!-- معلومات النشر -->
+        <div class="flex flex-wrap items-center justify-between mb-8 pb-6 border-b border-gray-200">
+            <div class="flex items-center space-x-4 space-x-reverse">
+                <!-- صورة المؤلف -->
+                <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {{ post.author.first_name|default:post.author.username|first|upper }}
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800">{{ post.author.get_full_name|default:post.author.username }}</h4>
+                    <div class="flex items-center text-gray-500 text-sm">
+                        <i class="fas fa-calendar ml-2"></i>
+                        <span>{{ post.publish_date|date:"Y/m/d" }}</span>
+                        <i class="fas fa-clock mr-2 ml-4"></i>
+                        <span>{{ post.publish_date|time:"g:i A" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- الإحصائيات -->
+            <div class="flex items-center space-x-6 space-x-reverse mt-4 md:mt-0">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600">{{ post.views }}</div>
+                    <div class="text-gray-500 text-sm">مشاهدة</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">{{ comments.count }}</div>
+                    <div class="text-gray-500 text-sm">تعليق</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- صورة المقال -->
+        {% if post.image %}
+        <div class="mb-8 rounded-xl overflow-hidden">
+            <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-auto max-h-[500px] object-cover">
+        </div>
+        {% endif %}
+        
+        <!-- محتوى المقال -->
+        <div class="prose prose-lg max-w-none mb-12">
+            {{ post.content|linebreaks }}
+        </div>
+        
+        <!-- رابط المنشور -->
+        {% if post.link %}
+        <div class="mb-12">
+            <div class="link-delay-container text-white p-6 rounded-xl text-center">
+                <h3 class="text-2xl font-bold mb-4">
+                    <i class="fas fa-external-link-alt mr-2"></i> رابط المنشور
+                </h3>
+                <p class="mb-4">سيظهر الرابط بعد انتهاء العد التنازلي:</p>
+                
+                <div class="text-5xl font-bold mb-6" id="main-countdown">{{ post.link_delay }}</div>
+                
+                <button 
+                    class="bg-white text-purple-600 px-8 py-3 rounded-lg font-bold text-lg opacity-50 cursor-not-allowed"
+                    id="main-link-button"
+                    disabled
+                >
+                    <i class="fas fa-external-link-alt mr-2"></i> الانتقال للرابط
+                </button>
+                
+                <script>
+                    // عداد الانتظار الرئيسي
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const delay = {{ post.link_delay }};
+                        const countdownEl = document.getElementById('main-countdown');
+                        const buttonEl = document.getElementById('main-link-button');
+                        const link = '{{ post.link }}';
+                        
+                        let countdown = delay;
+                        const interval = setInterval(function() {
+                            countdown--;
+                            countdownEl.textContent = countdown;
+                            
+                            if (countdown <= 0) {
+                                clearInterval(interval);
+                                countdownEl.textContent = '0';
+                                buttonEl.innerHTML = '<i class="fas fa-external-link-alt mr-2"></i> الانتقال للرابط الآن!';
+                                buttonEl.classList.remove('opacity-50', 'cursor-not-allowed');
+                                buttonEl.classList.add('hover:bg-gray-100');
+                                buttonEl.disabled = false;
+                                
+                                buttonEl.addEventListener('click', function() {
+                                    window.open(link, '_blank');
+                                });
+                            }
+                        }, 1000);
+                    });
+                </script>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- المشاركة -->
+        <div class="mb-12 p-6 bg-gray-50 rounded-xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-share-alt mr-2"></i> شارك هذا المنشور
+            </h3>
+            <div class="flex space-x-4 space-x-reverse">
+                <button class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700">
+                    <i class="fab fa-facebook-f"></i>
+                </button>
+                <button class="w-12 h-12 bg-blue-400 rounded-full flex items-center justify-center text-white hover:bg-blue-500">
+                    <i class="fab fa-twitter"></i>
+                </button>
+                <button class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white hover:bg-red-700">
+                    <i class="fab fa-whatsapp"></i>
+                </button>
+                <button class="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-white hover:bg-gray-900">
+                    <i class="fas fa-link"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- التعليقات -->
+        <div class="mb-12">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-comments mr-2"></i> التعليقات ({{ comments.count }})
+            </h3>
+            
+            <!-- نموذج إضافة تعليق -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                <h4 class="text-lg font-bold text-gray-800 mb-4">أضف تعليقك</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="comment_form" value="1">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">الاسم *</label>
+                            {{ comment_form.name }}
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">البريد الإلكتروني *</label>
+                            {{ comment_form.email }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2">التعليق *</label>
+                        {{ comment_form.content }}
+                    </div>
+                    
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
+                        <i class="fas fa-paper-plane mr-2"></i> إرسال التعليق
+                    </button>
+                </form>
+            </div>
+            
+            <!-- قائمة التعليقات -->
+            {% if comments %}
+            <div class="space-y-6">
+                {% for comment in comments %}
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-start mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
+                            {{ comment.name|first|upper }}
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-start">
+                                <h5 class="font-bold text-gray-800">{{ comment.name }}</h5>
+                                <span class="text-gray-500 text-sm">{{ comment.created_at|timesince }}</span>
+                            </div>
+                            <p class="text-gray-600 mt-2">{{ comment.content }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8 bg-gray-50 rounded-xl">
+                <i class="fas fa-comment-slash text-gray-400 text-4xl mb-4"></i>
+                <p class="text-gray-600">لا توجد تعليقات بعد. كن أول من يعلق!</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- منشورات مشابهة -->
+        {% if similar_posts %}
+        <div class="mb-12">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-th-large mr-2"></i> منشورات مشابهة
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for similar in similar_posts %}
+                <a href="{% url 'post_detail' similar.slug %}" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <div class="flex items-start">
+                        {% if similar.image %}
+                        <img src="{{ similar.image.url }}" alt="{{ similar.title }}" class="w-20 h-20 object-cover rounded-lg ml-4">
+                        {% else %}
+                        <div class="w-20 h-20 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg ml-4 flex items-center justify-center">
+                            <i class="fas fa-file-alt text-white"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="font-bold text-gray-800 mb-1">{{ similar.title|truncatechars:50 }}</h5>
+                            <p class="text-gray-600 text-sm mb-2">{{ similar.content|truncatechars:80 }}</p>
+                            <div class="flex items-center text-gray-500 text-sm">
+                                <i class="fas fa-eye ml-2"></i>
+                                <span>{{ similar.views }}</span>
+                                <i class="fas fa-calendar mr-2 ml-4"></i>
+                                <span>{{ similar.publish_date|date:"Y/m/d" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</article>
+{% endblock %}

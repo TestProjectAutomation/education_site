@@ -1,0 +1,338 @@
+<!-- templates/edit_post.html -->
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}تعديل المنشور - موقع التعليم{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- عنوان الصفحة -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">
+            <i class="fas fa-edit mr-2"></i> تعديل المنشور
+        </h1>
+        <p class="text-gray-600">قم بتعديل المنشور "{{ post.title }}"</p>
+    </div>
+
+    <!-- نموذج تعديل المنشور -->
+    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                <strong>خطأ!</strong> يرجى تصحيح الأخطاء أدناه.
+            </div>
+            {% endif %}
+            
+            <!-- قسم العنوان والفئة -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-heading mr-2"></i> عنوان المنشور *
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-folder mr-2"></i> القسم *
+                    </label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.category.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- معرّف المنشور -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-link mr-2"></i> رابط المنشور (Slug)
+                </label>
+                <div class="flex items-center">
+                    <span class="bg-gray-100 px-4 py-3 rounded-r-lg border border-gray-300 text-gray-600">
+                        /post/
+                    </span>
+                    <input type="text" name="slug" value="{{ post.slug }}" 
+                           class="flex-grow px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <p class="text-gray-500 text-sm mt-2">يستخدم لإنشاء رابط فريد للمنشور</p>
+            </div>
+            
+            <!-- محتوى المنشور -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-align-left mr-2"></i> محتوى المنشور *
+                </label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.content.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- قسم الصورة والرابط -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-image mr-2"></i> صورة المنشور
+                    </label>
+                    
+                    <!-- معاينة الصورة الحالية -->
+                    {% if post.image %}
+                    <div class="mb-4">
+                        <img src="{{ post.image.url }}" alt="الصورة الحالية" class="w-full h-48 object-cover rounded-lg mb-2">
+                        <div class="flex items-center">
+                            <input type="checkbox" name="clear_image" id="clear_image" class="ml-2">
+                            <label for="clear_image" class="text-gray-700 text-sm">حذف الصورة الحالية</label>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- تحميل صورة جديدة -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <div id="image-preview" class="hidden mb-4">
+                            <img id="preview-img" class="w-full h-48 object-cover rounded-lg">
+                        </div>
+                        {{ form.image }}
+                        <p class="text-gray-500 text-sm mt-2">اختر صورة جديدة أو اتركها فارغة للحفاظ على الصورة الحالية</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-link mr-2"></i> رابط خارجي
+                    </label>
+                    {{ form.link }}
+                    <p class="text-gray-500 text-sm mt-2">رابط الكورس أو المصدر الخارجي</p>
+                    
+                    <label class="block text-gray-700 font-medium mb-2 mt-4">
+                        <i class="fas fa-clock mr-2"></i> مدة الانتظار للرابط (ثانية)
+                    </label>
+                    {{ form.link_delay }}
+                    <p class="text-gray-500 text-sm mt-2">الوقت قبل ظهور الرابط للزوار</p>
+                </div>
+            </div>
+            
+            <!-- حالة المنشور -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-toggle-on mr-2"></i> حالة المنشور
+                </label>
+                <div class="flex space-x-4 space-x-reverse">
+                    <label class="flex items-center">
+                        <input type="radio" name="status" value="draft" class="ml-2" 
+                               {% if post.status == 'draft' %}checked{% endif %}>
+                        <span class="text-gray-700">مسودة</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="status" value="published" class="ml-2"
+                               {% if post.status == 'published' %}checked{% endif %}>
+                        <span class="text-gray-700">منشور</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- تاريخ النشر -->
+            <div class="mb-8">
+                <label class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-calendar-alt mr-2"></i> تاريخ النشر
+                </label>
+                <input type="datetime-local" name="publish_date" 
+                       value="{{ post.publish_date|date:'Y-m-d\TH:i' }}"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-gray-500 text-sm mt-2">يمكنك تعديل تاريخ النشر إذا أردت تأجيله</p>
+            </div>
+            
+            <!-- إحصائيات المنشور -->
+            <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                <h4 class="font-bold text-gray-800 mb-3">
+                    <i class="fas fa-chart-bar mr-2"></i> إحصائيات المنشور
+                </h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ post.views }}</div>
+                        <div class="text-gray-600 text-sm">مشاهدة</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600">{{ post.comments.count }}</div>
+                        <div class="text-gray-600 text-sm">تعليق</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-600">{{ post.created_at|timesince }}</div>
+                        <div class="text-gray-600 text-sm">منذ النشر</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-yellow-600">
+                            {% if post.status == 'published' %}
+                            <i class="fas fa-check-circle"></i>
+                            {% else %}
+                            <i class="fas fa-clock"></i>
+                            {% endif %}
+                        </div>
+                        <div class="text-gray-600 text-sm">الحالة</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- أزرار الإجراء -->
+            <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                <div class="flex space-x-3 space-x-reverse">
+                    <a href="{% url 'post_detail' post.slug %}" class="text-gray-600 hover:text-gray-800 font-medium" target="_blank">
+                        <i class="fas fa-eye mr-2"></i> معاينة
+                    </a>
+                    <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-gray-800 font-medium">
+                        <i class="fas fa-arrow-right mr-2"></i> إلغاء
+                    </a>
+                </div>
+                
+                <div class="flex space-x-3 space-x-reverse">
+                    <button type="submit" name="save_draft" value="1" 
+                            class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-medium">
+                        <i class="fas fa-save mr-2"></i> حفظ كمسودة
+                    </button>
+                    
+                    <button type="submit" name="publish" value="1" 
+                            class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 font-medium">
+                        <i class="fas fa-paper-plane mr-2"></i> حفظ وتحديث
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- خيارات متقدمة -->
+    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-cogs mr-2"></i> خيارات متقدمة
+        </h3>
+        
+        <div class="space-y-4">
+            <!-- حذف المنشور -->
+            <div class="p-4 border border-red-200 rounded-lg">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-red-700 mb-1">حذف المنشور</h4>
+                        <p class="text-red-600 text-sm">هذا الإجراء لا يمكن التراجع عنه</p>
+                    </div>
+                    <button type="button" onclick="confirmDelete()" 
+                            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-medium">
+                        <i class="fas fa-trash mr-2"></i> حذف المنشور
+                    </button>
+                </div>
+            </div>
+            
+            <!-- نسخ الرابط -->
+            <div class="p-4 border border-blue-200 rounded-lg">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-blue-700 mb-1">نسخ رابط المنشور</h4>
+                        <p class="text-blue-600 text-sm">انسخ رابط المنشور للمشاركة</p>
+                    </div>
+                    <button type="button" onclick="copyPostLink()" 
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
+                        <i class="fas fa-copy mr-2"></i> نسخ الرابط
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// تأكيد الحذف
+function confirmDelete() {
+    if (confirm('هل أنت متأكد من حذف هذا المنشور؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+        window.location.href = "{% url 'delete_post' post.id %}";
+    }
+}
+
+// نسخ رابط المنشور
+function copyPostLink() {
+    const link = "{{ request.scheme }}://{{ request.get_host }}{% url 'post_detail' post.slug %}";
+    navigator.clipboard.writeText(link).then(() => {
+        alert('تم نسخ رابط المنشور إلى الحافظة');
+    });
+}
+
+// عرض معاينة الصورة
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.querySelector('input[name="image"]');
+    const previewDiv = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewDiv.classList.remove('hidden');
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                previewDiv.classList.add('hidden');
+            }
+        });
+    }
+    
+    // إضافة فئة Tailwind لحقول النموذج
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        if (!input.classList.contains('form-control')) {
+            input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
+                              'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500');
+        }
+    });
+});
+</script>
+
+<style>
+/* تنسيق إضافي لحقول النموذج */
+input[type="text"],
+input[type="url"],
+input[type="number"],
+input[type="datetime-local"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: all 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+input[type="datetime-local"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+textarea {
+    min-height: 300px;
+    resize: vertical;
+}
+
+/* تنسيق الأزرار */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

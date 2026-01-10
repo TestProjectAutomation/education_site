@@ -1,0 +1,221 @@
+<!-- templates/create_post.html -->
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}إنشاء منشور جديد - موقع التعليم{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- عنوان الصفحة -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">
+            <i class="fas fa-plus-circle mr-2"></i> إنشاء منشور جديد
+        </h1>
+        <p class="text-gray-600">املأ النموذج أدناه لإنشاء منشور جديد</p>
+    </div>
+
+    <!-- نموذج إنشاء المنشور -->
+    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                <strong>خطأ!</strong> يرجى تصحيح الأخطاء أدناه.
+            </div>
+            {% endif %}
+            
+            <!-- قسم العنوان والفئة -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-heading mr-2"></i> عنوان المنشور *
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-folder mr-2"></i> القسم *
+                    </label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.category.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- محتوى المنشور -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-align-left mr-2"></i> محتوى المنشور *
+                </label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ form.content.errors.0 }}</p>
+                {% endif %}
+                <p class="text-gray-500 text-sm mt-2">يمكنك استخدام HTML tags للتنسيق</p>
+            </div>
+            
+            <!-- قسم الصورة والرابط -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-image mr-2"></i> صورة المنشور
+                    </label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <div id="image-preview" class="hidden mb-4">
+                            <img id="preview-img" class="w-full h-48 object-cover rounded-lg">
+                        </div>
+                        {{ form.image }}
+                        <p class="text-gray-500 text-sm mt-2">الحجم الأمثل: 1200×600 بكسل</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-link mr-2"></i> رابط خارجي
+                    </label>
+                    {{ form.link }}
+                    <p class="text-gray-500 text-sm mt-2">رابط الكورس أو المصدر الخارجي</p>
+                    
+                    <label class="block text-gray-700 font-medium mb-2 mt-4">
+                        <i class="fas fa-clock mr-2"></i> مدة الانتظار للرابط (ثانية)
+                    </label>
+                    {{ form.link_delay }}
+                    <p class="text-gray-500 text-sm mt-2">الوقت قبل ظهور الرابط للزوار</p>
+                </div>
+            </div>
+            
+            <!-- حالة المنشور -->
+            <div class="mb-8">
+                <label class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-toggle-on mr-2"></i> حالة المنشور
+                </label>
+                <div class="flex space-x-4 space-x-reverse">
+                    <label class="flex items-center">
+                        <input type="radio" name="status" value="draft" class="ml-2" checked>
+                        <span class="text-gray-700">مسودة</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="status" value="published" class="ml-2">
+                        <span class="text-gray-700">نشر مباشرة</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- أزرار الإجراء -->
+            <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-gray-800 font-medium">
+                    <i class="fas fa-arrow-right mr-2"></i> إلغاء والعودة
+                </a>
+                
+                <div class="flex space-x-3 space-x-reverse">
+                    <button type="submit" name="save_draft" value="1" 
+                            class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-medium">
+                        <i class="fas fa-save mr-2"></i> حفظ كمسودة
+                    </button>
+                    
+                    <button type="submit" name="publish" value="1" 
+                            class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 font-medium">
+                        <i class="fas fa-paper-plane mr-2"></i> نشر الآن
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- نصائح للنشر -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+        <h3 class="text-lg font-bold text-blue-800 mb-3">
+            <i class="fas fa-lightbulb mr-2"></i> نصائح للنشر الجيد
+        </h3>
+        <ul class="space-y-2 text-blue-700">
+            <li class="flex items-start">
+                <i class="fas fa-check-circle mt-1 ml-2 text-green-500"></i>
+                <span>استخدم عناوين واضحة وجذابة</span>
+            </li>
+            <li class="flex items-start">
+                <i class="fas fa-check-circle mt-1 ml-2 text-green-500"></i>
+                <span>اختر فئة مناسبة للمحتوى</span>
+            </li>
+            <li class="flex items-start">
+                <i class="fas fa-check-circle mt-1 ml-2 text-green-500"></i>
+                <span>استخدم صور عالية الجودة تناسب المحتوى</span>
+            </li>
+            <li class="flex items-start">
+                <i class="fas fa-check-circle mt-1 ml-2 text-green-500"></i>
+                <span>راجع المحتوى قبل النشر للتأكد من خلوه من الأخطاء</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+// عرض معاينة الصورة
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.querySelector('input[name="image"]');
+    const previewDiv = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewDiv.classList.remove('hidden');
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                previewDiv.classList.add('hidden');
+            }
+        });
+    }
+    
+    // إضافة فئة Tailwind لحقول النموذج
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        if (!input.classList.contains('form-control')) {
+            input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
+                              'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500');
+        }
+    });
+});
+</script>
+
+<style>
+/* تنسيق إضافي لحقول النموذج */
+input[type="text"],
+input[type="url"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: all 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+textarea {
+    min-height: 200px;
+    resize: vertical;
+}
+</style>
+{% endblock %}

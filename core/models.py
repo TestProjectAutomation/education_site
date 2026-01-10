@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.utils.text import slugify
 
 class Category(models.Model):
     CATEGORY_TYPES = [
@@ -44,6 +45,18 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = slugify(self.title, allow_unicode=True) or "post"
+            slug = base
+            i = 1
+            while Post.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                i += 1
+                slug = f"{base}-{i}"
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+
     class Meta:
         verbose_name = 'منشور'
         verbose_name_plural = 'المنشورات'
@@ -98,6 +111,7 @@ class UserProfile(models.Model):
     phone = models.CharField(max_length=20, blank=True)
     role = models.CharField(max_length=50, blank=True, default='مستخدم')
     is_content_editor = models.BooleanField(default=False)
+    
     
     class Meta:
         verbose_name = 'ملف المستخدم'

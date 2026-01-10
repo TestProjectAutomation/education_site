@@ -1,0 +1,206 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+
+{% block title %}الرئيسية - موقع التعليم{% endblock %}
+
+{% block content %}
+<!-- قسم الهيرو -->
+<section class="hero-gradient text-white py-20">
+    <div class="container mx-auto px-4 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 animate__animated animate__fadeIn">
+            منصة التعليم العربية الشاملة
+        </h1>
+        <p class="text-xl md:text-2xl mb-8 opacity-90">
+            اكتشف عالم المعرفة مع كورسات، مقالات، منح تدريبية، كتب وملخصات
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="{% url 'courses' %}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
+                <i class="fas fa-play-circle mr-2"></i> ابدأ التعلم الآن
+            </a>
+            <a href="{% url 'register' %}" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-white hover:text-blue-600 transition">
+                <i class="fas fa-user-plus mr-2"></i> انضم إلينا
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- الإحصائيات -->
+<section class="py-12 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="stat-card text-white p-6 rounded-xl text-center">
+                <i class="fas fa-video text-4xl mb-4"></i>
+                <h3 class="text-3xl font-bold">{{ courses_posts.count }}+</h3>
+                <p class="opacity-90">كورس تعليمي</p>
+            </div>
+            <div class="bg-gradient-to-r from-green-400 to-blue-500 text-white p-6 rounded-xl text-center">
+                <i class="fas fa-newspaper text-4xl mb-4"></i>
+                <h3 class="text-3xl font-bold">{{ articles_posts.count }}+</h3>
+                <p class="opacity-90">مقال تعليمي</p>
+            </div>
+            <div class="bg-gradient-to-r from-yellow-400 to-red-500 text-white p-6 rounded-xl text-center">
+                <i class="fas fa-award text-4xl mb-4"></i>
+                <h3 class="text-3xl font-bold">{{ grants_posts.count }}+</h3>
+                <p class="opacity-90">منحة تدريبية</p>
+            </div>
+            <div class="bg-gradient-to-r from-purple-400 to-pink-500 text-white p-6 rounded-xl text-center">
+                <i class="fas fa-book text-4xl mb-4"></i>
+                <h3 class="text-3xl font-bold">{{ books_posts.count }}+</h3>
+                <p class="opacity-90">كتاب وملخص</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- الأقسام -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">استكشف أقسامنا التعليمية</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- الكورسات -->
+            <a href="{% url 'courses' %}" class="bg-white rounded-xl shadow-lg p-6 text-center card-hover animate-card">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-video text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">الكورسات</h3>
+                <p class="text-gray-600 mb-4">دروس تعليمية متخصصة تغطي مختلف المجالات</p>
+                <div class="text-blue-600 font-medium">
+                    <span>استعرض {{ courses_posts.count }} كورس</span>
+                    <i class="fas fa-arrow-left mr-2"></i>
+                </div>
+            </a>
+            
+            <!-- المقالات -->
+            <a href="{% url 'articles' %}" class="bg-white rounded-xl shadow-lg p-6 text-center card-hover animate-card">
+                <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-newspaper text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">المقالات</h3>
+                <p class="text-gray-600 mb-4">مقالات تعليمية ومواضيع متنوعة</p>
+                <div class="text-green-600 font-medium">
+                    <span>استعرض {{ articles_posts.count }} مقال</span>
+                    <i class="fas fa-arrow-left mr-2"></i>
+                </div>
+            </a>
+            
+            <!-- المنح والتدريبات -->
+            <a href="{% url 'grants' %}" class="bg-white rounded-xl shadow-lg p-6 text-center card-hover animate-card">
+                <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-award text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">المنح والتدريبات</h3>
+                <p class="text-gray-600 mb-4">فرص منح دراسية وتدريبات عملية</p>
+                <div class="text-yellow-600 font-medium">
+                    <span>استعرض {{ grants_posts.count }} فرصة</span>
+                    <i class="fas fa-arrow-left mr-2"></i>
+                </div>
+            </a>
+            
+            <!-- الكتب والملخصات -->
+            <a href="{% url 'books' %}" class="bg-white rounded-xl shadow-lg p-6 text-center card-hover animate-card">
+                <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-book text-white text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">الكتب والملخصات</h3>
+                <p class="text-gray-600 mb-4">كتب وملخصات تعليمية متنوعة</p>
+                <div class="text-purple-600 font-medium">
+                    <span>استعرض {{ books_posts.count }} كتاب</span>
+                    <i class="fas fa-arrow-left mr-2"></i>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- آخر المنشورات -->
+<section class="py-16">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">آخر المنشورات</h2>
+        
+        <!-- الكورسات -->
+        {% if courses_posts %}
+        <div class="mb-12">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-blue-600">
+                    <i class="fas fa-video mr-2"></i> أحدث الكورسات
+                </h3>
+                <a href="{% url 'courses' %}" class="text-blue-600 hover:text-blue-800 font-medium">
+                    عرض الكل <i class="fas fa-arrow-left mr-1"></i>
+                </a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {% for post in courses_posts|slice:":3" %}
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover animate-card">
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center">
+                        <i class="fas fa-video text-white text-4xl"></i>
+                    </div>
+                    {% endif %}
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-lg font-bold text-gray-800">{{ post.title|truncatechars:50 }}</h4>
+                        </div>
+                        <p class="text-gray-600 mb-4">{{ post.content|truncatechars:80 }}</p>
+                        <div class="flex justify-between items-center">
+                            <a href="{% url 'post_detail' post.slug %}" class="text-blue-600 hover:text-blue-800 font-medium">
+                                اقرأ المزيد <i class="fas fa-arrow-left mr-1"></i>
+                            </a>
+                            <div class="flex items-center text-gray-500">
+                                <i class="fas fa-eye ml-2"></i>
+                                <span class="text-sm">{{ post.views }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- المقالات -->
+        {% if articles_posts %}
+        <div class="mb-12">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-green-600">
+                    <i class="fas fa-newspaper mr-2"></i> أحدث المقالات
+                </h3>
+                <a href="{% url 'articles' %}" class="text-green-600 hover:text-green-800 font-medium">
+                    عرض الكل <i class="fas fa-arrow-left mr-1"></i>
+                </a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {% for post in articles_posts|slice:":3" %}
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover animate-card">
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gradient-to-r from-green-400 to-green-600 flex items-center justify-center">
+                        <i class="fas fa-newspaper text-white text-4xl"></i>
+                    </div>
+                    {% endif %}
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-lg font-bold text-gray-800">{{ post.title|truncatechars:50 }}</h4>
+                        </div>
+                        <p class="text-gray-600 mb-4">{{ post.content|truncatechars:80 }}</p>
+                        <div class="flex justify-between items-center">
+                            <a href="{% url 'post_detail' post.slug %}" class="text-green-600 hover:text-green-800 font-medium">
+                                اقرأ المزيد <i class="fas fa-arrow-left mr-1"></i>
+                            </a>
+                            <div class="flex items-center text-gray-500">
+                                <i class="fas fa-eye ml-2"></i>
+                                <span class="text-sm">{{ post.views }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
