@@ -24,7 +24,6 @@
     
 
     <!-- GSAP -->
-    <!-- GSAP & ScrollTrigger -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
@@ -33,16 +32,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- الخط العربي -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-        <!-- AOS Animation -->
+    <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <style>
         * {
             font-family: 'Cairo', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
         }
         
         body {
             background-color: #f8fafc;
+            overflow-x: hidden;
+            transition: background-color 0.5s ease;
         }
         
         .hero-gradient {
@@ -52,7 +54,6 @@
         .card-hover:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
         }
         
         .link-delay-container {
@@ -62,113 +63,856 @@
         .stat-card {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
+        
+        /* Responsive Navigation */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .user-info span {
+                display: none;
+            }
+            
+            .logo-img {
+                height: 2.5rem !important;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .nav-container {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .logo-img {
+                height: 3rem !important;
+            }
+        }
+        
+        /* Mobile Menu Styles */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 320px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .mobile-menu.active {
+            right: 0;
+        }
+        
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Animated Background */
+        #animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 10%;
+            animation-duration: 25s;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            top: 60%;
+            right: 15%;
+            animation-duration: 20s;
+            animation-delay: 5s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            bottom: 20%;
+            left: 20%;
+            animation-duration: 30s;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.5;
+            }
+            25% {
+                transform: translateY(-20px) rotate(90deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(0) rotate(180deg);
+                opacity: 0.5;
+            }
+            75% {
+                transform: translateY(20px) rotate(270deg);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+                opacity: 0.5;
+            }
+        }
+
+        /* Dark Mode Styles */
+        .dark-mode {
+            background-color: #0f172a !important;
+            color: #f1f5f9 !important;
+        }
+
+        .dark-mode nav {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+        }
+
+        .dark-mode .bg-white {
+            background-color: #1e293b !important;
+        }
+
+        .dark-mode .text-gray-700,
+        .dark-mode .text-gray-800,
+        .dark-mode .text-gray-900 {
+            color: #f1f5f9 !important;
+        }
+
+        .dark-mode .text-gray-600,
+        .dark-mode .text-gray-500 {
+            color: #cbd5e1 !important;
+        }
+
+        .dark-mode .bg-gray-50 {
+            background-color: #0f172a !important;
+        }
+
+        .dark-mode .bg-gray-100 {
+            background-color: #1e293b !important;
+        }
+
+        .dark-mode .border-gray-200,
+        .dark-mode .border-gray-300 {
+            border-color: #475569 !important;
+        }
+
+        .dark-mode .shadow-lg {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .dark-mode .shadow-md {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .dark-mode .mobile-menu {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+        }
+
+        .dark-mode .mobile-menu a {
+            color: #cbd5e1 !important;
+        }
+
+        .dark-mode .mobile-menu a:hover {
+            color: #60a5fa !important;
+        }
+
+        .dark-mode .mobile-menu-overlay {
+            background: rgba(0, 0, 0, 0.7) !important;
+        }
+
+        .dark-mode footer {
+            background-color: #111827 !important;
+        }
+
+        .dark-mode .card-hover {
+            background-color: #1e293b !important;
+            border: 1px solid #475569 !important;
+        }
+
+        .dark-mode input,
+        .dark-mode textarea,
+        .dark-mode select {
+            background-color: #334155 !important;
+            color: #f1f5f9 !important;
+            border-color: #475569 !important;
+        }
+
+        .dark-mode input:focus,
+        .dark-mode textarea:focus,
+        .dark-mode select:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+        }
+
+        .dark-mode .bg-green-100 {
+            background-color: rgba(16, 185, 129, 0.2) !important;
+            border-color: rgba(16, 185, 129, 0.4) !important;
+            color: #a7f3d0 !important;
+        }
+
+        .dark-mode .bg-blue-100 {
+            background-color: rgba(59, 130, 246, 0.2) !important;
+            border-color: rgba(59, 130, 246, 0.4) !important;
+            color: #93c5fd !important;
+        }
+
+        .dark-mode .bg-red-100 {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            border-color: rgba(239, 68, 68, 0.4) !important;
+            color: #fca5a5 !important;
+        }
+
+        .dark-mode #user-menu {
+            background-color: #334155 !important;
+            border-color: #475569 !important;
+        }
+
+        .dark-mode #user-menu a {
+            color: #cbd5e1 !important;
+        }
+
+        .dark-mode #user-menu a:hover {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+        }
+
+        .dark-mode .bg-gray-900 {
+            background-color: #111827 !important;
+        }
+
+        .dark-mode .border-gray-800 {
+            border-color: #475569 !important;
+        }
+
+        .dark-mode #loading-overlay {
+            background-color: #0f172a !important;
+        }
+
+        .dark-mode .dark-mode-toggle {
+            background: linear-gradient(135deg, #f59e0b, #f97316) !important;
+        }
+
+        .dark-mode .back-to-top {
+            background: linear-gradient(135deg, #3b82f6, #10b981) !important;
+        }
+
+        /* Toggle Buttons */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 5rem;
+            left: 127.5rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .dark-mode-toggle .tooltip {
+            position: absolute;
+            right: 60px;
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            border: 1px solid #475569;
+        }
+
+        .dark-mode-toggle:hover .tooltip {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .dark-mode .dark-mode-toggle .tooltip {
+            background: #0f172a;
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 127.5rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(20px);
+            visibility: hidden;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: scale(1.1) translateY(0);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .back-to-top .tooltip {
+            position: absolute;
+            right: 60px;
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateX(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            border: 1px solid #475569;
+        }
+
+        .back-to-top:hover .tooltip {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .dark-mode .back-to-top .tooltip {
+            background: #0f172a;
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+
+        /* System Badge */
+        .system-badge {
+            position: fixed;
+            bottom: 9rem;
+            right: 1.5rem;
+            background: #e5e7eb;
+            color: #374151;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 998;
+            border: 1px solid #d1d5db;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .system-badge {
+            background: #1e293b;
+            color: #cbd5e1;
+            border-color: #475569;
+        }
+
+        /* Custom Scrollbar */
+        .dark-mode ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .dark-mode ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        .dark-mode ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 5px;
+        }
+
+        .dark-mode ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+
+        /* Selection Color */
+        .dark-mode ::selection {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .dark-mode-toggle,
+            .back-to-top {
+                bottom: 1rem;
+                left: 1rem;
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+            
+            .dark-mode-toggle {
+                bottom: 5rem;
+            }
+            
+            .system-badge {
+                bottom: 5rem;
+                right: 1rem;
+                font-size: 0.7rem;
+                padding: 0.4rem 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dark-mode-toggle,
+            .back-to-top {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+            }
+            
+            .dark-mode-toggle .tooltip,
+            .back-to-top .tooltip {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.6rem;
+                right: 50px;
+            }
+        }
+
+        /* Smooth Dark Mode Transition */
+        .dark-mode-transition {
+            animation: darkModeFade 0.5s ease;
+        }
+
+        @keyframes darkModeFade {
+            from {
+                opacity: 0.8;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .dark-mode-toggle,
+            .back-to-top,
+            .system-badge {
+                display: none !important;
+            }
+        }
+
+        /* Footer Responsive Styles */
+        @media (max-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr !important;
+                gap: 2rem !important;
+            }
+            
+            .footer-section {
+                text-align: center;
+            }
+            
+            .social-icons {
+                justify-content: center !important;
+            }
+            
+            .newsletter-form {
+                flex-direction: column !important;
+            }
+            
+            .newsletter-input {
+                border-radius: 0.5rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            .newsletter-button {
+                border-radius: 0.5rem !important;
+                width: 100% !important;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 2rem !important;
+            }
+        }
     </style>
     
-
     
+    <style>
+        /* أضف هذه الأنماط في قسم extra_css */
+        :root {
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --success-color: #28a745;
+            --border-radius: 6px;
+        }
+
+        /* تنسيق الحقول عند الخطأ */
+        .input-error {
+            border: 2px solid var(--danger-color) !important;
+            background-color: rgba(220, 53, 69, 0.05) !important;
+            animation: pulse-danger 2s infinite;
+        }
+
+        /* تنسيق الحقول عند التحذير */
+        .input-alert {
+            border: 2px solid var(--warning-color) !important;
+            background-color: rgba(255, 193, 7, 0.05) !important;
+        }
+
+        /* تأثير النبض للحقول ذات الخطأ */
+        @keyframes pulse-danger {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+
+        /* تأثير النبض للحقول ذات التحذير */
+        @keyframes pulse-warning {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(255, 193, 7, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+            }
+        }
+
+        /* تنسيق العدادات */
+        .character-counter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .character-counter .remaining {
+            font-weight: 500;
+        }
+
+        .character-counter .over-limit {
+            color: var(--danger-color);
+            font-weight: bold;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* أيقونة التحذير بجانب الحقل */
+        .field-status {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+        }
+
+        .input-error + .field-status.error,
+        .input-alert + .field-status.warning {
+            display: block;
+        }
+
+        .field-status.error i {
+            color: var(--danger-color);
+        }
+
+        .field-status.warning i {
+            color: var(--warning-color);
+        }
+
+        /* تنسيق خاص للنص في textarea عند الخطأ */
+        textarea.input-error::placeholder {
+            color: rgba(220, 53, 69, 0.5);
+        }
+
+        /* تأثير عند hover على الحقل ذو الخطأ */
+        .input-error:hover {
+            background-color: rgba(220, 53, 69, 0.08) !important;
+        }
+
+        /* تنسيق حاوية الحقل لاحتواء الأيقونة */
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.with-icon input,
+        .form-group.with-icon textarea {
+            padding-right: 35px;
+        }
+
+    </style>
+ 
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-50">
+    <!-- زر Dark Mode -->
+    <button class="dark-mode-toggle" id="darkModeToggle">
+        <i class="fas fa-moon"></i>
+        <span class="tooltip">الوضع الداكن</span>
+    </button>
+
+    <!-- زر العودة للأعلى -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+        <span class="tooltip">العودة للأعلى</span>
+    </button>
+
+    <!-- System Badge -->
+    <div class="system-badge" id="systemBadge">
+        <i class="fas fa-desktop"></i>
+        <span id="modeIndicator">النظام</span>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center space-x-2 space-x-reverse">
+                <a href="{% url 'home' %}" class="flex items-center gap-2">
+                    <img src="{% static 'images/logo.png' %}" class="h-12" alt="الشعار">
+                </a>
+            </div>
+            <button class="text-gray-700 dark:text-gray-300 text-2xl" id="closeMobileMenu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="space-y-4">
+            <a href="{% url 'home' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                <i class="fas fa-home ml-2"></i> الرئيسية
+            </a>
+            <a href="{% url 'courses' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                <i class="fas fa-video ml-2"></i> الكورسات
+            </a>
+            <a href="{% url 'articles' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                <i class="fas fa-newspaper ml-2"></i> المقالات
+            </a>
+            <a href="{% url 'grants' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                <i class="fas fa-award ml-2"></i> المنح والتدريبات
+            </a>
+            <a href="{% url 'books' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                <i class="fas fa-book ml-2"></i> الكتب والملخصات
+            </a>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                    <i class="fas fa-tachometer-alt ml-2"></i> لوحة التحكم
+                </a>
+                <a href="{% url 'profile' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                    <i class="fas fa-user ml-2"></i> الملف الشخصي
+                </a>
+                {% if user.is_staff or user.profile.is_content_editor %}
+                <a href="{% url 'create_post' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                    <i class="fas fa-plus-circle ml-2"></i> إنشاء منشور
+                </a>
+                {% endif %}
+                <form action="{% url 'logout' %}" method="post" class="pt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 py-2 rounded-lg font-medium">
+                        <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+                    </button>
+                </form>
+            {% else %}
+                <div class="pt-4 space-y-2">
+                    <a href="{% url 'login' %}" class="block text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border border-gray-300 dark:border-gray-700 rounded-lg">
+                        <i class="fas fa-sign-in-alt ml-2"></i> تسجيل الدخول
+                    </a>
+                    <a href="{% url 'register' %}" class="block text-center bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:opacity-90 font-medium">
+                        <i class="fas fa-user-plus ml-2"></i> إنشاء حساب
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
     <!-- شريط التنقل -->
-    <nav class="bg-white shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto px-4">
+    <nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 nav-container">
             <div class="flex justify-between items-center py-4">
                 <!-- الشعار -->
                 <div class="flex items-center space-x-2 space-x-reverse">
-                <a href="{% url 'home' %}" class="flex items-center gap-2">
-                    <img src="{% static 'images/logo.png' %}" class="h-16" alt="الشعار">
-                </a>
-
+                    <a href="{% url 'home' %}" class="flex items-center gap-2">
+                        <img src="{% static 'images/logo.png' %}" class="h-16 logo-img" alt="الشعار">
+                    </a>
                 </div>
                 
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden text-gray-700 dark:text-gray-300 text-xl mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
                 <!-- روابط التنقل -->
-                <div class="hidden md:flex space-x-8 space-x-reverse">
-                    <a href="{% url 'home' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if request.path == '/' %}text-blue-600{% endif %}">
+                <div class="hidden md:flex space-x-8 space-x-reverse nav-links">
+                    <a href="{% url 'home' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if request.path == '/' %}text-blue-600{% endif %}">
                         <i class="fas fa-home mr-1"></i> الرئيسية
                     </a>
-                    <a href="{% url 'courses' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if '/courses/' in request.path %}text-blue-600{% endif %}">
+                    <a href="{% url 'courses' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if '/courses/' in request.path %}text-blue-600{% endif %}">
                         <i class="fas fa-video mr-1"></i> الكورسات
                     </a>
-                    <a href="{% url 'articles' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if '/articles/' in request.path %}text-blue-600{% endif %}">
+                    <a href="{% url 'articles' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if '/articles/' in request.path %}text-blue-600{% endif %}">
                         <i class="fas fa-newspaper mr-1"></i> المقالات
                     </a>
-                    <a href="{% url 'grants' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if '/grants/' in request.path %}text-blue-600{% endif %}">
+                    <a href="{% url 'grants' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if '/grants/' in request.path %}text-blue-600{% endif %}">
                         <i class="fas fa-award mr-1"></i> المنح والتدريبات
                     </a>
-                    <a href="{% url 'books' %}" class="text-gray-700 hover:text-blue-600 font-medium {% if '/books/' in request.path %}text-blue-600{% endif %}">
+                    <a href="{% url 'books' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if '/books/' in request.path %}text-blue-600{% endif %}">
                         <i class="fas fa-book mr-1"></i> الكتب والملخصات
                     </a>
                 </div>
                 
-    <!-- أزرار المستخدم -->
-    <div class="flex items-center space-x-4 space-x-reverse">
+                <!-- أزرار المستخدم -->
+                <div class="hidden md:flex items-center space-x-4 space-x-reverse">
+                    {% if user.is_authenticated %}
+                    <div class="relative">
+                        <!-- زر المستخدم -->
+                        <button id="user-menu-btn"
+                            class="flex items-center space-x-2 space-x-reverse focus:outline-none select-none">
+                            <div class="w-9 h-9 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                                {{ user.first_name|default:user.username|first|upper }}
+                            </div>
+                            <span class="text-gray-700 dark:text-gray-300 user-info">
+                                {{ user.first_name|default:user.username }}
+                            </span>
+                            <i class="fas fa-chevron-down text-gray-500 dark:text-gray-400 text-sm"></i>
+                        </button>
 
-    {% if user.is_authenticated %}
-    <div class="relative">
+                        <!-- القائمة المنسدلة -->
+                        <div id="user-menu"
+                            class="absolute right-0 mt-3 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-2xl py-2
+                                border border-gray-100 dark:border-gray-700
+                                opacity-0 invisible scale-95
+                                transition-all duration-200 origin-top-right z-50">
 
-            <!-- زر المستخدم -->
-            <button id="user-menu-btn"
-                class="flex items-center space-x-2 space-x-reverse focus:outline-none select-none">
-                <div class="w-9 h-9 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {{ user.first_name|default:user.username|first|upper }}
-                </div>
-                <span class="text-gray-700 hidden md:inline">
-                    {{ user.first_name|default:user.username }}
-                </span>
-                <i class="fas fa-chevron-down text-gray-500 text-sm"></i>
-            </button>
+                            <a href="{% url 'dashboard' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
+                                <i class="fas fa-tachometer-alt ml-2"></i> لوحة التحكم
+                            </a>
 
-            <!-- القائمة المنسدلة -->
-            <div id="user-menu"
-                class="absolute right-0 mt-3 w-52 bg-white rounded-xl shadow-2xl py-2
-                    border border-gray-100
-                    opacity-0 invisible scale-95
-                    transition-all duration-200 origin-top-right z-50">
+                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
+                                <i class="fas fa-user ml-2"></i> الملف الشخصي
+                            </a>
 
-                <a href="{% url 'dashboard' %}" class="block px-4 py-2 hover:bg-gray-100">
-                    <i class="fas fa-tachometer-alt ml-2"></i> لوحة التحكم
-                </a>
+                            {% if user.is_staff or user.profile.is_content_editor %}
+                            <a href="{% url 'create_post' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
+                                <i class="fas fa-plus-circle ml-2"></i> إنشاء منشور
+                            </a>
+                            {% endif %}
 
-                <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100">
-                    <i class="fas fa-user ml-2"></i> الملف الشخصي
-                </a>
+                            {% if user.is_staff %}
+                            <a href="/admin/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
+                                <i class="fas fa-cog ml-2"></i> الإدارة
+                            </a>
+                            {% endif %}
 
-                {% if user.is_staff or user.profile.is_content_editor %}
-                <a href="{% url 'create_post' %}" class="block px-4 py-2 hover:bg-gray-100">
-                    <i class="fas fa-plus-circle ml-2"></i> إنشاء منشور
-                </a>
-                {% endif %}
+                            <div class="border-t my-2 dark:border-gray-700"></div>
 
-                {% if user.is_staff %}
-                <a href="/admin/" class="block px-4 py-2 hover:bg-gray-100">
-                    <i class="fas fa-cog ml-2"></i> الإدارة
-                </a>
-                {% endif %}
+                            <form action="{% url 'logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="block w-full text-right px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                    <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium">
+                        <i class="fas fa-sign-in-alt ml-1"></i> تسجيل الدخول
+                    </a>
 
-                <div class="border-t my-2"></div>
-
-                <form action="{% url 'logout' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="block px-4 py-2 text-red-600 hover:bg-red-50">
-                        <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
-                    </button>
-                </form>
-
-
-            </div>
-        </div>
-
-        {% else %}
-        <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600 font-medium">
-            <i class="fas fa-sign-in-alt ml-1"></i> تسجيل الدخول
-        </a>
-
-        <a href="{% url 'register' %}"
-        class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
-            <i class="fas fa-user-plus ml-1"></i> إنشاء حساب
-        </a>
-        {% endif %}
-
+                    <a href="{% url 'register' %}"
+                    class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
+                        <i class="fas fa-user-plus ml-1"></i> إنشاء حساب
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -178,12 +922,13 @@
     {% if messages %}
     <div class="container mx-auto px-4 mt-4">
         {% for message in messages %}
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-2" role="alert">
+        <div class="bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded relative mb-2" role="alert">
             <span class="block sm:inline">{{ message }}</span>
         </div>
         {% endfor %}
     </div>
     {% endif %}
+    
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-white dark:bg-gray-900 z-[100] flex items-center justify-center transition-opacity duration-500">
         <div class="text-center">
@@ -199,10 +944,8 @@
         </div>
     </div>
 
-    <!-- المحتوى الرئيسي -->
-    <main class="min-h-screen">   
     <!-- Progress Bar -->
-<div id="progressBar" class="fixed top-0 left-0 right-0 h-1 bg-green-600 origin-left transform scale-x-0 z-[9998] transition-transform duration-200"></div>
+    <div id="progressBar" class="fixed top-0 left-0 right-0 h-1 bg-green-600 origin-left transform scale-x-0 z-[9998] transition-transform duration-200"></div>
 
     <!-- خلفية GSAP المتحركة -->
     <div id="animated-background">
@@ -210,15 +953,18 @@
         <div class="floating-element"></div>
         <div class="floating-element"></div>
     </div>
+    
+    <!-- المحتوى الرئيسي -->
+    <main class="min-h-screen">   
         {% block content %}{% endblock %}
     </main>
-    
+     
     <!-- التذييل -->
-    <footer class="bg-gray-900 text-white py-12 mt-16">
+    <footer class="bg-gray-900 dark:bg-gray-950 text-white py-12">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="footer-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- معلومات الموقع -->
-                <div>
+                <div class="footer-section">
                     <div class="flex items-center space-x-2 space-x-reverse mb-4">
                         <a href="{% url 'home' %}" class="flex items-center gap-2">
                              <img src="{% static 'images/logo.png' %}" class="h-16" alt="الشعار">
@@ -230,55 +976,52 @@
                 </div>
                 
                 <!-- روابط سريعة -->
-                <div>
+                <div class="footer-section">
                     <h4 class="text-xl font-bold mb-4">روابط سريعة</h4>
                     <ul class="space-y-2">
-                        <li><a href="{% url 'home' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> الرئيسية</a></li>
-                        <li><a href="{% url 'courses' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> الكورسات</a></li>
-                        <li><a href="{% url 'articles' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> المقالات</a></li>
-                        <li><a href="{% url 'grants' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> المنح والتدريبات</a></li>
-                        <li><a href="{% url 'books' %}" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> الكتب والملخصات</a></li>
+                        <li><a href="{% url 'home' %}" class="text-gray-300 hover:text-white transition"><i class="fas fa-chevron-left ml-2"></i> الرئيسية</a></li>
+                        <li><a href="{% url 'courses' %}" class="text-gray-300 hover:text-white transition"><i class="fas fa-chevron-left ml-2"></i> الكورسات</a></li>
+                        <li><a href="{% url 'articles' %}" class="text-gray-300 hover:text-white transition"><i class="fas fa-chevron-left ml-2"></i> المقالات</a></li>
+                        <li><a href="{% url 'grants' %}" class="text-gray-300 hover:text-white transition"><i class="fas fa-chevron-left ml-2"></i> المنح والتدريبات</a></li>
+                        <li><a href="{% url 'books' %}" class="text-gray-300 hover:text-white transition"><i class="fas fa-chevron-left ml-2"></i> الكتب والملخصات</a></li>
                     </ul>
                 </div>
                 
                 <!-- سياسات -->
-                <div>
+                <div class="footer-section">
                     <h4 class="text-xl font-bold mb-4">سياسات</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> سياسة الخصوصية</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> شروط الاستخدام</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> الأسئلة الشائعة</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-chevron-left ml-2"></i> اتصل بنا</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition"><i class="fas fa-chevron-left ml-2"></i> سياسة الخصوصية</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition"><i class="fas fa-chevron-left ml-2"></i> شروط الاستخدام</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition"><i class="fas fa-chevron-left ml-2"></i> الأسئلة الشائعة</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition"><i class="fas fa-chevron-left ml-2"></i> اتصل بنا</a></li>
                     </ul>
                 </div>
                 
                 <!-- وسائل التواصل -->
-                <div>
+                <div class="footer-section">
                     <h4 class="text-xl font-bold mb-4">تابعنا</h4>
-                    <div class="flex space-x-4 space-x-reverse">
-                        
-                        <a href="{{ url_media.facebook_url }}" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700">
+                    <div class="flex space-x-4 space-x-reverse social-icons mb-4">
+                        <a href="{{ url_media.facebook_url }}" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="{{ url_media.instagram_url }}" class="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500">
+                        <a href="{{ url_media.instagram_url }}" class="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center hover:opacity-90 transition">
                             <i class="fab fa-instagram"></i>
                         </a>
-                        <a href="{{ url_media.youtube_url }}" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700">
+                        <a href="{{ url_media.youtube_url }}" class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition">
                             <i class="fab fa-youtube"></i>
                         </a>
-                        <a href="{{ url_media.twitter_url }}" class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700">
+                        <a href="{{ url_media.twitter_url }}" class="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 transition">
                             <i class="fab fa-twitter"></i>
                         </a>
-
-
-
                     </div>
-                    <p class="mt-4 text-gray-300">
+                    <p class="mt-4 text-gray-300 mb-2">
                         اشترك في نشرتنا البريدية للحصول على آخر التحديثات
                     </p>
-                    <div class="mt-2 flex">
-                        <input type="email" placeholder="بريدك الإلكتروني" class="flex-grow px-3 py-2 rounded-r-lg border border-gray-700 bg-gray-800 text-white focus:outline-none">
-                        <button class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2 rounded-l-lg hover:opacity-90">
+                    <div class="mt-2 flex newsletter-form">
+                        <input type="email" placeholder="بريدك الإلكتروني" 
+                               class="flex-grow px-3 py-2 rounded-r-lg border border-gray-700 bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 newsletter-input">
+                        <button class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2 rounded-l-lg hover:opacity-90 transition newsletter-button">
                             اشتراك
                         </button>
                     </div>
@@ -286,8 +1029,9 @@
             </div>
             
             <!-- حقوق النشر -->
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>© {% now "Y" %} موقع كنوز . جميع الحقوق محفوظة.</p> <p> تصميم ب بواسطة <a href="https://mohamednabilpro.deplois.net/" class="text-blue-500 hover:underline">محمد نبيل </a> </p>
+            <div class="border-t border-gray-800 dark:border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© {% now "Y" %} موقع كنوز . جميع الحقوق محفوظة.</p> 
+                <p class="mt-1"> تصميم وتطوير بواسطة <a href="https://mohamednabilpro.deplois.net/" class="text-blue-500 hover:underline">محمد نبيل</a></p>
             </div>
         </div>
     </footer>
@@ -296,6 +1040,7 @@
     <script>
         // إعدادات Tailwind CSS
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -319,62 +1064,609 @@
             }
         }
         
+        // Mobile Menu Functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeMobileMenuFunc() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', openMobileMenu);
+        }
+        
+        if (closeMobileMenu) {
+            closeMobileMenu.addEventListener('click', closeMobileMenuFunc);
+        }
+        
+        if (mobileMenuOverlay) {
+            mobileMenuOverlay.addEventListener('click', closeMobileMenuFunc);
+        }
+        
+        // إغلاق القائمة المنسدلة عند الضغط على زر الهروب
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenuFunc();
+            }
+        });
+        
         // GSAP Animations
         document.addEventListener('DOMContentLoaded', function() {
             // تحريك العناصر عند التحميل
             gsap.from("nav", {duration: 0.8, y: -50, opacity: 0});
             
-            // تحريك البطاقات عند التمرير
-            gsap.utils.toArray(".animate-card").forEach(card => {
-                gsap.from(card, {
-                    duration: 0.8,
-                    y: 50,
-                    opacity: 0,
-                    scrollTrigger: {
-                        trigger: card,
-                        start: "top 80%",
-                    }
-                });
+            // Wait for DOM to be fully loaded
+            console.log('DOM Content Loaded');
+        });
+        
+        // إظهار/إخفاء القائمة المنسدلة للمستخدم
+        const btn = document.getElementById("user-menu-btn");
+        const menu = document.getElementById("user-menu");
+
+        btn?.addEventListener("click", () => {
+            menu.classList.toggle("opacity-0");
+            menu.classList.toggle("invisible");
+            menu.classList.toggle("scale-95");
+        });
+
+        document.addEventListener("click", (e) => {
+            if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add("opacity-0", "invisible", "scale-95");
+            }
+        });
+        
+        // شريط التقدم حسب scroll
+        const progressBar = document.getElementById("progressBar");
+        if (progressBar) {
+            const updateProgress = () => {
+                const scrollTop = window.scrollY;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) : 0;
+                progressBar.style.transform = `scaleX(${scrollPercent})`;
+            };
+
+            window.addEventListener("scroll", updateProgress);
+            window.addEventListener("resize", updateProgress);
+            updateProgress();
+        }
+        
+        // زر العودة للأعلى
+        const backToTopBtn = document.getElementById("backToTop");
+        
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add("visible");
+            } else {
+                backToTopBtn.classList.remove("visible");
+            }
+        });
+        
+        backToTopBtn.addEventListener("click", () => {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
             });
         });
-                // Wait for DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded');
+        
+        // Dark Mode System
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        const systemBadge = document.getElementById('systemBadge');
+        const modeIndicator = document.getElementById('modeIndicator');
+        
+        // التحقق من تفضيل النظام والمخزن المحلي
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const storedTheme = localStorage.getItem('theme');
+        
+        // تحديد الثيم بناءً على التخزين أو تفضيل النظام
+        function setTheme(theme) {
+            const isDark = theme === 'dark' || (!storedTheme && prefersDarkScheme.matches);
             
-            // Initialize GSAP
-            initGSAP();
+            if (isDark) {
+                body.classList.add('dark-mode');
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i><span class="tooltip">الوضع الفاتح</span>';
+                modeIndicator.textContent = 'داكن';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.remove('dark-mode');
+                darkModeToggle.innerHTML = '<i class="fas fa-moon"></i><span class="tooltip">الوضع الداكن</span>';
+                modeIndicator.textContent = 'فاتح';
+                localStorage.setItem('theme', 'light');
+            }
             
-            // Hide loading overlay
+            // إضافة animation مؤقت
+            body.classList.add('dark-mode-transition');
             setTimeout(() => {
-                const loadingOverlay = document.getElementById('loading-overlay');
-                if (loadingOverlay) {
-                    gsap.to(loadingOverlay, {
-                        opacity: 0,
-                        duration: 0.5,
-                        onComplete: () => {
-                            loadingOverlay.style.display = 'none';
-                        }
+                body.classList.remove('dark-mode-transition');
+            }, 500);
+        }
+        
+        // تهيئة الثيم
+        setTheme(storedTheme);
+        
+        // تبديل الثيم عند النقر على الزر
+        darkModeToggle.addEventListener('click', () => {
+            const isDark = body.classList.contains('dark-mode');
+            setTheme(isDark ? 'light' : 'dark');
+            
+            // تأثير animation إضافي
+            gsap.to(darkModeToggle, {
+                rotation: 360,
+                duration: 0.5,
+                ease: "power2.out",
+                onComplete: () => {
+                    gsap.set(darkModeToggle, { rotation: 0 });
+                }
+            });
+        });
+        
+        // الاستماع لتغيرات تفضيل النظام
+        prefersDarkScheme.addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                setTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+        
+        // عرض badge بناءً على مصدر الثيم
+        function updateSystemBadge() {
+            if (localStorage.getItem('theme')) {
+                systemBadge.innerHTML = '<i class="fas fa-user-cog"></i><span id="modeIndicator">مخصص</span>';
+            } else if (prefersDarkScheme.matches) {
+                systemBadge.innerHTML = '<i class="fas fa-desktop"></i><span id="modeIndicator">النظام</span>';
+            } else {
+                systemBadge.innerHTML = '<i class="fas fa-desktop"></i><span id="modeIndicator">النظام</span>';
+            }
+        }
+        
+        updateSystemBadge();
+        
+        // إضافة تأثير hover على الأزرار
+        const floatingButtons = [darkModeToggle, backToTopBtn];
+        floatingButtons.forEach(btn => {
+            if (btn) {
+                btn.addEventListener('mouseenter', () => {
+                    gsap.to(btn, {
+                        scale: 1.1,
+                        duration: 0.3,
+                        ease: "power2.out"
+                    });
+                });
+                
+                btn.addEventListener('mouseleave', () => {
+                    gsap.to(btn, {
+                        scale: 1,
+                        duration: 0.3,
+                        ease: "power2.out"
+                    });
+                });
+            }
+        });
+        
+        // تحسين تجربة المستخدم على الأجهزة المحمولة
+        function handleResize() {
+            if (window.innerWidth >= 768) {
+                closeMobileMenuFunc();
+            }
+        }
+        
+        window.addEventListener('resize', handleResize);
+        
+        // تهيئة AOS
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 1000,
+                once: true,
+                offset: 100,
+            });
+        }
+
+        // تحميل الصفحة
+        window.addEventListener("load", function() {
+            const overlay = document.getElementById("loading-overlay");
+            if (overlay) {
+                overlay.classList.add("opacity-0");
+                setTimeout(() => overlay.style.display = "none", 500);
+            }
+        });
+
+        // Smooth scroll للروابط الداخلية
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    e.preventDefault();
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
                     });
                 }
-            }, 1000);
+            });
         });
-        // إظهار/إخفاء القائمة المنسدلة للمستخدم
-        document.addEventListener('click', function(e) {
-            const userDropdown = document.querySelector('.group');
-            if (userDropdown && !userDropdown.contains(e.target)) {
-                const dropdown = userDropdown.querySelector('.hidden');
-                if (dropdown) dropdown.classList.add('hidden');
+    </script>
+
+<!-- Search Stats (When typing) -->
+{% comment %} 
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const suggestionsBox = document.getElementById('search-suggestions');
+
+        searchInput.addEventListener('input', function() {
+            const term = this.value.trim();
+            if (!term) {
+                suggestionsBox.innerHTML = '';
+                suggestionsBox.classList.add('hidden');
+                return;
             }
 
+            fetch(`/autocomplete_search/?term=${encodeURIComponent(term)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        suggestionsBox.innerHTML = '<div class="px-4 py-2 text-gray-500">لا توجد نتائج</div>';
+                    } else {
+                        suggestionsBox.innerHTML = data.map(item => `
+                            <a href="${item.url}" 
+                            class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition">
+                                ${item.title}
+                            </a>
+                        `).join('');
+                    }
+                    suggestionsBox.classList.remove('hidden');
+                })
+                .catch(err => {
+                    console.error(err);
+                    suggestionsBox.classList.add('hidden');
+                });
         });
 
-        
+        // إخفاء الاقتراحات إذا ضغط المستخدم خارج الـ input
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.classList.add('hidden');
+            }
+        });
+
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js" async></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+ {% endcomment %}
 
-    {% block extra_js %}{% endblock %}
 
+
+    <!-- Search JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            const searchForm = document.getElementById('search-form');
+            const searchSuggestions = document.getElementById('search-suggestions');
+            const liveResults = document.getElementById('live-search-results');
+            const emptyState = document.getElementById('search-empty-state');
+            const loadingState = document.getElementById('search-loading');
+            const searchStats = document.getElementById('search-stats');
+            const resultsCount = document.getElementById('results-count');
+            const recentSearchesDiv = document.getElementById('recent-searches');
+            const recentSearchesList = document.getElementById('recent-searches-list');
+
+            let searchTimeout;
+            let isSearching = false;
+
+            // تحميل عمليات البحث السابقة
+            function loadRecentSearches() {
+                const recent = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+                if (recent.length > 0) {
+                    recentSearchesDiv.classList.remove('hidden');
+                    recentSearchesList.innerHTML = '';
+                    
+                    recent.slice(0, 5).forEach(term => {
+                        const item = document.createElement('div');
+                        item.className = 'flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group';
+                        item.innerHTML = `
+                            <button onclick="setSearchTerm('${term}')" class="flex-1 text-left">
+                                <div class="flex items-center">
+                                    <i class="fas fa-history text-gray-400 dark:text-gray-500 ml-2 text-sm"></i>
+                                    <span class="text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                        ${term}
+                                    </span>
+                                </div>
+                            </button>
+                            <button onclick="removeRecentSearch('${term}')" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                                <i class="fas fa-times text-sm"></i>
+                            </button>
+                        `;
+                        recentSearchesList.appendChild(item);
+                    });
+                } else {
+                    recentSearchesDiv.classList.add('hidden');
+                }
+            }
+
+            // حفظ عملية البحث
+            function saveRecentSearch(term) {
+                if (!term.trim()) return;
+                
+                let recent = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+                recent = recent.filter(t => t !== term);
+                recent.unshift(term);
+                recent = recent.slice(0, 10);
+                localStorage.setItem('recentSearches', JSON.stringify(recent));
+                loadRecentSearches();
+            }
+
+            // تعيين مصطلح البحث
+            window.setSearchTerm = function(term) {
+                searchInput.value = term;
+                searchInput.focus();
+                performSearch(term);
+            }
+
+            // إزالة بحث سابق
+            window.removeRecentSearch = function(term) {
+                let recent = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+                recent = recent.filter(t => t !== term);
+                localStorage.setItem('recentSearches', JSON.stringify(recent));
+                loadRecentSearches();
+            }
+
+            // مسح عمليات البحث السابقة
+            window.clearRecentSearches = function() {
+                if (confirm('هل تريد مسح كل عمليات البحث السابقة؟')) {
+                    localStorage.removeItem('recentSearches');
+                    loadRecentSearches();
+                }
+            }
+
+            // تنفيذ البحث
+            async function performSearch(query) {
+                if (!query.trim() || query.length < 2) {
+                    hideSuggestions();
+                    return;
+                }
+
+                isSearching = true;
+                showLoading();
+
+                try {
+                    const response = await fetch(`/autocomplete_search/?term=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+
+                    if (data.length > 0) {
+                        showResults(data);
+                        resultsCount.textContent = data.length;
+                        searchStats.style.opacity = '1';
+                    } else {
+                        showEmptyState();
+                        resultsCount.textContent = '0';
+                        searchStats.style.opacity = '1';
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                    showEmptyState();
+                } finally {
+                    isSearching = false;
+                    hideLoading();
+                }
+            }
+
+            // عرض النتائج
+            function showResults(results) {
+                liveResults.innerHTML = '';
+                
+                results.forEach((item, index) => {
+                    const result = document.createElement('a');
+                    result.href = item.url;
+                    result.className = `block px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 
+                                    border-b border-gray-100 dark:border-gray-700 last:border-b-0 
+                                    transition-colors duration-200 group animate-fadeIn`;
+                    result.style.animationDelay = `${index * 50}ms`;
+                    
+                    result.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 
+                                        flex items-center justify-center text-white ml-3">
+                                <i class="fas fa-file-alt text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h5 class="font-medium text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 
+                                        transition-colors truncate">
+                                    ${item.title}
+                                </h5>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                    ${item.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                                </p>
+                            </div>
+                            <i class="fas fa-chevron-left text-gray-300 dark:text-gray-600 
+                                    group-hover:text-blue-500 dark:group-hover:text-blue-400 
+                                    transition-colors transform group-hover:translate-x-1"></i>
+                        </div>
+                    `;
+                    liveResults.appendChild(result);
+                });
+
+                showSuggestions();
+            }
+
+            // عرض حالة عدم وجود نتائج
+            function showEmptyState() {
+                liveResults.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                showSuggestions();
+            }
+
+            // عرض حالة التحميل
+            function showLoading() {
+                loadingState.classList.remove('hidden');
+                liveResults.innerHTML = '';
+                emptyState.classList.add('hidden');
+            }
+
+            // إخفاء حالة التحميل
+            function hideLoading() {
+                loadingState.classList.add('hidden');
+            }
+
+            // عرض الاقتراحات
+            function showSuggestions() {
+                searchSuggestions.style.display = 'block';
+                setTimeout(() => {
+                    searchSuggestions.classList.remove('opacity-0', 'translate-y-2');
+                }, 10);
+            }
+
+            // إخفاء الاقتراحات
+            function hideSuggestions() {
+                searchSuggestions.classList.add('opacity-0', 'translate-y-2');
+                searchStats.style.opacity = '0';
+                setTimeout(() => {
+                    searchSuggestions.style.display = 'none';
+                }, 300);
+            }
+
+            // أحداث البحث
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length < 2) {
+                    hideSuggestions();
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    performSearch(query);
+                }, 300);
+            });
+
+            searchInput.addEventListener('focus', function() {
+                if (this.value.trim().length >= 2) {
+                    performSearch(this.value);
+                } else {
+                    showSuggestions();
+                    liveResults.innerHTML = '';
+                    emptyState.classList.add('hidden');
+                    searchStats.style.opacity = '0';
+                }
+            });
+
+            // عند إرسال النموذج
+            searchForm.addEventListener('submit', function(e) {
+                const query = searchInput.value.trim();
+                if (query) {
+                    saveRecentSearch(query);
+                }
+            });
+
+            // إغلاق الاقتراحات عند النقر خارجها
+            document.addEventListener('click', function(e) {
+                if (!searchForm.contains(e.target)) {
+                    hideSuggestions();
+                }
+            });
+
+            // اختصارات لوحة المفاتيح
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    hideSuggestions();
+                }
+                
+                if (e.key === 'Enter' && document.activeElement === searchInput) {
+                    saveRecentSearch(searchInput.value.trim());
+                }
+                
+                // Ctrl/Cmd + K للبحث
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+
+            // تأثيرات إضافية
+            searchInput.addEventListener('mouseenter', function() {
+                this.style.boxShadow = '0 10px 25px rgba(59, 130, 246, 0.15)';
+            });
+
+            searchInput.addEventListener('mouseleave', function() {
+                this.style.boxShadow = '';
+            });
+
+            // تحميل عمليات البحث السابقة عند البدء
+            loadRecentSearches();
+
+            // تحسين الوصول
+            searchInput.setAttribute('aria-label', 'بحث عن محتوى تعليمي');
+            searchInput.setAttribute('aria-describedby', 'search-description');
+            
+            // إضافة وصف للوصول
+            const description = document.createElement('div');
+            description.id = 'search-description';
+            description.className = 'sr-only';
+            description.textContent = 'استخدم هذا الحقل للبحث عن كورسات، مقالات، منح، كتب وملخصات. استخدم مفاتيح الأسهم للتنقل بين الاقتراحات واضغط Enter للبحث.';
+            searchForm.appendChild(description);
+        });
+
+        // CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .animate-fadeIn {
+                animation: fadeIn 0.3s ease forwards;
+            }
+            
+            /* Custom scrollbar for search suggestions */
+            #search-suggestions::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            #search-suggestions::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.05);
+                border-radius: 10px;
+            }
+            
+            #search-suggestions::-webkit-scrollbar-thumb {
+                background: rgba(59, 130, 246, 0.3);
+                border-radius: 10px;
+            }
+            
+            .dark #search-suggestions::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.05);
+            }
+            
+            .dark #search-suggestions::-webkit-scrollbar-thumb {
+                background: rgba(59, 130, 246, 0.5);
+            }
+            
+            /* Focus styles for accessibility */
+            #search-input:focus {
+                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            }
+            
+            .dark #search-input:focus {
+                box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const bg = document.getElementById("hero-bg");
@@ -419,65 +1711,358 @@
             }
         });
     </script>
-   
+
+
     <script>
-        const btn = document.getElementById("user-menu-btn");
-        const menu = document.getElementById("user-menu");
-
-        btn?.addEventListener("click", () => {
-            menu.classList.toggle("opacity-0");
-            menu.classList.toggle("invisible");
-            menu.classList.toggle("scale-95");
-        });
-
-        document.addEventListener("click", (e) => {
-            if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add("opacity-0", "invisible", "scale-95");
-            }
-        });
-    </script>
-   
-    <script>
-        const searchInput = document.getElementById('search-input');
-        const suggestionsBox = document.getElementById('search-suggestions');
-
-        searchInput.addEventListener('input', function() {
-            const term = this.value.trim();
-            if (!term) {
-                suggestionsBox.innerHTML = '';
-                suggestionsBox.classList.add('hidden');
-                return;
-            }
-
-            fetch(`/autocomplete_search/?term=${encodeURIComponent(term)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        suggestionsBox.innerHTML = '<div class="px-4 py-2 text-gray-500">لا توجد نتائج</div>';
-                    } else {
-                        suggestionsBox.innerHTML = data.map(item => `
-                            <a href="${item.url}" 
-                            class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition">
-                                ${item.title}
-                            </a>
-                        `).join('');
+        // ============ نظام عداد الأحرف التلقائي ============
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // دالة تحديث عداد ومظهر الحقل
+            function updateCharacterCounter(field, maxLength) {
+                const currentLength = field.value.length;
+                const remaining = maxLength - currentLength;
+                const fieldName = field.name || field.id;
+                const counterId = `${fieldName}_counter`;
+                
+                // العثور على العداد أو إنشاؤه
+                let counter = document.getElementById(counterId);
+                if (!counter) {
+                    counter = document.createElement('div');
+                    counter.id = counterId;
+                    counter.className = 'character-counter text-muted text-sm mt-1';
+                    counter.style.fontSize = '12px';
+                    counter.style.minHeight = '20px';
+                    counter.style.transition = 'all 0.3s ease';
+                    
+                    // وضع العداد بعد الحقل
+                    field.parentNode.insertBefore(counter, field.nextSibling);
+                }
+                
+                // تحديث نص العداد
+                counter.innerHTML = `
+                    <span class="${remaining < 0 ? 'text-danger' : (remaining < 20 ? 'text-warning' : 'text-muted')}">
+                        ${remaining} حرف متبقية
+                        ${remaining < 0 ? ` (تجاوزت الحد بـ ${Math.abs(remaining)} حرف)` : ''}
+                    </span>
+                `;
+                
+                // ======== تغيير مظهر الحقل حسب عدد الأحرف ========
+                
+                // إزالة جميع classes السابقة أولاً
+                field.classList.remove(
+                    'input-valid', 'input-warning', 'input-danger',
+                    'border-success', 'border-warning', 'border-danger',
+                    'is-valid', 'is-invalid'
+                );
+                
+                if (remaining < 0) {
+                    // حالة الخطأ: تجاوز الحد
+                    field.classList.add('input-danger', 'border-danger', 'is-invalid');
+                    field.style.borderWidth = '2px';
+                    field.style.borderColor = '#dc3545';
+                    field.style.boxShadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.25)';
+                    
+                    // إضافة أيقونة خطأ
+                    if (!field.parentNode.querySelector('.error-icon')) {
+                        const errorIcon = document.createElement('div');
+                        errorIcon.className = 'error-icon';
+                        errorIcon.innerHTML = '❌';
+                        errorIcon.style.position = 'absolute';
+                        errorIcon.style.right = '10px';
+                        errorIcon.style.top = '50%';
+                        errorIcon.style.transform = 'translateY(-50%)';
+                        errorIcon.style.color = '#dc3545';
+                        errorIcon.style.fontSize = '14px';
+                        field.parentNode.style.position = 'relative';
+                        field.parentNode.appendChild(errorIcon);
                     }
-                    suggestionsBox.classList.remove('hidden');
-                })
-                .catch(err => {
-                    console.error(err);
-                    suggestionsBox.classList.add('hidden');
-                });
-        });
-
-        // إخفاء الاقتراحات إذا ضغط المستخدم خارج الـ input
-        document.addEventListener('click', function(e) {
-            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                suggestionsBox.classList.add('hidden');
+                    
+                } else if (remaining < 10) {
+                    // حالة تحذير: قريب من الحد
+                    field.classList.add('input-warning', 'border-warning');
+                    field.style.borderWidth = '2px';
+                    field.style.borderColor = '#ffc107';
+                    field.style.boxShadow = '0 0 0 0.2rem rgba(255, 193, 7, 0.25)';
+                    
+                    // إزالة أيقونة الخطأ إذا كانت موجودة
+                    const errorIcon = field.parentNode.querySelector('.error-icon');
+                    if (errorIcon) errorIcon.remove();
+                    
+                } else if (remaining < 20) {
+                    // حالة إنذار: قريب من التحذير
+                    field.classList.add('border-warning');
+                    field.style.borderWidth = '1px';
+                    field.style.borderColor = '#ffc107';
+                    field.style.boxShadow = 'none';
+                    
+                } else {
+                    // حالة عادية
+                    field.style.borderWidth = '1px';
+                    field.style.borderColor = '';
+                    field.style.boxShadow = 'none';
+                    
+                    // إزالة أيقونة الخطأ إذا كانت موجودة
+                    const errorIcon = field.parentNode.querySelector('.error-icon');
+                    if (errorIcon) errorIcon.remove();
+                }
+                
+                // تحديث معاينة SEO إذا كان الحقل متعلقاً بـ SEO
+                updateSEOPreview(field, remaining);
             }
+            
+            // دالة تحديث معاينة SEO
+            function updateSEOPreview(field, remaining) {
+                if (field.name === 'seo_title') {
+                    const preview = document.getElementById('seoTitlePreview');
+                    if (preview) {
+                        preview.textContent = field.value || 'عنوان SEO سيظهر هنا';
+                        
+                        // إذا تجاوز الحد، جعل المعاينة حمراء
+                        if (remaining < 0) {
+                            preview.style.color = '#dc3545';
+                            preview.style.fontWeight = 'bold';
+                        } else {
+                            preview.style.color = '';
+                            preview.style.fontWeight = '';
+                        }
+                    }
+                }
+                
+                if (field.name === 'seo_description') {
+                    const preview = document.getElementById('seoDescPreview');
+                    if (preview) {
+                        preview.textContent = field.value || 'وصف SEO سيظهر هنا...';
+                        
+                        // إذا تجاوز الحد، جعل المعاينة حمراء
+                        if (remaining < 0) {
+                            preview.style.color = '#dc3545';
+                            preview.style.fontWeight = 'bold';
+                        } else {
+                            preview.style.color = '';
+                            preview.style.fontWeight = '';
+                        }
+                    }
+                }
+            }
+            
+            // ======== تطبيق النظام على جميع الحقول ========
+            const fields = document.querySelectorAll('input[maxlength], textarea[maxlength]');
+            
+            fields.forEach(field => {
+                const maxLength = parseInt(field.getAttribute('maxlength')) || 0;
+                
+                if (maxLength > 0) {
+                    // إضافة حدث input
+                    field.addEventListener('input', function() {
+                        updateCharacterCounter(this, maxLength);
+                    });
+                    
+                    // إضافة حدث focus للتركيز
+                    field.addEventListener('focus', function() {
+                        this.style.transition = 'all 0.3s ease';
+                    });
+                    
+                    // إضافة حدث blur (عند خروج التركيز)
+                    field.addEventListener('blur', function() {
+                        if (this.value.length <= maxLength) {
+                            this.style.boxShadow = 'none';
+                        }
+                    });
+                    
+                    // تحديث أولي
+                    updateCharacterCounter(field, maxLength);
+                    
+                    // التحقق عند تحميل الصفحة إذا كان هناك قيمة مسبقة
+                    if (field.value && field.value.length > maxLength) {
+                        updateCharacterCounter(field, maxLength);
+                    }
+                }
+            });
+            
+            // ======== التحقق عند إرسال النموذج ========
+            const form = document.getElementById('postForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    let hasErrors = false;
+                    const errorFields = [];
+                    
+                    fields.forEach(field => {
+                        const maxLength = parseInt(field.getAttribute('maxlength')) || 0;
+                        if (field.value.length > maxLength) {
+                            hasErrors = true;
+                            errorFields.push(field);
+                            
+                            // جعل الحقل يهتز للإشارة للخطأ
+                            field.style.animation = 'shake 0.5s ease-in-out';
+                            setTimeout(() => {
+                                field.style.animation = '';
+                            }, 500);
+                            
+                            // التركيز على أول حقل به خطأ
+                            if (errorFields.length === 1) {
+                                field.focus();
+                            }
+                        }
+                    });
+                    
+                    if (hasErrors) {
+                        e.preventDefault();
+                        
+                        // عرض رسالة خطأ
+                        showErrorMessage('⚠️ هناك أخطاء في بعض الحقول. الرجاء تصحيحها قبل الإرسال.');
+                    }
+                });
+            }
+            
+            // ======== دالة عرض رسالة الخطأ ========
+            function showErrorMessage(message) {
+                // إزالة أي رسالة سابقة
+                const oldAlert = document.querySelector('.submit-error-alert');
+                if (oldAlert) oldAlert.remove();
+                
+                // إنشاء رسالة جديدة
+                const alert = document.createElement('div');
+                alert.className = 'submit-error-alert alert alert-danger';
+                alert.style.position = 'fixed';
+                alert.style.top = '20px';
+                alert.style.left = '50%';
+                alert.style.transform = 'translateX(-50%)';
+                alert.style.zIndex = '9999';
+                alert.style.maxWidth = '500px';
+                alert.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                alert.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <span>${message}</span>
+                        <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                    </div>
+                `;
+                
+                document.body.appendChild(alert);
+                
+                // إزالة تلقائية بعد 5 ثوان
+                setTimeout(() => {
+                    if (alert.parentNode) alert.remove();
+                }, 5000);
+            }
+            
+            // ======== CSS إضافي ========
+            const style = document.createElement('style');
+            style.textContent = `
+                /* تنسيق الحقول حسب الحالة */
+                .input-danger {
+                    border-color: #dc3545 !important;
+                    border-width: 2px !important;
+                    background-color: rgba(220, 53, 69, 0.05) !important;
+                }
+                
+                .input-warning {
+                    border-color: #ffc107 !important;
+                    border-width: 2px !important;
+                    background-color: rgba(255, 193, 7, 0.05) !important;
+                }
+                
+                .input-valid {
+                    border-color: #28a745 !important;
+                    border-width: 1px !important;
+                }
+                
+                /* تأثير الهز */
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+                
+                /* تنسيق العداد */
+                .character-counter {
+                    font-size: 12px;
+                    margin-top: 4px;
+                    min-height: 20px;
+                    transition: all 0.3s ease;
+                }
+                
+                /* تلميح للأحرف المتجاوزة */
+                .character-counter .text-danger::after {
+                    content: " ⚠️";
+                }
+                
+                /* تأثير عند التركيز على حقل به خطأ */
+                .input-danger:focus {
+                    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.5) !important;
+                }
+                
+                .input-warning:focus {
+                    box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.5) !important;
+                }
+                
+                /* تحسين شكل حقول النص */
+                .form-control {
+                    transition: all 0.3s ease;
+                    position: relative;
+                }
+                
+                .form-control:focus {
+                    border-color: #86b7fe;
+                    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+                }
+                
+                /* تنسيق خاص لـ textarea */
+                textarea.form-control {
+                    min-height: 80px;
+                    resize: vertical;
+                }
+                
+                /* إضافة أيقونة الخطأ */
+                .form-group {
+                    position: relative;
+                }
+                
+                .error-icon {
+                    position: absolute;
+                    right: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #dc3545;
+                    font-size: 14px;
+                    z-index: 10;
+                }
+                
+                /* تنسيق خاص لحقول textarea */
+                textarea.form-control + .error-icon {
+                    top: 30px;
+                }
+                
+                /* تغيير لون العداد */
+                .text-danger {
+                    color: #dc3545 !important;
+                    font-weight: bold;
+                }
+                
+                .text-warning {
+                    color: #ffc107 !important;
+                    font-weight: 500;
+                }
+                
+                .text-muted {
+                    color: #6c757d !important;
+                }
+                
+                /* تحسين عرض المعاينة */
+                .seo-title-preview.text-danger {
+                    color: #dc3545 !important;
+                }
+            `;
+            document.head.appendChild(style);
         });
 
     </script>
+    
+    <script src="{% static 'js/clean-paste.js' %}"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js" async></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

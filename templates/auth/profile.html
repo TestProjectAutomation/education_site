@@ -1,388 +1,1007 @@
-<!-- templates/profile.html -->
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}الملف الشخصي - كنوز{% endblock %}
 
-{% block content %}
-<div class="container mx-auto px-4 py-8">
-    <!-- عنوان الصفحة -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">
-            <i class="fas fa-user-circle mr-2"></i> الملف الشخصي
-        </h1>
-        <p class="text-gray-600">إدارة معلومات حسابك الشخصية</p>
-    </div>
-    
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- العمود الأيسر - معلومات الملف الشخصي -->
-        <div class="lg:col-span-1">
-            <!-- بطاقة الملف الشخصي -->
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div class="text-center">
-                    <!-- صورة الملف الشخصي -->
-                    <div class="relative inline-block mb-4">
-                        {% if user.profile.profile_picture %}
-                        <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" 
-                             class="w-32 h-32 rounded-full object-cover border-4 border-white shadow">
-                        {% else %}
-                        <div class="w-32 h-32 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-4xl border-4 border-white shadow">
-                            {{ user.first_name|default:user.username|first|upper }}
-                        </div>
-                        {% endif %}
-                        
-                        <!-- زر تغيير الصورة -->
-                        <label for="id_profile_picture" class="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-blue-700">
-                            <i class="fas fa-camera"></i>
-                        </label>
-                    </div>
-                    
-                    <!-- المعلومات الأساسية -->
-                    <h2 class="text-xl font-bold text-gray-800 mb-1">
-                        {{ user.get_full_name|default:user.username }}
-                    </h2>
-                    <p class="text-gray-600 mb-3">{{ user.email }}</p>
-                    
-                    <!-- الدور -->
-                    <div class="inline-block bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 px-4 py-1 rounded-full text-sm font-medium mb-4">
-                        <i class="fas fa-user-tag mr-1"></i>
-                        {{ user.profile.role|default:"مستخدم" }}
-                    </div>
-                    
-                    <!-- الإحصائيات -->
-                    <div class="grid grid-cols-3 gap-2 mb-6">
-                        <div class="text-center">
-                            <div class="text-lg font-bold text-blue-600">
-                                {{ user.posts.count }}
-                            </div>
-                            <div class="text-gray-500 text-sm">منشور</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-lg font-bold text-green-600">
-                                {{ published_posts_count  }}
-                            </div>
-                            <div class="text-gray-500 text-sm">منشور</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-lg font-bold text-purple-600">
-                                {{ total_comments }}
-                            </div>
-                            <div class="text-gray-500 text-sm">تعليق</div>
-                        </div>
-                    </div>
-                    
-                    <!-- معلومات الحساب -->
-                    <div class="space-y-3 text-right">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">تاريخ الانضمام:</span>
-                            <span class="font-medium">{{ user.date_joined|date:"Y/m/d" }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">آخر دخول:</span>
-                            <span class="font-medium">{{ user.last_login|date:"Y/m/d H:i" }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">حالة الحساب:</span>
-                            <span class="font-medium text-green-600">نشط</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- روابط سريعة -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="font-bold text-gray-800 mb-4">الإعدادات السريعة</h3>
-                <div class="space-y-3">
-                    <a href="{% url 'dashboard' %}" class="flex items-center text-gray-700 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-tachometer-alt ml-2"></i>
-                        <span>لوحة التحكم</span>
-                    </a>
-                    
-                    {% if user.profile.is_content_editor or user.is_staff %}
-                    <a href="{% url 'create_post' %}" class="flex items-center text-gray-700 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-plus-circle ml-2"></i>
-                        <span>إنشاء منشور جديد</span>
-                    </a>
-                    {% endif %}
-                    
-                    <a href="#" class="flex items-center text-gray-700 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-bell ml-2"></i>
-                        <span>الإشعارات</span>
-                    </a>
-                    
-                    <a href="#" class="flex items-center text-gray-700 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-shield-alt ml-2"></i>
-                        <span>الأمان</span>
-                    </a>
-                    
-                    <a href="#" class="flex items-center text-gray-700 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-50">
-                        <i class="fas fa-moon ml-2"></i>
-                        <span>الوضع الليلي</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- العمود الأيمن - نموذج التعديل -->
-        <div class="lg:col-span-2">
-            <!-- نموذج تعديل الملف الشخصي -->
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-6">
-                    <i class="fas fa-edit mr-2"></i> تعديل المعلومات الشخصية
-                </h3>
-                
-                <form method="post" enctype="multipart/form-data" novalidate>
-                    {% csrf_token %}
-                    
-                    <!-- معلومات المستخدم -->
-                    <div class="mb-8">
-                        <h4 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
-                            <i class="fas fa-user mr-2"></i> معلومات الحساب الأساسية
-                        </h4>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <label class="block text-gray-700 font-medium mb-2">الاسم الأول</label>
-                                {{ user_form.first_name }}
-                                {% if user_form.first_name.errors %}
-                                <p class="text-red-500 text-sm mt-1">{{ user_form.first_name.errors.0 }}</p>
-                                {% endif %}
-                            </div>
-                            
-                            <div>
-                                <label class="block text-gray-700 font-medium mb-2">اسم العائلة</label>
-                                {{ user_form.last_name }}
-                                {% if user_form.last_name.errors %}
-                                <p class="text-red-500 text-sm mt-1">{{ user_form.last_name.errors.0 }}</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label class="block text-gray-700 font-medium mb-2">البريد الإلكتروني</label>
-                            {{ user_form.email }}
-                            {% if user_form.email.errors %}
-                            <p class="text-red-500 text-sm mt-1">{{ user_form.email.errors.0 }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    <!-- معلومات الملف الشخصي -->
-                    <div class="mb-8">
-                        <h4 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
-                            <i class="fas fa-id-card mr-2"></i> معلومات الملف الشخصي
-                        </h4>
-                        
-                        <div class="mb-6">
-                            <label class="block text-gray-700 font-medium mb-2">عن نفسك</label>
-                            {{ profile_form.bio }}
-                            <p class="text-gray-500 text-sm mt-2">اخبرنا المزيد عن نفسك وخبراتك</p>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <label class="block text-gray-700 font-medium mb-2">رقم الهاتف</label>
-                                {{ profile_form.phone }}
-                            </div>
-                            
-                            <div>
-                                <label class="block text-gray-700 font-medium mb-2">الدور/الوظيفة</label>
-                                {{ profile_form.role }}
-                            </div>
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label class="block text-gray-700 font-medium mb-2">صورة الملف الشخصي</label>
-                            <div class="flex items-center space-x-4 space-x-reverse">
-                                {{ profile_form.profile_picture }}
-                                <div class="text-gray-500 text-sm">
-                                    <p>الحجم الأمثل: 400×400 بكسل</p>
-                                    <p>الصيغ المسموحة: JPG, PNG, GIF</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- إعدادات الحساب -->
-                    <div class="mb-8">
-                        <h4 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
-                            <i class="fas fa-cog mr-2"></i> إعدادات الحساب
-                        </h4>
-                        
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium text-gray-800">الوضع الليلي</div>
-                                    <div class="text-gray-500 text-sm">واجهة داكنة مريحة للعين</div>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:right-1 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:right-6 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
-                            </div>
-                            
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium text-gray-800">إشعارات البريد الإلكتروني</div>
-                                    <div class="text-gray-500 text-sm">تلقي إشعارات على بريدك الإلكتروني</div>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" checked>
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:right-1 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:right-6 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                                </label>
-                            </div>
-                            
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium text-gray-800">خصوصية الملف الشخصي</div>
-                                    <div class="text-gray-500 text-sm">إظهار ملفك الشخصي للعامة</div>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" class="sr-only peer" checked>
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:right-1 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:right-6 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- أزرار الحفظ -->
-                    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
-                        <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-gray-800 font-medium">
-                            <i class="fas fa-arrow-right mr-2"></i> إلغاء والعودة
-                        </a>
-                        
-                        <div class="flex space-x-3 space-x-reverse">
-                            <button type="reset" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-medium">
-                                <i class="fas fa-undo mr-2"></i> إعادة تعيين
-                            </button>
-                            
-                            <button type="submit" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 font-medium">
-                                <i class="fas fa-save mr-2"></i> حفظ التغييرات
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- تغيير كلمة المرور -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-6">
-                    <i class="fas fa-key mr-2"></i> تغيير كلمة المرور
-                </h3>
-                
-                <form method="post" action="{% url 'change_password' %}">
-                    {% csrf_token %}
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">كلمة المرور الحالية</label>
-                            <input type="password" name="old_password" required 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">كلمة المرور الجديدة</label>
-                            <input type="password" name="new_password1" required 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-gray-700 font-medium mb-2">تأكيد كلمة المرور الجديدة</label>
-                            <input type="password" name="new_password2" required 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        
-                        <div class="pt-4">
-                            <button type="submit" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:opacity-90 font-medium">
-                                <i class="fas fa-key mr-2"></i> تغيير كلمة المرور
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // إضافة فئات Tailwind لحقول النموذج
-    document.addEventListener('DOMContentLoaded', function() {
-        const inputs = document.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            if (!input.classList.contains('custom-input')) {
-                input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
-                                'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500');
-            }
-        });
-        
-        // معاينة صورة الملف الشخصي
-        const profilePicInput = document.getElementById('id_profile_picture');
-        if (profilePicInput) {
-            profilePicInput.addEventListener('change', function(e) {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-                    const profilePic = document.querySelector('.rounded-full img') || 
-                                    document.querySelector('.rounded-full div');
-                    
-                    reader.onload = function(e) {
-                        if (profilePic.tagName === 'IMG') {
-                            profilePic.src = e.target.result;
-                        } else {
-                            // إذا كان div نستبدله بصور
-                            const parent = profilePic.parentElement;
-                            const img = document.createElement('img');
-                            img.src = e.target.result;
-                            img.className = 'w-32 h-32 rounded-full object-cover border-4 border-white shadow';
-                            parent.replaceChild(img, profilePic);
-                        }
-                    }
-                    
-                    reader.readAsDataURL(this.files[0]);
-                }
-            });
-        }
-    });
-</script>
-
+{% block extra_css %}
 <style>
-    /* تنسيق إضافي */
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    input[type="password"],
-    select,
-    textarea {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.5rem;
-        transition: all 0.3s;
+    .profile-container {
+        max-width: 1200px;
+        margin: 0 auto;
     }
-
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    input[type="tel"]:focus,
-    input[type="password"]:focus,
-    select:focus,
-    textarea:focus {
-        outline: none;
+    
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border: 5px solid white;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .profile-avatar:hover {
+        transform: scale(1.05);
+    }
+    
+    .profile-stats {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+    }
+    
+    .activity-item {
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    .activity-item:hover {
+        border-color: #3b82f6;
+        background-color: #f8fafc;
+    }
+    
+    .badge-custom {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+    }
+    
+    .tab-content {
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .form-input {
+        border-radius: 0.5rem;
+        border: 1px solid #d1d5db;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-
-    textarea {
-        min-height: 120px;
-        resize: vertical;
+    
+    .file-upload {
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
     }
-
-    /* تنسيق مفتاح التبديل */
-    .toggle-checkbox:checked {
+    
+    .file-upload input {
+        position: absolute;
+        top: 0;
         right: 0;
-        border-color: #3b82f6;
+        min-width: 100%;
+        min-height: 100%;
+        opacity: 0;
+        cursor: pointer;
     }
-
-    .toggle-checkbox:checked + .toggle-label {
-        background-color: #3b82f6;
+    
+    @media (max-width: 768px) {
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .profile-header {
+            padding: 1.5rem !important;
+        }
     }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container px-4 py-8">
+    <!-- رأس الملف الشخصي -->
+    <div class="profile-header p-8 mb-8 text-white">
+        <div class="flex flex-col md:flex-row items-center gap-6">
+            <!-- الصورة الشخصية -->
+            <div class="relative">
+                <img src="{% if user.profile.profile_image %}{{ user.profile.profile_image.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" 
+                     alt="صورة {{ user.username }}"
+                     class="profile-avatar rounded-full object-cover">
+                <label for="profile-image-upload" class="absolute bottom-2 right-2 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700 transition">
+                    <i class="fas fa-camera text-white text-sm"></i>
+                </label>
+            </div>
+            
+            <!-- معلومات المستخدم -->
+            <div class="flex-1 text-center md:text-right">
+                <h1 class="text-3xl font-bold mb-2">
+                    {{ user.profile.full_name|default:user.get_full_name|default:user.username }}
+                </h1>
+                <p class="text-lg opacity-90 mb-3">
+                    @{{ user.username }}
+                </p>
+                <p class="opacity-80">
+                    {% if user.profile.bio %}
+                        {{ user.profile.bio|truncatechars:120 }}
+                    {% else %}
+                        لم يقم المستخدم بإضافة وصف شخصي
+                    {% endif %}
+                </p>
+                
+                <!-- معلومات الاتصال -->
+                <div class="flex flex-wrap justify-center md:justify-end gap-4 mt-4">
+                    {% if user.email %}
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-envelope"></i>
+                        <span>{{ user.email }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user.profile.phone %}
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-phone"></i>
+                        <span>{{ user.profile.phone }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-calendar"></i>
+                        <span>منذ {{ user.date_joined|timesince }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- إحصائيات المستخدم -->
+    <div class="profile-stats p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="stat-card bg-gradient-to-br from-blue-50 to-blue-100">
+                <div class="stat-icon bg-blue-100 text-blue-600">
+                    <i class="fas fa-newspaper text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-1">{{ total_posts }}</h3>
+                <p class="text-gray-600">المقالات المنشورة</p>
+            </div>
+            
+            <div class="stat-card bg-gradient-to-br from-green-50 to-green-100">
+                <div class="stat-icon bg-green-100 text-green-600">
+                    <i class="fas fa-eye text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-1">{{ total_views }}</h3>
+                <p class="text-gray-600">عدد المشاهدات</p>
+            </div>
+            
+            <div class="stat-card bg-gradient-to-br from-purple-50 to-purple-100">
+                <div class="stat-icon bg-purple-100 text-purple-600">
+                    <i class="fas fa-comments text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-1">{{ comments_count }}</h3>
+                <p class="text-gray-600">التعليقات</p>
+            </div>
+            
+            <div class="stat-card bg-gradient-to-br from-orange-50 to-orange-100">
+                <div class="stat-icon bg-orange-100 text-orange-600">
+                    <i class="fas fa-award text-xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-1">
+                    {% if user.is_superuser %}أدمن{% elif user.is_staff %}Staff{% elif user.profile.is_content_editor %}محرر{% else %}مستخدم{% endif %}
+                </h3>
+                <p class="text-gray-600">الرتبة</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- علامات التبويب -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div class="border-b border-gray-200">
+            <nav class="flex flex-wrap md:flex-nowrap">
+                <button id="info-tab" class="tab-btn flex-1 px-6 py-4 text-center font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-all active">
+                    <i class="fas fa-user-circle ml-2"></i>
+                    المعلومات الشخصية
+                </button>
+                <button id="posts-tab" class="tab-btn flex-1 px-6 py-4 text-center font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-all">
+                    <i class="fas fa-newspaper ml-2"></i>
+                    مقالاتي
+                </button>
+                <button id="activity-tab" class="tab-btn flex-1 px-6 py-4 text-center font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-all">
+                    <i class="fas fa-chart-line ml-2"></i>
+                    النشاط
+                </button>
+                <button id="settings-tab" class="tab-btn flex-1 px-6 py-4 text-center font-medium text-gray-600 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-all">
+                    <i class="fas fa-cog ml-2"></i>
+                    الإعدادات
+                </button>
+            </nav>
+        </div>
+        
+        <!-- محتوى علامات التبويب -->
+        <div class="p-6">
+            <!-- تبويب المعلومات الشخصية -->
+            <div id="info-content" class="tab-content">
+                <div class="max-w-4xl mx-auto">
+                    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- الاسم الكامل -->
+                            <div>
+                                <label class="block text-gray-700 mb-2">
+                                    <i class="fas fa-user ml-2"></i>
+                                    الاسم الكامل
+                                </label>
+                                <input type="text" 
+                                       name="full_name" 
+                                       value="{{ user.profile.full_name|default:'' }}"
+                                       class="w-full form-input"
+                                       placeholder="أدخل اسمك الكامل">
+                            </div>
+                            
+                            <!-- البريد الإلكتروني -->
+                            <div>
+                                <label class="block text-gray-700 mb-2">
+                                    <i class="fas fa-envelope ml-2"></i>
+                                    البريد الإلكتروني
+                                </label>
+                                <input type="email" 
+                                       value="{{ user.email }}"
+                                       class="w-full form-input bg-gray-50"
+                                       readonly>
+                                <small class="text-gray-500 text-sm">لن يتم عرض بريدك الإلكتروني للعامة</small>
+                            </div>
+                            
+                            <!-- رقم الهاتف -->
+                            <div>
+                                <label class="block text-gray-700 mb-2">
+                                    <i class="fas fa-phone ml-2"></i>
+                                    رقم الهاتف
+                                </label>
+                                <input type="text" 
+                                       name="phone" 
+                                       value="{{ user.profile.phone|default:'' }}"
+                                       class="w-full form-input"
+                                       placeholder="أدخل رقم هاتفك">
+                            </div>
+                            
+                            <!-- تاريخ الميلاد -->
+                            <div>
+                                <label class="block text-gray-700 mb-2">
+                                    <i class="fas fa-birthday-cake ml-2"></i>
+                                    تاريخ الميلاد
+                                </label>
+                                <input type="date" 
+                                       name="birth_date" 
+                                       value="{{ user.profile.birth_date|default:''|date:'Y-m-d' }}"
+                                       class="w-full form-input">
+                            </div>
+                        </div>
+                        
+                        <!-- السيرة الذاتية -->
+                        <div>
+                            <label class="block text-gray-700 mb-2">
+                                <i class="fas fa-edit ml-2"></i>
+                                السيرة الذاتية
+                            </label>
+                            <textarea name="bio" 
+                                      rows="4" 
+                                      class="w-full form-input"
+                                      placeholder="أخبرنا عن نفسك...">{{ user.profile.bio|default:'' }}</textarea>
+                        </div>
+                        
+                        <!-- رفع الصورة الشخصية -->
+                        <div>
+                            <label class="block text-gray-700 mb-2">
+                                <i class="fas fa-image ml-2"></i>
+                                الصورة الشخصية
+                            </label>
+                            <div class="file-upload relative">
+                                <input type="file" 
+                                       id="profile-image-upload" 
+                                       name="profile_image" 
+                                       accept="image/*"
+                                       class="hidden">
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-4"></i>
+                                    <p class="text-gray-600 mb-2">اسحب وأفلت الصورة هنا أو انقر للاختيار</p>
+                                    <p class="text-gray-500 text-sm">يُفضل صورة بحجم 500×500 بكسل</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- أزرار الحفظ -->
+                        <div class="flex flex-wrap gap-4 pt-6">
+                            <button type="submit" 
+                                    class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:opacity-90 transition">
+                                <i class="fas fa-save ml-2"></i>
+                                حفظ التغييرات
+                            </button>
+                            
+                            <a href="{% url 'change_password' %}" 
+                               class="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white font-medium rounded-lg hover:opacity-90 transition">
+                                <i class="fas fa-lock ml-2"></i>
+                                تغيير كلمة المرور
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <!-- معلومات إضافية -->
+                    <div class="mt-8 pt-8 border-t border-gray-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">
+                            <i class="fas fa-info-circle ml-2"></i>
+                            معلومات الحساب
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600">اسم المستخدم:</span>
+                                    <span class="font-medium">{{ user.username }}</span>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600">تاريخ الانضمام:</span>
+                                    <span class="font-medium">{{ user.date_joined|date:"Y-m-d" }}</span>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600">آخر تسجيل دخول:</span>
+                                    <span class="font-medium">{{ user.last_login|default:"لم يسجل دخول بعد"|date:"Y-m-d H:i" }}</span>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600">حالة الحساب:</span>
+                                    <span class="font-medium {% if user.is_active %}text-green-600{% else %}text-red-600{% endif %}">
+                                        {% if user.is_active %}نشط{% else %}غير نشط{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تبويب المقالات -->
+            <div id="posts-content" class="tab-content hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">
+                        <i class="fas fa-newspaper ml-2"></i>
+                        مقالاتي المنشورة
+                    </h3>
+                    <a href="{% url 'create_post' %}" 
+                       class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:opacity-90 transition">
+                        <i class="fas fa-plus ml-2"></i>
+                        مقال جديد
+                    </a>
+                </div>
+                
+                {% if posts %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for post in posts %}
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition">
+                        <a href="{% url 'post_detail' post.slug %}">
+                            {% if post.image %}
+                            <img src="{{ post.image.url }}" 
+                                 alt="{{ post.title }}"
+                                 class="w-full h-48 object-cover">
+                            {% else %}
+                            <div class="w-full h-48 bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
+                                <i class="fas fa-image text-gray-400 text-4xl"></i>
+                            </div>
+                            {% endif %}
+                        </a>
+                        
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
+                                    {{ post.category.name }}
+                                </span>
+                                <span class="text-sm text-gray-500">
+                                    {{ post.created_at|timesince }}
+                                </span>
+                            </div>
+                            
+                            <h4 class="font-bold text-gray-800 mb-2">
+                                <a href="{% url 'post_detail' post.slug %}" class="hover:text-blue-600 transition">
+                                    {{ post.title|truncatechars:60 }}
+                                </a>
+                            </h4>
+                            
+                            <p class="text-gray-600 text-sm mb-3">
+                                {{ post.content|striptags|truncatechars:80 }}
+                            </p>
+                            
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-eye text-gray-400"></i>
+                                    <span class="text-sm text-gray-600">{{ post.views }}</span>
+                                </div>
+                                
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs px-2 py-1 rounded-full 
+                                        {% if post.status == 'published' %}bg-green-100 text-green-600
+                                        {% elif post.status == 'draft' %}bg-yellow-100 text-yellow-600
+                                        {% else %}bg-gray-100 text-gray-600{% endif %}">
+                                        {{ post.get_status_display }}
+                                    </span>
+                                    
+                                    <a href="{% url 'edit_post' post.id %}" 
+                                       class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- الترقيم -->
+                {% if posts.paginator.num_pages > 1 %}
+                <div class="mt-8 flex justify-center">
+                    <nav class="flex items-center gap-2">
+                        {% if posts.has_previous %}
+                        <a href="?page={{ posts.previous_page_number }}" 
+                           class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        {% endif %}
+                        
+                        {% for num in posts.paginator.page_range %}
+                            {% if posts.number == num %}
+                            <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">{{ num }}</span>
+                            {% else %}
+                            <a href="?page={{ num }}" 
+                               class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+                                {{ num }}
+                            </a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if posts.has_next %}
+                        <a href="?page={{ posts.next_page_number }}" 
+                           class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <div class="text-center py-12">
+                    <div class="w-24 h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-newspaper text-gray-400 text-3xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-700 mb-2">لا توجد مقالات بعد</h4>
+                    <p class="text-gray-600 mb-6">ابدأ بنشر أول مقال لك ومشاركة المعرفة مع الآخرين</p>
+                    <a href="{% url 'create_post' %}" 
+                       class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:opacity-90 transition">
+                        <i class="fas fa-plus ml-2"></i>
+                        ابدأ بنشر أول مقال
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- تبويب النشاط -->
+            <div id="activity-content" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- إحصائيات النشاط -->
+                    <div class="lg:col-span-2">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">
+                            <i class="fas fa-chart-line ml-2"></i>
+                            إحصائيات النشاط
+                        </h3>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl">
+                                <div class="text-2xl font-bold text-gray-800">{{ total_posts }}</div>
+                                <div class="text-sm text-gray-600">مقالات</div>
+                                <div class="text-xs text-blue-600 mt-1">
+                                    <i class="fas fa-arrow-up ml-1"></i>
+                                    +{{ published_posts_count }} منشورة
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl">
+                                <div class="text-2xl font-bold text-gray-800">{{ total_views }}</div>
+                                <div class="text-sm text-gray-600">مشاهدة</div>
+                                <div class="text-xs text-green-600 mt-1">
+                                    <i class="fas fa-chart-line ml-1"></i>
+                                    {{ avg_views_per_post|default:"0" }} لكل مقال
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl">
+                                <div class="text-2xl font-bold text-gray-800">{{ comments_count }}</div>
+                                <div class="text-sm text-gray-600">تعليق</div>
+                                <div class="text-xs text-purple-600 mt-1">
+                                    <i class="fas fa-comment ml-1"></i>
+                                    +{{ recent_comments_count|default:"0" }} جديد
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-xl">
+                                <div class="text-2xl font-bold text-gray-800">{{ days_active|default:"1" }}</div>
+                                <div class="text-sm text-gray-600">يوم نشاط</div>
+                                <div class="text-xs text-orange-600 mt-1">
+                                    <i class="fas fa-history ml-1"></i>
+                                    منذ {{ user.date_joined|date:"Y-m-d" }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- جدول النشاط الأخير -->
+                        <div class="bg-white border border-gray-200 rounded-xl">
+                            <div class="p-4 border-b border-gray-200">
+                                <h4 class="font-bold text-gray-800">
+                                    <i class="fas fa-clock ml-2"></i>
+                                    النشاط الأخير
+                                </h4>
+                            </div>
+                            
+                            <div class="divide-y divide-gray-100">
+                                {% for activity in recent_activities %}
+                                <div class="p-4 hover:bg-gray-50 transition">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center 
+                                            {% cycle 'bg-blue-100 text-blue-600' 'bg-green-100 text-green-600' 'bg-purple-100 text-purple-600' 'bg-orange-100 text-orange-600' %}">
+                                            <i class="{% cycle 'fas fa-newspaper' 'fas fa-edit' 'fas fa-comment' 'fas fa-eye' %}"></i>
+                                        </div>
+                                        
+                                        <div class="flex-1">
+                                            <div class="flex justify-between items-start">
+                                                <p class="text-gray-800">
+                                                    {{ activity.message }}
+                                                </p>
+                                                <span class="text-xs text-gray-500 whitespace-nowrap">
+                                                    {{ activity.time|timesince }}
+                                                </span>
+                                            </div>
+                                            
+                                            {% if activity.details %}
+                                            <p class="text-sm text-gray-600 mt-1">
+                                                {{ activity.details }}
+                                            </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="p-8 text-center">
+                                    <i class="fas fa-inbox text-gray-300 text-4xl mb-4"></i>
+                                    <p class="text-gray-600">لا يوجد نشاط مسجل بعد</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- إنجازات المستخدم -->
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">
+                            <i class="fas fa-trophy ml-2"></i>
+                            الإنجازات
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <!-- إنجاز المقال الأول -->
+                            <div class="activity-item bg-gradient-to-r from-blue-50 to-white">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-bold text-gray-800">كاتب مبتدئ</h5>
+                                        <p class="text-sm text-gray-600">
+                                            {% if total_posts > 0 %}مكتمل{% else %}قيد الإنجاز{% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full" style="width: {% if total_posts > 0 %}100{% else %}20{% endif %}%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">نشر أول مقال لك</p>
+                                </div>
+                            </div>
+                            
+                            <!-- إنجاز التفاعل -->
+                            <div class="activity-item bg-gradient-to-r from-green-50 to-white">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-bold text-gray-800">متفاعل</h5>
+                                        <p class="text-sm text-gray-600">
+                                            {% if comments_count >= 10 %}مكتمل{% else %}قيد الإنجاز{% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            <div class="mt-2">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: {{ comments_width }}%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">{{ comments_count }} من أصل 10 تعليق</p>
+                            </div>
+                            </div>
+                            
+                            <!-- إنجاز المشاهدات -->
+                            <div class="activity-item bg-gradient-to-r from-purple-50 to-white">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white">
+                                        <i class="fas fa-fire"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-bold text-gray-800">شائع</h5>
+                                        <p class="text-sm text-gray-600">
+                                            {% if total_views >= 1000 %}مكتمل{% else %}قيد الإنجاز{% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-purple-600 h-2 rounded-full" style="width: {% if total_views >= 1000 %}100{% elif total_views > 0 %}{{ total_views|divisibleby:"10" }}{% else %}0{% endif %}%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">{{ total_views }} من أصل 1000 مشاهدة</p>
+                                </div>
+                            </div>
+                            
+                            <!-- إنجاز المتابعة -->
+                            <div class="activity-item bg-gradient-to-r from-orange-50 to-white">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-bold text-gray-800">محرر محتوى</h5>
+                                        <p class="text-sm text-gray-600">
+                                            {% if user.profile.is_content_editor %}مكتمل{% else %}قيد الإنجاز{% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-orange-600 h-2 rounded-full" style="width: {% if user.profile.is_content_editor %}100{% else %}50{% endif %}%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        {% if user.profile.is_content_editor %}مبروك! أنت محرر محتوى{% else %}محتاج 5 مقالات منشورة{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تبويب الإعدادات -->
+            <div id="settings-content" class="tab-content hidden">
+                <div class="max-w-2xl mx-auto">
+                    <div class="space-y-6">
+                        <!-- إعدادات الحساب -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">
+                                <i class="fas fa-user-cog ml-2"></i>
+                                إعدادات الحساب
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">إشعارات البريد الإلكتروني</h4>
+                                        <p class="text-sm text-gray-600">تلقي إشعارات حول التعليقات والتفاعلات</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                                
+                                <div class="border-t border-gray-200 pt-4">
+                                    <h4 class="font-medium text-gray-800 mb-2">الخصوصية</h4>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center gap-2">
+                                            <input type="checkbox" class="rounded text-blue-600" checked>
+                                            <span class="text-gray-700">عرض نشاطي للعامة</span>
+                                        </label>
+                                        <label class="flex items-center gap-2">
+                                            <input type="checkbox" class="rounded text-blue-600">
+                                            <span class="text-gray-700">إخفاء البريد الإلكتروني</span>
+                                        </label>
+                                        <label class="flex items-center gap-2">
+                                            <input type="checkbox" class="rounded text-blue-600" checked>
+                                            <span class="text-gray-700">السماح بالتعليقات على مقالاتي</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- الأمان -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">
+                                <i class="fas fa-shield-alt ml-2"></i>
+                                الأمان
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <a href="{% url 'change_password' %}" 
+                                   class="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:from-green-100 hover:to-green-200 transition">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">تغيير كلمة المرور</h4>
+                                            <p class="text-sm text-gray-600">آخر تحديث منذ {{ last_password_change|default:"فترة طويلة" }}</p>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-left text-gray-400"></i>
+                                </a>
+                                
+                                <div class="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                                    <h4 class="font-medium text-gray-800 mb-2">جلسات التسجيل</h4>
+                                    <p class="text-sm text-gray-600 mb-3">يمكنك رؤية وإدارة جلسات تسجيل الدخول النشطة على أجهزتك</p>
+                                    <button class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition">
+                                        <i class="fas fa-desktop ml-2"></i>
+                                        عرض الجلسات النشطة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- الإجراءات الخطيرة -->
+                        <div class="bg-white border border-red-200 rounded-xl p-6">
+                            <h3 class="text-xl font-bold text-red-700 mb-4">
+                                <i class="fas fa-exclamation-triangle ml-2"></i>
+                                الإجراءات الخطيرة
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div class="p-4 bg-red-50 rounded-lg">
+                                    <h4 class="font-medium text-red-700 mb-2">تصدير بياناتي</h4>
+                                    <p class="text-sm text-red-600 mb-3">يمكنك طلب نسخة من جميع بياناتك الشخصية على المنصة</p>
+                                    <button class="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition">
+                                        <i class="fas fa-download ml-2"></i>
+                                        طلب تصدير البيانات
+                                    </button>
+                                </div>
+                                
+                                <div class="p-4 bg-red-50 rounded-lg">
+                                    <h4 class="font-medium text-red-700 mb-2">حذف الحساب نهائياً</h4>
+                                    <p class="text-sm text-red-600 mb-3">هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع بياناتك بشكل نهائي.</p>
+                                    <a href="{% url 'delete_account' %}" 
+                                       class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition">
+                                        <i class="fas fa-trash ml-2"></i>
+                                        حذف حسابي نهائياً
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- البادجات والمكافآت -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h3 class="text-xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-medal ml-2"></i>
+            البادجات والمكافآت
+        </h3>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <!-- بادج المؤلف الجديد -->
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-r from-blue-100 to-blue-200 flex items-center justify-center">
+                    <i class="fas fa-feather text-blue-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-800">مؤلف جديد</p>
+                <p class="text-xs text-gray-600">نشر أول مقال</p>
+            </div>
+            
+            <!-- بادج المتواصل -->
+            {% if comments_count >= 5 %}
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-r from-green-100 to-green-200 flex items-center justify-center">
+                    <i class="fas fa-comments text-green-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-800">المتواصل</p>
+                <p class="text-xs text-gray-600">5+ تعليقات</p>
+            </div>
+            {% endif %}
+            
+            <!-- بادج المشهور -->
+            {% if total_views >= 500 %}
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-r from-purple-100 to-purple-200 flex items-center justify-center">
+                    <i class="fas fa-fire text-purple-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-800">المشهور</p>
+                <p class="text-xs text-gray-600">500+ مشاهدة</p>
+            </div>
+            {% endif %}
+            
+            <!-- بادج الملتزم -->
+            {% if total_posts >= 10 %}
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-r from-orange-100 to-orange-200 flex items-center justify-center">
+                    <i class="fas fa-calendar-check text-orange-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-800">الملتزم</p>
+                <p class="text-xs text-gray-600">10+ مقالات</p>
+            </div>
+            {% endif %}
+            
+            <!-- بادج المحرر -->
+            {% if user.profile.is_content_editor %}
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-r from-red-100 to-red-200 flex items-center justify-center">
+                    <i class="fas fa-crown text-red-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-800">المحرر</p>
+                <p class="text-xs text-gray-600">محرر معتمد</p>
+            </div>
+            {% endif %}
+            
+            <!-- بادج الريادة -->
+            {% if user.date_joined.year == 2024 %}
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-gradient-to-r from-yellow-100 to-yellow-200 flex items-center justify-center">
+                    <i class="fas fa-rocket text-yellow-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-800">الريادة</p>
+                <p class="text-xs text-gray-600">مبكر التسجيل</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // تبويبات الصفحة
+    const tabs = {
+        'info-tab': 'info-content',
+        'posts-tab': 'posts-content',
+        'activity-tab': 'activity-content',
+        'settings-tab': 'settings-content'
+    };
+    
+    // تهيئة التبويبات
+    document.querySelectorAll('.tab-btn').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.id;
+            
+            // إخفاء جميع المحتويات
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // إزالة النشط من جميع الأزرار
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'border-blue-600', 'text-blue-600');
+                btn.classList.add('text-gray-600');
+            });
+            
+            // إظهار المحتوى المطلوب
+            const contentId = tabs[tabId];
+            document.getElementById(contentId).classList.remove('hidden');
+            
+            // تفعيل الزر النشط
+            this.classList.add('active', 'border-blue-600', 'text-blue-600');
+            this.classList.remove('text-gray-600');
+        });
+    });
+    
+    // معاينة الصورة قبل الرفع
+    const imageUpload = document.getElementById('profile-image-upload');
+    const profileAvatar = document.querySelector('.profile-avatar');
+    
+    if (imageUpload) {
+        imageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    profileAvatar.src = event.target.result;
+                    
+                    // إظهار رسالة نجاح
+                    Toastify({
+                        text: "تم تحميل الصورة بنجاح، قم بحفظ التغييرات",
+                        duration: 3000,
+                        gravity: "bottom",
+                        position: "left",
+                        backgroundColor: "#10b981",
+                    }).showToast();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // تحميل التبويب المناسب من الرابط
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab');
+        
+        if (tab && tabs[`${tab}-tab`]) {
+            document.getElementById(`${tab}-tab`).click();
+        }
+        
+        // تحميل الصفحة مع تأثير
+        gsap.from('.profile-header', {
+            duration: 1,
+            y: 30,
+            opacity: 0,
+            ease: "power2.out"
+        });
+        
+        gsap.from('.profile-stats', {
+            duration: 1,
+            y: 30,
+            opacity: 0,
+            delay: 0.2,
+            ease: "power2.out"
+        });
+        
+        gsap.from('.stat-card', {
+            duration: 0.8,
+            y: 20,
+            opacity: 0,
+            stagger: 0.1,
+            delay: 0.4,
+            ease: "back.out(1.7)"
+        });
+    });
+    
+    // رسائل النجاح والخطأ
+    {% if messages %}
+    {% for message in messages %}
+    Toastify({
+        text: "{{ message }}",
+        duration: 5000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "{% if message.tags == 'success' %}#10b981{% else %}#ef4444{% endif %}",
+    }).showToast();
+    {% endfor %}
+    {% endif %}
+</script>
 {% endblock %}

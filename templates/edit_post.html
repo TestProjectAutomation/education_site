@@ -381,185 +381,82 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.tiny.cloud/1/YOUR_API_KEY/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script>
-        let blocksData = [];
+<script>
+    let blocksData = [];
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // معاينة الصور
-            const featuredImageInput = document.querySelector('input[name="featured_image"]');
-            const featuredPreviewDiv = document.getElementById('featured-image-preview');
-            const featuredPreviewImg = document.getElementById('preview-featured-img');
-            
-            if (featuredImageInput) {
-                featuredImageInput.addEventListener('change', function(e) {
-                    if (this.files && this.files[0]) {
-                        const reader = new FileReader();
-                        
-                        reader.onload = function(e) {
-                            featuredPreviewImg.src = e.target.result;
-                            featuredPreviewDiv.classList.remove('hidden');
-                        }
-                        
-                        reader.readAsDataURL(this.files[0]);
-                    } else {
-                        featuredPreviewDiv.classList.add('hidden');
-                    }
-                });
-            }
-            
-            // عداد الأحرف
-            const excerptField = document.querySelector('[name="excerpt"]');
-            const excerptCounter = document.getElementById('excerpt-counter');
-            const seoDescField = document.querySelector('[name="seo_description"]');
-            const seoDescCounter = document.getElementById('seo-desc-counter');
-            
-            function updateCounter(field, counter) {
-                field.addEventListener('input', function() {
-                    const length = this.value.length;
-                    counter.textContent = `${length}/300`;
-                    
-                    if (length > 300) {
-                        counter.classList.add('text-red-500');
-                        counter.classList.remove('text-gray-500');
-                    } else {
-                        counter.classList.remove('text-red-500');
-                        counter.classList.add('text-gray-500');
-                    }
-                });
-                field.dispatchEvent(new Event('input'));
-            }
-            
-            if (excerptField && excerptCounter) updateCounter(excerptField, excerptCounter);
-            if (seoDescField && seoDescCounter) updateCounter(seoDescField, seoDescCounter);
-            
-            // تقويم تاريخ النشر
-            const publishDateField = document.querySelector('[name="publish_date"]');
-            if (publishDateField) {
-                flatpickr(publishDateField, {
-                    enableTime: true,
-                    dateFormat: "Y-m-d H:i",
-                    time_24hr: true,
-                    locale: "ar",
-                    minDate: "today",
-                    defaultDate: new Date()
-                });
-            }
-            
-            // تحميل البيانات القديمة للبلوكات
-            {% for block in post_blocks %}
-            blocksData.push({
-                id: {{ block.id }},
-                type: '{{ block.block_type }}',
-                text: `{{ block.text|escapejs|safe }}`,
-                image: '{{ block.image.url|default:"" }}',
-                order: {{ block.order }}
-            });
-            {% endfor %}
-        });
-
-        // وظائف البلوكات
-        function addTextBlock() {
-            document.getElementById('modalTitle').textContent = 'إضافة بلوك نصي';
-            document.getElementById('modalContent').innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-gray-700 mb-2">النص</label>
-                        <textarea id="blockText" class="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg"></textarea>
-                    </div>
-                </div>
-            `;
-            
-            // تهيئة TinyMCE للتحرير
-            tinymce.init({
-                selector: '#blockText',
-                plugins: 'link image lists',
-                toolbar: 'formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image',
-                language: 'ar',
-                directionality: 'rtl'
-            });
-            
-            document.getElementById('blockModal').classList.remove('hidden');
-        }
-
-        function addImageBlock() {
-            document.getElementById('modalTitle').textContent = 'إضافة بلوك صورة';
-            document.getElementById('modalContent').innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-gray-700 mb-2">الصورة</label>
-                        <input type="file" id="blockImage" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    </div>
-                    <div id="imagePreview" class="hidden">
-                        <img id="previewImage" class="w-full h-48 object-cover rounded-lg">
-                    </div>
-                </div>
-            `;
-            
-            const imageInput = document.getElementById('blockImage');
-            imageInput.addEventListener('change', function(e) {
+    document.addEventListener('DOMContentLoaded', function() {
+        // معاينة الصور
+        const featuredImageInput = document.querySelector('input[name="featured_image"]');
+        const featuredPreviewDiv = document.getElementById('featured-image-preview');
+        const featuredPreviewImg = document.getElementById('preview-featured-img');
+        
+        if (featuredImageInput) {
+            featuredImageInput.addEventListener('change', function(e) {
                 if (this.files && this.files[0]) {
                     const reader = new FileReader();
-                    const preview = document.getElementById('previewImage');
-                    const previewDiv = document.getElementById('imagePreview');
                     
                     reader.onload = function(e) {
-                        preview.src = e.target.result;
-                        previewDiv.classList.remove('hidden');
+                        featuredPreviewImg.src = e.target.result;
+                        featuredPreviewDiv.classList.remove('hidden');
                     }
                     
                     reader.readAsDataURL(this.files[0]);
+                } else {
+                    featuredPreviewDiv.classList.add('hidden');
                 }
             });
-            
-            document.getElementById('blockModal').classList.remove('hidden');
         }
-
-        function closeModal() {
-            document.getElementById('blockModal').classList.add('hidden');
-            tinymce.remove('#blockText');
+        
+        // عداد الأحرف
+        const excerptField = document.querySelector('[name="excerpt"]');
+        const excerptCounter = document.getElementById('excerpt-counter');
+        const seoDescField = document.querySelector('[name="seo_description"]');
+        const seoDescCounter = document.getElementById('seo-desc-counter');
+        
+        function updateCounter(field, counter) {
+            field.addEventListener('input', function() {
+                const length = this.value.length;
+                counter.textContent = `${length}/300`;
+                
+                if (length > 300) {
+                    counter.classList.add('text-red-500');
+                    counter.classList.remove('text-gray-500');
+                } else {
+                    counter.classList.remove('text-red-500');
+                    counter.classList.add('text-gray-500');
+                }
+            });
+            field.dispatchEvent(new Event('input'));
         }
-
-        function saveBlock() {
-            // حفظ البلوك في المصفوفة
-            // ثم إغلاق المودال
-            closeModal();
-        }
-
-        // تأكيد الحذف
-        function confirmDelete() {
-            if (confirm('هل أنت متأكد من حذف هذا المنشور؟ هذا الإجراء لا يمكن التراجع عنه.')) {
-                window.location.href = "{% url 'delete_post' post.id %}";
-            }
-        }
-
-        // نسخ رابط المنشور
-        function copyPostLink() {
-            const link = "{{ request.scheme }}://{{ request.get_host }}{% url 'post_detail' post.slug %}";
-            navigator.clipboard.writeText(link).then(() => {
-                alert('تم نسخ رابط المنشور إلى الحافظة');
+        
+        if (excerptField && excerptCounter) updateCounter(excerptField, excerptCounter);
+        if (seoDescField && seoDescCounter) updateCounter(seoDescField, seoDescCounter);
+        
+        // تقويم تاريخ النشر
+        const publishDateField = document.querySelector('[name="publish_date"]');
+        if (publishDateField) {
+            flatpickr(publishDateField, {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true,
+                locale: "ar",
+                minDate: "today",
+                defaultDate: new Date()
             });
         }
-
-
-
-        // دالة للحصول على CSRF token
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
+        
+        // تحميل البيانات القديمة للبلوكات
+        {% for block in post_blocks %}
+        blocksData.push({
+            id: {{ block.id }},
+            type: '{{ block.block_type }}',
+            text: `{{ block.text|escapejs|safe }}`,
+            image: '{{ block.image.url|default:"" }}',
+            order: {{ block.order }}
+        });
+        {% endfor %}
+        
         // إضافة فئة Tailwind لحقول النموذج
         const inputs = document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]), select, textarea');
         inputs.forEach(input => {
@@ -567,40 +464,157 @@
                             'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500',
                             'transition');
         });
-    </script>
+    });
 
-    <style>
-        /* تنسيق إضافي */
-        textarea {
-            min-height: 200px;
-            resize: vertical;
-        }
+    // وظائف البلوكات
+    function addTextBlock() {
+        document.getElementById('modalTitle').textContent = 'إضافة بلوك نصي';
+        document.getElementById('modalContent').innerHTML = `
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">النص</label>
+                    <textarea id="blockText" class="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('blockModal').classList.remove('hidden');
+    }
 
-        select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
+    function addImageBlock() {
+        document.getElementById('modalTitle').textContent = 'إضافة بلوك صورة';
+        document.getElementById('modalContent').innerHTML = `
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">الصورة</label>
+                    <input type="file" id="blockImage" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div id="imagePreview" class="hidden">
+                    <img id="previewImage" class="w-full h-48 object-cover rounded-lg">
+                </div>
+            </div>
+        `;
+        
+        const imageInput = document.getElementById('blockImage');
+        imageInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                const preview = document.getElementById('previewImage');
+                const previewDiv = document.getElementById('imagePreview');
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewDiv.classList.remove('hidden');
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        document.getElementById('blockModal').classList.remove('hidden');
+    }
 
-        /* تأثيرات المودال */
-        #blockModal {
-            transition: all 0.3s ease;
-        }
+    function closeModal() {
+        document.getElementById('blockModal').classList.add('hidden');
+    }
 
-        .modal-content {
-            transform: translateY(-20px);
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
+    function saveBlock() {
+        // حفظ البلوك في المصفوفة
+        // ثم إغلاق المودال
+        closeModal();
+    }
 
-        #blockModal:not(.hidden) .modal-content {
-            transform: translateY(0);
-            opacity: 1;
+    function editBlock(blockId) {
+        // يمكن تنفيذ التعديل هنا
+        alert('ميزة تعديل البلوكات قيد التطوير');
+    }
+
+    function deleteBlock(blockId) {
+        if (confirm('هل أنت متأكد من حذف هذا البلوك؟')) {
+            // إرسال طلب AJAX لحذف البلوك
+            fetch(`/api/blocks/${blockId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('حدث خطأ أثناء حذف البلوك');
+                }
+            });
         }
-    </style>
+    }
+
+    // تأكيد الحذف
+    function confirmDelete() {
+        if (confirm('هل أنت متأكد من حذف هذا المنشور؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+            window.location.href = "{% url 'delete_post' post.id %}";
+        }
+    }
+
+    // نسخ رابط المنشور
+    function copyPostLink() {
+        const link = "{{ request.scheme }}://{{ request.get_host }}{% url 'post_detail' post.slug %}";
+        navigator.clipboard.writeText(link).then(() => {
+            alert('تم نسخ رابط المنشور إلى الحافظة');
+        });
+    }
+
+    // دالة للحصول على CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+</script>
+
+<style>
+    /* تنسيق إضافي */
+    textarea {
+        min-height: 200px;
+        resize: vertical;
+    }
+
+    select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    /* تأثيرات المودال */
+    #blockModal {
+        transition: all 0.3s ease;
+    }
+
+    .modal-content {
+        transform: translateY(-20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    #blockModal:not(.hidden) .modal-content {
+        transform: translateY(0);
+        opacity: 1;
+    }
+</style>
 {% endblock %}

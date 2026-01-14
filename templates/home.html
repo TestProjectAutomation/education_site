@@ -6,118 +6,457 @@
 
 {% block content %}
 
-<section class="relative hero-gradient text-white min-h-[60vh] flex items-center overflow-hidden">
-
-    {% comment %} <!-- Background Image -->
-    <div class="absolute inset-0">
-        <img src="{% static 'images/hero.jpeg' %}"
-             class="w-full h-full object-cover opacity-20"
-             alt="Hero Background">
-    </div> {% endcomment %}
-    <div class="absolute inset-0 overflow-hidden">
-        <img id="hero-bg"
-            src="{% static 'images/hero.jpeg' %}"
-            class="w-full h-full object-cover opacity-30 scale-110 transition-transform duration-300 ease-out"
-            alt="Hero Background">
-    </div>
-    <!-- Dark overlay for better readability -->
-    <div class="absolute inset-0 bg-black/40"></div>
-
-    <!-- Content -->
-    <div class="relative z-10 container mx-auto px-4 text-center">
-
-        <h1 class="text-4xl md:text-6xl font-bold mb-6 animate__animated animate__fadeIn">
-            منصة التعليم العربية الشاملة
-        </h1>
-
-        <p class="text-xl md:text-2xl mb-8 opacity-90">
-            اكتشف عالم المعرفة مع كورسات، مقالات، منح تدريبية، كتب وملخصات
-        </p>
-
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="{% url 'courses' %}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
-                <i class="fas fa-play-circle mr-2"></i> ابدأ التعلم الآن
-            </a>
-
-            <a href="{% url 'register' %}" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-white hover:text-blue-600 transition">
-                <i class="fas fa-user-plus mr-2"></i> انضم إلينا
-            </a>
+<section class="relative hero-gradient text-white min-h-[60vh] flex items-center ">
+        <div class="absolute inset-0 overflow-hidden">
+            <img id="hero-bg"
+                src="{% static 'images/hero.jpeg' %}"
+                class="w-full h-full object-cover opacity-30 scale-100 transition-transform duration-300 ease-out"
+                alt="Hero Background">
         </div>
+        <!-- Dark overlay for better readability -->
+        <div class="absolute inset-0 bg-black/40"></div>
+        <!-- Content -->
+        <div class="relative z-10 container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 animate__animated animate__fadeIn">
+                منصة التعليم العربية الشاملة
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 opacity-90">
+                اكتشف عالم المعرفة مع كورسات، مقالات، منح تدريبية، كتب وملخصات
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{% url 'courses' %}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-play-circle mr-2"></i> ابدأ التعلم الآن
+                </a>
+                <a href="{% url 'register' %}" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-white hover:text-blue-600 transition">
+                    <i class="fas fa-user-plus mr-2"></i> انضم إلينا
+                </a>
+            </div>
+
+        {% comment %}
+            <!-- Search -->
+            <div class="flex justify-center w-full pt-6">
+                <form method="get" action="{% url 'search' %}" 
+                    class="relative w-full max-w-xl" id="search-form">
+                    <input
+                        type="text"
+                        name="q"
+                        placeholder="ابحث عن كورسات، مقالات، منح، كتب وملخصات"
+                        id="search-input"
+                        autocomplete="off"
+                        class="w-full px-5 py-3 pr-12 bg-white dark:bg-gray-800 
+                            border border-gray-200 dark:border-gray-700 
+                            rounded-full shadow-md focus:outline-none 
+                            focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500 transition">
+
+                    <button type="submit"
+                            class="absolute left-3 top-1/2 transform -translate-y-1/2 
+                                text-gray-400 hover:text-blue-500 transition">
+                        <i class="fas fa-search"></i>
+                    </button>
+
+                    <!-- قائمة الاقتراحات -->
+                    <div id="search-suggestions" 
+                        class="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 
+                                rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 
+                                hidden z-50 max-h-96 overflow-y-auto transition">
+                        <!-- سيتم ملء الاقتراحات بواسطة JavaScript -->
+                    </div>
+                </form>
+            </div>
+         {% endcomment %}
+        {% comment %} 
+            <!-- Search -->
+            <div class="flex justify-center w-full pt-6 px-4">
+                <form method="get" action="{% url 'search' %}" 
+                    class="relative w-full max-w-2xl" id="search-form">
+                    <div class="relative">
+                        <input
+                            type="text"
+                            name="q"
+                            placeholder="ابحث عن كورسات، مقالات، منح، كتب وملخصات..."
+                            id="search-input"
+                            autocomplete="off"
+                            class="w-full px-6 py-4 pr-14 bg-white dark:bg-gray-800 
+                                border-2 border-gray-200 dark:border-gray-700 
+                                rounded-full shadow-lg dark:shadow-gray-900/50 
+                                focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 
+                                focus:ring-4 focus:ring-blue-500/20 dark:focus:ring-blue-400/30 
+                                placeholder-gray-400 dark:placeholder-gray-500 
+                                text-gray-800 dark:text-gray-200 text-lg
+                                transition-all duration-300 ease-out
+                                hover:border-gray-300 dark:hover:border-gray-600
+                                placeholder:transition-all placeholder:duration-300
+                                placeholder:hover:opacity-70">
+
+                        <button type="submit"
+                                class="absolute left-5 top-1/2 transform -translate-y-1/2 
+                                    w-10 h-10 flex items-center justify-center
+                                    bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700
+                                    text-white rounded-full 
+                                    shadow-md dark:shadow-gray-900/50
+                                    hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800
+                                    active:scale-95 focus:outline-none focus:ring-3 focus:ring-blue-500/40
+                                    transition-all duration-300 ease-out group">
+                            <i class="fas fa-search text-sm group-hover:scale-110 transition-transform duration-300"></i>
+                        </button>
+
+                        <!-- Search Type Selector (Optional) -->
+                        <div class="absolute right-5 top-1/2 transform -translate-y-1/2">
+                            <select name="type" 
+                                    class="bg-transparent border-none outline-none 
+                                        text-gray-500 dark:text-gray-400 text-sm
+                                        cursor-pointer focus:outline-none
+                                        transition-colors duration-300">
+                                <option value="">كل النتائج</option>
+                                <option value="courses">كورسات</option>
+                                <option value="articles">مقالات</option>
+                                <option value="grants">منح</option>
+                                <option value="books">كتب</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Search Suggestions -->
+                    <div id="search-suggestions" 
+                        class="absolute top-full mt-3 w-full bg-white dark:bg-gray-800 
+                                rounded-2xl shadow-2xl dark:shadow-gray-900/50
+                                border border-gray-100 dark:border-gray-700 
+                                hidden z-50 max-h-96 overflow-y-auto
+                                backdrop-blur-sm bg-white/95 dark:bg-gray-800/95
+                                transition-all duration-300 ease-out opacity-0 translate-y-2"
+                        style="display: none;">
+                        
+                        <!-- Popular Searches -->
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-fire ml-2"></i> البحث الشائع
+                                </h4>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                {% for term in popular_terms|slice:":5" %}
+                                <a href="{% url 'search' %}?q={{ term|urlencode }}" 
+                                class="inline-flex items-center px-3 py-1.5 
+                                        bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600
+                                        text-gray-700 dark:text-gray-300 text-sm rounded-full
+                                        transition-all duration-300 ease-out hover:scale-105">
+                                    <i class="fas fa-hashtag text-xs ml-1.5 text-gray-400 dark:text-gray-500"></i>
+                                    {{ term }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Recent Searches (From localStorage) -->
+                        <div id="recent-searches" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 hidden">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-history ml-2"></i> عمليات البحث السابقة
+                                </h4>
+                                <button onclick="clearRecentSearches()" 
+                                        class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors">
+                                    مسح الكل
+                                </button>
+                            </div>
+                            <div id="recent-searches-list" class="space-y-2">
+                                <!-- Dynamic content from localStorage -->
+                            </div>
+                        </div>
+
+                        <!-- Live Search Results -->
+                        <div id="live-search-results" class="py-2">
+                            <!-- Dynamic content from AJAX -->
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="search-empty-state" class="px-6 py-8 text-center hidden">
+                            <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center 
+                                        bg-gray-100 dark:bg-gray-700 rounded-full">
+                                <i class="fas fa-search text-gray-400 dark:text-gray-500 text-xl"></i>
+                            </div>
+                            <p class="text-gray-500 dark:text-gray-400 mb-2">لم يتم العثور على نتائج</p>
+                            <p class="text-sm text-gray-400 dark:text-gray-500">
+                                جرب كلمات بحث مختلفة
+                            </p>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="search-loading" class="px-6 py-8 text-center hidden">
+                            <div class="inline-block w-8 h-8 border-2 border-gray-300 dark:border-gray-600 
+                                        border-t-blue-500 dark:border-t-blue-400 rounded-full animate-spin"></div>
+                            <p class="mt-3 text-gray-500 dark:text-gray-400">جاري البحث...</p>
+                        </div>
+
+                        <!-- Quick Categories -->
+                        <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                            <div class="grid grid-cols-2 gap-3">
+                                <a href="{% url 'courses' %}" 
+                                class="flex items-center p-3 rounded-xl
+                                        bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40
+                                        border border-blue-100 dark:border-blue-800/30
+                                        transition-all duration-300 group">
+                                    <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 
+                                                flex items-center justify-center text-white ml-3">
+                                        <i class="fas fa-video text-sm"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800 dark:text-gray-200">الكورسات</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ courses_posts.count }} كورس</p>
+                                    </div>
+                                    <i class="fas fa-chevron-left text-gray-400 dark:text-gray-500 
+                                            group-hover:translate-x-1 transition-transform"></i>
+                                </a>
+
+                                <a href="{% url 'books' %}" 
+                                class="flex items-center p-3 rounded-xl
+                                        bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40
+                                        border border-purple-100 dark:border-purple-800/30
+                                        transition-all duration-300 group">
+                                    <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 
+                                                flex items-center justify-center text-white ml-3">
+                                        <i class="fas fa-book text-sm"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-800 dark:text-gray-200">الكتب</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ books_posts.count }} كتاب</p>
+                                    </div>
+                                    <i class="fas fa-chevron-left text-gray-400 dark:text-gray-500 
+                                            group-hover:translate-x-1 transition-transform"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Stats (When typing) -->
+                    <div id="search-stats" 
+                        class="absolute -bottom-8 left-0 right-0 text-center 
+                                text-xs text-gray-500 dark:text-gray-400 opacity-0 
+                                transition-opacity duration-300">
+                        <span id="results-count">0</span> نتيجة متاحة
+                    </div>
+                </form>
+            </div>
+        {% endcomment %}
+        <!-- Search -->
+        <div class="flex justify-center w-full pt-6 px-4">
+            <form method="get" action="{% url 'search' %}" 
+                class="relative w-full max-w-2xl z-10" id="search-form">
+                <div class="relative z-20">
+                <input
+                type="text"
+                name="q"
+                placeholder="ابحث عن كورسات، مقالات، منح، كتب وملخصات..."
+                id="search-input"
+                autocomplete="off"
+                class="w-full px-6 py-4 pr-28 bg-white dark:bg-gray-800
+                        border-2 border-gray-200 dark:border-gray-700
+                        rounded-full shadow-lg dark:shadow-gray-900/50
+                        focus:outline-none focus:border-blue-500 dark:focus:border-blue-400
+                        focus:ring-4 focus:ring-blue-500/20 dark:focus:ring-blue-400/30
+                        placeholder-gray-400 dark:placeholder-gray-500
+                        text-gray-800 dark:text-gray-200 text-lg
+                        transition-all duration-300 ease-out
+                        hover:border-gray-300 dark:hover:border-gray-600
+                        placeholder:transition-all placeholder:duration-300
+                        placeholder:hover:opacity-70">
 
 
+                    <button type="submit"
+                            class="absolute left-5 top-1/2 transform -translate-y-1/2 
+                                w-10 h-10 flex items-center justify-center
+                                bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700
+                                text-white rounded-full 
+                                shadow-md dark:shadow-gray-900/50
+                                hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800
+                                active:scale-95 focus:outline-none focus:ring-3 focus:ring-blue-500/40
+                                transition-all duration-300 ease-out group
+                                z-30">
+                        <i class="fas fa-search text-sm group-hover:scale-110 transition-transform duration-300"></i>
+                    </button>
 
-<!-- Search -->
-<div class="flex justify-center w-full pt-6">
-    <form method="get" action="{% url 'search' %}" 
-          class="relative w-full max-w-xl" id="search-form">
-        <input
-            type="text"
-            name="q"
-            placeholder="ابحث عن كورسات، مقالات، منح، كتب وملخصات"
-            id="search-input"
-            autocomplete="off"
-            class="w-full px-5 py-3 pr-12 bg-white dark:bg-gray-800 
-                   border border-gray-200 dark:border-gray-700 
-                   rounded-full shadow-md focus:outline-none 
-                   focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500 transition">
+                    <!-- Search Type Selector -->
+                    <div class="absolute right-5 top-1/2 transform -translate-y-1/2 z-30">
+                        <select name="type" 
+                                class="bg-transparent border-none outline-none 
+                                    text-gray-500 dark:text-gray-400 text-sm
+                                    cursor-pointer focus:outline-none
+                                    transition-colors duration-300
+                                    pr-2">
+                            <option value="">كل النتائج</option>
+                            <option value="courses">كورسات</option>
+                            <option value="articles">مقالات</option>
+                            <option value="grants">منح</option>
+                            <option value="books">كتب</option>
+                        </select>
+                    </div>
+                </div>
 
-        <button type="submit"
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 
-                       text-gray-400 hover:text-blue-500 transition">
-            <i class="fas fa-search"></i>
-        </button>
+                <!-- Search Suggestions -->
+                <div id="search-suggestions" 
+                    class="absolute top-full mt-3 w-full bg-white dark:bg-gray-800 
+                            rounded-2xl shadow-2xl dark:shadow-gray-900/50
+                            border border-gray-100 dark:border-gray-700 
+                            hidden z-40 max-h-[500px] overflow-y-auto
+                            backdrop-blur-sm bg-white/95 dark:bg-gray-800/95
+                            transition-all duration-300 ease-out opacity-0 translate-y-2
+                            scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+                    style="display: none;">
+                    
+                    <!-- Popular Searches -->
+                    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                                <i class="fas fa-fire ml-2 text-orange-500"></i> 
+                                <span class="mr-1">البحث الشائع</span>
+                            </h4>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            {% for term in popular_terms|slice:":5" %}
+                            <a href="{% url 'search' %}?q={{ term|urlencode }}" 
+                            class="inline-flex items-center px-3 py-1.5 
+                                    bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600
+                                    text-gray-700 dark:text-gray-300 text-sm rounded-full
+                                    transition-all duration-300 ease-out hover:scale-105
+                                    border border-gray-200 dark:border-gray-600">
+                                <i class="fas fa-hashtag text-xs ml-1.5 text-gray-400 dark:text-gray-500"></i>
+                                <span class="mr-1">{{ term }}</span>
+                            </a>
+                            {% empty %}
+                            <div class="text-gray-500 dark:text-gray-400 text-sm">
+                                لا توجد عمليات بحث شائعة حالياً
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
 
-        <!-- قائمة الاقتراحات -->
-        <div id="search-suggestions" 
-             class="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 
-                    rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 
-                    hidden z-50 max-h-96 overflow-y-auto transition">
-            <!-- سيتم ملء الاقتراحات بواسطة JavaScript -->
+                    <!-- Recent Searches -->
+                    <div id="recent-searches" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                                <i class="fas fa-history ml-2 text-blue-500"></i>
+                                <span class="mr-1">عمليات البحث السابقة</span>
+                            </h4>
+                            <button onclick="clearRecentSearches()" 
+                                    class="text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors
+                                        px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                                مسح الكل
+                            </button>
+                        </div>
+                        <div id="recent-searches-list" class="space-y-2">
+                            <!-- Dynamic content from localStorage -->
+                        </div>
+                    </div>
+
+                    <!-- Live Search Results -->
+                    <div id="live-search-results" class="py-2">
+                        <!-- Dynamic content from AJAX -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="search-empty-state" class="px-6 py-8 text-center hidden">
+                        <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center 
+                                    bg-gray-100 dark:bg-gray-700 rounded-full">
+                            <i class="fas fa-search text-gray-400 dark:text-gray-500 text-xl"></i>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 mb-2">لم يتم العثور على نتائج</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500">
+                            جرب كلمات بحث مختلفة أو تحقق من الإملاء
+                        </p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="search-loading" class="px-6 py-8 text-center hidden">
+                        <div class="inline-block w-8 h-8 border-2 border-gray-300 dark:border-gray-600 
+                                    border-t-blue-500 dark:border-t-blue-400 rounded-full animate-spin"></div>
+                        <p class="mt-3 text-gray-500 dark:text-gray-400">جاري البحث...</p>
+                    </div>
+
+                    <!-- Quick Categories -->
+                    <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="{% url 'courses' %}" 
+                            class="flex items-center p-3 rounded-xl
+                                    bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40
+                                    border border-blue-100 dark:border-blue-800/30
+                                    transition-all duration-300 group">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 
+                                            flex items-center justify-center text-white ml-3">
+                                    <i class="fas fa-video text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-800 dark:text-gray-200">الكورسات</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ courses_posts.count }} كورس</p>
+                                </div>
+                                <i class="fas fa-chevron-left text-gray-400 dark:text-gray-500 
+                                        group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+
+                            <a href="{% url 'books' %}" 
+                            class="flex items-center p-3 rounded-xl
+                                    bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40
+                                    border border-purple-100 dark:border-purple-800/30
+                                    transition-all duration-300 group">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 
+                                            flex items-center justify-center text-white ml-3">
+                                    <i class="fas fa-book text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-800 dark:text-gray-200">الكتب</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ books_posts.count }} كتاب</p>
+                                </div>
+                                <i class="fas fa-chevron-left text-gray-400 dark:text-gray-500 
+                                        group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Stats -->
+                <div id="search-stats" 
+                    class="absolute -bottom-8 left-0 right-0 text-center 
+                            text-xs text-gray-500 dark:text-gray-400 opacity-0 
+                            transition-opacity duration-300 z-30">
+                    <span id="results-count">0</span> نتيجة متاحة
+                </div>
+            </form>
         </div>
-    </form>
-</div>
-
-
-
-
 
     </div>
 </section>
 
-    {% comment %} !-- الإحصائيات -->
-    <section class="py-12 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="stat-card text-white p-6 rounded-xl text-center">
-                    <i class="fas fa-video text-4xl mb-4"></i>
-                    <h3 class="text-3xl font-bold">{{ courses_posts.count }}+</h3>
-                    <p class="opacity-90">كورس تعليمي</p>
-                </div>
-                <div class="bg-gradient-to-r from-green-400 to-blue-500 text-white p-6 rounded-xl text-center">
-                    <i class="fas fa-newspaper text-4xl mb-4"></i>
-                    <h3 class="text-3xl font-bold">{{ articles_posts.count }}+</h3>
-                    <p class="opacity-90">مقال تعليمي</p>
-                </div>
-                <div class="bg-gradient-to-r from-yellow-400 to-red-500 text-white p-6 rounded-xl text-center">
-                    <i class="fas fa-award text-4xl mb-4"></i>
-                    <h3 class="text-3xl font-bold">{{ grants_posts.count }}+</h3>
-                    <p class="opacity-90">منحة تدريبية</p>
-                </div>
-                <div class="bg-gradient-to-r from-purple-400 to-pink-500 text-white p-6 rounded-xl text-center">
-                    <i class="fas fa-book text-4xl mb-4"></i>
-                    <h3 class="text-3xl font-bold">{{ books_posts.count }}+</h3>
-                    <p class="opacity-90">كتاب وملخص</p>
-                </div>
+
+
+{% comment %} !-- الإحصائيات -->
+<section class="py-12 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="stat-card text-white p-6 rounded-xl text-center">
+                <i class="fas fa-video text-4xl mb-4"></i>
+                <h3 class="text-3xl font-bold">{{ courses_posts.count }}+</h3>
+                <p class="opacity-90">كورس تعليمي</p>
+            </div>
+            <div class="bg-gradient-to-r from-green-400 to-blue-500 text-white p-6 rounded-xl text-center">
+                <i class="fas fa-newspaper text-4xl mb-4"></i>
+                <h3 class="text-3xl font-bold">{{ articles_posts.count }}+</h3>
+                <p class="opacity-90">مقال تعليمي</p>
+            </div>
+            <div class="bg-gradient-to-r from-yellow-400 to-red-500 text-white p-6 rounded-xl text-center">
+                <i class="fas fa-award text-4xl mb-4"></i>
+                <h3 class="text-3xl font-bold">{{ grants_posts.count }}+</h3>
+                <p class="opacity-90">منحة تدريبية</p>
+            </div>
+            <div class="bg-gradient-to-r from-purple-400 to-pink-500 text-white p-6 rounded-xl text-center">
+                <i class="fas fa-book text-4xl mb-4"></i>
+                <h3 class="text-3xl font-bold">{{ books_posts.count }}+</h3>
+                <p class="opacity-90">كتاب وملخص</p>
             </div>
         </div>
-    </section>  {% endcomment %}
-
-<<!-- الإحصائيات -->
+    </div>
+</section>  {% endcomment %}
+<!-- الإحصائيات -->
 <section class="py-14 bg-white">
     <div class="container mx-auto px-4">
-
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-
             <!-- كورسات -->
             <div class="relative overflow-hidden rounded-2xl text-white p-6 text-center shadow-xl group">
                 <img src="{% static 'images/courses-bg.jpg' %}"
@@ -243,7 +582,6 @@
         <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">آخر المنشورات</h2>
         
         <!-- الكورسات -->
-        {% if courses_posts %}
         <div class="mb-12">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-blue-600">
@@ -253,6 +591,7 @@
                     عرض الكل <i class="fas fa-arrow-left mr-1"></i>
                 </a>
             </div>
+            {% if courses_posts %}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {% for post in courses_posts|slice:":3" %}
                 <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover animate-card">
@@ -281,11 +620,10 @@
                 </div>
                 {% endfor %}
             </div>
+            {% endif %}
         </div>
-        {% endif %}
         
         <!-- المقالات -->
-        {% if articles_posts %}
         <div class="mb-12">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-green-600">
@@ -295,6 +633,7 @@
                     عرض الكل <i class="fas fa-arrow-left mr-1"></i>
                 </a>
             </div>
+            {% if articles_posts %}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {% for post in articles_posts|slice:":3" %}
                 <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover animate-card">
@@ -323,8 +662,101 @@
                 </div>
                 {% endfor %}
             </div>
+              {% endif %}
         </div>
-        {% endif %}
+      
+
+        <!-- المنح والتدريبات -->
+            <div class="mb-12">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-yellow-600">
+                        <i class="fas fa-award mr-2"></i> المنح والتدريبات
+                    </h3>
+                    <a href="{% url 'grants' %}" class="text-yellow-600 hover:text-yellow-800 font-medium">
+                        عرض الكل <i class="fas fa-arrow-left mr-1"></i>
+                    </a>
+                </div>
+                {% if grants_posts %}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {% for post in grants_posts|slice:":3" %}
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover animate-card">
+                        {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+                        {% else %}
+                        <div class="w-full h-48 bg-gradient-to-r from-yellow-400 to-yellow-600 flex items-center justify-center">
+                            <i class="fas fa-award text-white text-4xl"></i>
+                        </div>
+                        {% endif %}
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="text-lg font-bold text-gray-800">{{ post.title|truncatechars:50 }}</h4>
+                            </div>
+                            <p class="text-gray-600 mb-4">{{ post.content|truncatechars:80 }}</p>
+                            <div class="flex justify-between items-center">
+                                <a href="{% url 'post_detail' post.slug %}" class="text-yellow-600 hover:text-yellow-800 font-medium">
+                                    اقراء المزيد <i class="fas fa-arrow-left mr-1"></i>
+                                </a>
+                                <div class="flex items-center text-gray-500">
+                                    <i class="fas fa-eye ml-2"></i>
+                                    <span class="text-sm">{{ post.views }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+        <!-- كتب الكنوز -->
+        <div class="mb-12">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-purple-600">
+                    <i class="fas fa-book mr-2"></i> كتب الكنوز
+                </h3>
+                <a href="{% url 'books' %}" class="text-purple-600 hover:text-purple-800 font-medium">
+                    عرض الكل <i class="fas fa-arrow-left mr-1"></i>
+                </a>
+            </div>
+            {% if books_posts %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {% for post in books_posts|slice:":3" %}
+                <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover animate-card">
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-48 object-cover">
+                    {% else %}
+                    <div class="w-full h-48 bg-gradient-to-r from-teal-400 to-teal-600 flex items-center justify-center">
+                        <i class="fas fa-book text-white text-4xl"></i>
+                    </div>
+                    {% endif %}
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-lg font-bold text-gray-800">{{ post.title|truncatechars:50 }}</h4>
+                        </div>
+                        <p class="text-gray-600 mb-4">{{ post.content|truncatechars:80 }}</p>
+                        <div class="flex justify-between items-center">
+                            <a href="{% url 'post_detail' post.slug %}" class="text-teal-600 hover:text-teal-800 font-medium">
+                                اقراء المزيد <i class="fas fa-arrow-left mr-1"></i>
+                            </a>
+                            <div class="flex items-center text-gray-500">
+                                <i class="fas fa-eye ml-2"></i>
+                                <span class="text-sm">{{ post.views }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+
+
     </div>
 </section>
+
+
+
+
+
 {% endblock %}

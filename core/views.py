@@ -11,8 +11,8 @@ from django.db import transaction
 from .models import *
 from .forms import *
 import json
+import datetime as dt_module
 from datetime import datetime
-import datetime
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib import messages
@@ -36,7 +36,7 @@ from django.http import HttpResponse
 import json
 from .forms import *
 from .models import UserProfile
-
+from django.contrib.auth.models import User
 
 
 
@@ -46,6 +46,7 @@ def is_content_editor(user):
         user.is_staff or 
         (hasattr(user, 'profile') and user.profile.is_content_editor)
     )
+
 
 def home(request):
     # الحصول على آخر المنشورات من كل قسم
@@ -209,18 +210,61 @@ def post_detail(request, slug):
     return render(request, 'post_detail.html', context)
 
 
-@user_passes_test(is_content_editor)
+# دالة مساعدة لإنشاء البلوكات
+def create_post_blocks(post, blocks_data, files):
+    existing_blocks = {b.order: b for b in post.blocks.all()}
+
+    for i, block_data in enumerate(blocks_data):
+        block_type = block_data.get('type', 'text')
+        text_content = block_data.get('text', '')
+
+        # لو البلوك موجود → حدثه
+        if i in existing_blocks:
+            post_block = existing_blocks[i]
+            post_block.block_type = block_type
+        else:
+            # لو مش موجود → أنشئ واحد جديد
+            post_block = PostBlock(post=post, order=i, block_type=block_type)
+
+        if block_type == 'text':
+            post_block.text = text_content
+
+        elif block_type == 'image':
+            image_name = block_data.get('image_name', '')
+            if image_name:
+                for file_key in files:
+                    file = files[file_key]
+                    if hasattr(file, 'name') and file.name == image_name:
+                        post_block.image = file
+                        break
+
+        post_block.save()
+
+    return True
+
+@user_passes_test(lambda u: u.is_authenticated and (u.is_staff or hasattr(u, 'profile') and u.profile.is_content_editor))
 @login_required
 def create_post(request):
     if request.method == 'POST':
+        print("=" * 50)
+        print("📋 POST DATA:")
+        for key, value in request.POST.items():
+            print(f"  {key}: {value}")
+        print("\n📁 FILES:")
+        for key, file in request.FILES.items():
+            print(f"  {key}: {file.name} ({file.size} bytes)")
+        print("=" * 50)
+        
         form = PostForm(request.POST, request.FILES)
+        
         if form.is_valid():
+            print("✅ Form is valid")
             try:
                 with transaction.atomic():
                     post = form.save(commit=False)
                     post.author = request.user
                     
-                    # معالجة حالة النشر
+                    # تحديد الحالة من الزر المضغوط
                     if 'save_draft' in request.POST:
                         post.status = Post.Status.DRAFT
                     elif 'publish_now' in request.POST:
@@ -231,17 +275,18 @@ def create_post(request):
                     # حفظ المنشور
                     post.save()
                     
-                    # معالجة البلوكات إذا كانت موجودة في النموذج
-                    if 'blocks_data' in request.POST:
-                        try:
-                            blocks_data = json.loads(request.POST.get('blocks_data'))
-                            self.create_post_blocks(post, blocks_data, request.FILES)
-                        except json.JSONDecodeError:
-                            pass
+                    # معالجة البلوكات إذا كانت موجودة
+                    blocks_data_str = request.POST.get('blocks_data', '[]')
+                    try:
+                        blocks_data = json.loads(blocks_data_str)
+                        if blocks_data:
+                            create_post_blocks(post, blocks_data, request.FILES)
+                    except json.JSONDecodeError as e:
+                        print(f"⚠️ Blocks data error: {e}")
                     
-                    messages.success(request, f'تم { "نشر" if post.status == Post.Status.PUBLISHED else "حفظ" } المنشور "{post.title}" بنجاح!')
+                    messages.success(request, f'تم {"نشر" if post.status == Post.Status.PUBLISHED else "حفظ"} المنشور "{post.title}" بنجاح!')
                     
-                    # إعادة التوجيه حسب الحالة
+                    # إعادة التوجيه
                     if post.status == Post.Status.PUBLISHED:
                         return redirect('post_detail', slug=post.slug)
                     else:
@@ -249,25 +294,37 @@ def create_post(request):
                         
             except Exception as e:
                 messages.error(request, f'حدث خطأ أثناء حفظ المنشور: {str(e)}')
-                return render(request, 'create_post.html', {'form': form})
+                print(f"❌ Error saving post: {e}")
+        else:
+            messages.error(request, 'يرجى تصحيح الأخطاء في النموذج')
+            print("❌ Form is invalid")
+            print("📝 Form errors:", form.errors)
+            
+            # طباعة تفصيلية لكل حقل
+            print("\n🔍 Detailed field errors:")
+            for field in form:
+                if field.errors:
+                    print(f"  Field '{field.name}': {field.errors}")
+    
     else:
-        # تهيئة الحقول الافتراضية
+        # تهيئة القيم الافتراضية
         initial_data = {
             'link_delay': 30,
             'status': Post.Status.DRAFT,
         }
         
-        # الحصول على إعدادات الموقع لاستخدام التأخير الافتراضي
-        try:
-            site_settings = SiteSettings.objects.get(id=1)
-            initial_data['link_delay'] = site_settings.default_link_delay
-        except SiteSettings.DoesNotExist:
-            pass
-            
         form = PostForm(initial=initial_data)
     
-    # جلب الفئات حسب النوع لعرضها في الواجهة
     categories = Category.objects.all().order_by('name')
+    # قص الملخص إذا كان أطول من 300 حرف
+    if 'excerpt' in request.POST and request.POST['excerpt']:
+        excerpt = request.POST['excerpt']
+        if len(excerpt) > 300:
+            request.POST = request.POST.copy()
+            request.POST['excerpt'] = excerpt[:300] + '...'
+            print("📝 Excerpt trimmed from", len(excerpt), "to 300 characters")
+    
+    form = PostForm(request.POST, request.FILES)
     
     return render(request, 'create_post.html', {
         'form': form,
@@ -275,35 +332,13 @@ def create_post(request):
         'post_statuses': Post.Status.choices
     })
 
-def create_post_blocks(self, post, blocks_data, files):
-    """إنشاء البلوكات الخاصة بالمنشور"""
-    for i, block_data in enumerate(blocks_data):
-        block_type = block_data.get('type')
-        text = block_data.get('text', '')
-        image_file_name = block_data.get('image', '')
-        
-        post_block = PostBlock(
-            post=post,
-            block_type=block_type,
-            order=i
-        )
-        
-        if block_type == PostBlock.BlockType.TEXT:
-            post_block.text = text
-        elif block_type == PostBlock.BlockType.IMAGE and image_file_name:
-            # البحث عن الملف في request.FILES
-            for file_key in files:
-                if files[file_key].name == image_file_name:
-                    post_block.image = files[file_key]
-                    break
-        
-        post_block.save()
-
 @user_passes_test(is_content_editor)
 @login_required
 def edit_post(request, id):
     post = get_object_or_404(Post, id=id)
-    
+    post_blocks = post.blocks.all().order_by('order')
+    categories = Category.objects.all()
+
     # التحقق من صلاحية المستخدم
     if not (request.user.is_staff or post.author == request.user or 
             (hasattr(request.user, 'profile') and request.user.profile.is_content_editor)):
@@ -360,7 +395,9 @@ def edit_post(request, id):
         'form': form,
         'post': post,
         'post_blocks': post_blocks,
-        'post_statuses': Post.Status.choices
+        'post_statuses': Post.Status.choices,
+        'categories': categories,
+
     })
 
 
@@ -1353,9 +1390,8 @@ def dashboard(request):
 
 @login_required
 def profile(request):
-    """
-    صفحة الملف الشخصي للمستخدم
-    """
+    comments_count = request.user.profile.comments_count
+
     try:
         user_profile = UserProfile.objects.get(user=request.user)
     except UserProfile.DoesNotExist:
@@ -1381,6 +1417,8 @@ def profile(request):
         'profile': user_profile,
         'form': form,
         'published_posts_count': published_posts_count,
+        'comments_count': comments_count,
+
     }
     return render(request, 'auth/profile.html', context)
 
