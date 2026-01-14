@@ -2,16 +2,23 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}تعديل المنشور - موقع التعليم{% endblock %}
+{% block title %}تعديل المنشور - كنوز{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-8 max-w-4xl">
     <!-- عنوان الصفحة -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">
-            <i class="fas fa-edit mr-2"></i> تعديل المنشور
-        </h1>
-        <p class="text-gray-600">قم بتعديل المنشور "{{ post.title }}"</p>
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">
+                    <i class="fas fa-edit mr-2"></i> تعديل المنشور
+                </h1>
+                <p class="text-gray-600">قم بتعديل المنشور "{{ post.title }}"</p>
+            </div>
+            <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-gray-800 font-medium">
+                <i class="fas fa-arrow-right mr-2"></i> العودة للوحة التحكم
+            </a>
+        </div>
     </div>
 
     <!-- نموذج تعديل المنشور -->
@@ -22,6 +29,13 @@
             {% if form.errors %}
             <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
                 <strong>خطأ!</strong> يرجى تصحيح الأخطاء أدناه.
+                <ul class="mt-2 list-disc list-inside">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
             </div>
             {% endif %}
             
@@ -32,9 +46,6 @@
                         <i class="fas fa-heading mr-2"></i> عنوان المنشور *
                     </label>
                     {{ form.title }}
-                    {% if form.title.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ form.title.errors.0 }}</p>
-                    {% endif %}
                 </div>
                 
                 <div>
@@ -42,49 +53,75 @@
                         <i class="fas fa-folder mr-2"></i> القسم *
                     </label>
                     {{ form.category }}
-                    {% if form.category.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ form.category.errors.0 }}</p>
-                    {% endif %}
                 </div>
             </div>
             
-            <!-- معرّف المنشور -->
+            <!-- الملخص -->
             <div class="mb-6">
                 <label class="block text-gray-700 font-medium mb-2">
-                    <i class="fas fa-link mr-2"></i> رابط المنشور (Slug)
+                    <i class="fas fa-align-left mr-2"></i> ملخص المنشور
                 </label>
-                <div class="flex items-center">
-                    <span class="bg-gray-100 px-4 py-3 rounded-r-lg border border-gray-300 text-gray-600">
-                        /post/
-                    </span>
-                    <input type="text" name="slug" value="{{ post.slug }}" 
-                           class="flex-grow px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <p class="text-gray-500 text-sm mt-2">يستخدم لإنشاء رابط فريد للمنشور</p>
+                {{ form.excerpt }}
+                <p class="text-gray-500 text-sm mt-2">ملخص قصير يظهر في صفحة العرض الرئيسية (حد أقصى 300 حرف)</p>
+                <div class="mt-1 text-sm text-gray-500" id="excerpt-counter">{{ post.excerpt|length|default:"0" }}/300</div>
             </div>
             
             <!-- محتوى المنشور -->
             <div class="mb-6">
                 <label class="block text-gray-700 font-medium mb-2">
-                    <i class="fas fa-align-left mr-2"></i> محتوى المنشور *
+                    <i class="fas fa-edit mr-2"></i> محتوى المنشور *
                 </label>
                 {{ form.content }}
-                {% if form.content.errors %}
-                <p class="text-red-500 text-sm mt-1">{{ form.content.errors.0 }}</p>
-                {% endif %}
             </div>
             
-            <!-- قسم الصورة والرابط -->
+            <!-- قسم الصور -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- الصورة الرئيسية -->
                 <div>
                     <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-image mr-2"></i> صورة المنشور
+                        <i class="fas fa-image mr-2"></i> الصورة الرئيسية
+                    </label>
+                    
+                    <!-- معاينة الصورة الحالية -->
+                    {% if post.featured_image %}
+                    <div class="mb-4">
+                        <img src="{{ post.featured_image.url }}" alt="الصورة الحالية" 
+                             class="w-full h-48 object-cover rounded-lg mb-2 border border-gray-200">
+                        <div class="flex items-center">
+                            <input type="checkbox" name="clear_featured_image" id="clear_featured_image" class="ml-2">
+                            <label for="clear_featured_image" class="text-gray-700 text-sm">حذف الصورة الحالية</label>
+                        </div>
+                        {% if post.thumbnail %}
+                        <div class="mt-2">
+                            <p class="text-gray-500 text-sm">الصورة المصغرة:</p>
+                            <img src="{{ post.thumbnail.url }}" alt="Thumbnail" 
+                                 class="w-24 h-24 object-cover rounded border border-gray-200 mt-1">
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- تحميل صورة جديدة -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <div id="featured-image-preview" class="hidden mb-4">
+                            <img id="preview-featured-img" class="w-full h-48 object-cover rounded-lg">
+                        </div>
+                        {{ form.featured_image }}
+                        <p class="text-gray-500 text-sm mt-2">الحجم الأمثل: 1200×600 بكسل</p>
+                    </div>
+                </div>
+                
+                <!-- الصورة القديمة (للتوافق) -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-image mr-2"></i> الصورة القديمة (Legacy)
                     </label>
                     
                     <!-- معاينة الصورة الحالية -->
                     {% if post.image %}
                     <div class="mb-4">
-                        <img src="{{ post.image.url }}" alt="الصورة الحالية" class="w-full h-48 object-cover rounded-lg mb-2">
+                        <img src="{{ post.image.url }}" alt="الصورة القديمة" 
+                             class="w-full h-48 object-cover rounded-lg mb-2 border border-gray-200">
                         <div class="flex items-center">
                             <input type="checkbox" name="clear_image" id="clear_image" class="ml-2">
                             <label for="clear_image" class="text-gray-700 text-sm">حذف الصورة الحالية</label>
@@ -94,84 +131,158 @@
                     
                     <!-- تحميل صورة جديدة -->
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                        <div id="image-preview" class="hidden mb-4">
-                            <img id="preview-img" class="w-full h-48 object-cover rounded-lg">
-                        </div>
                         {{ form.image }}
-                        <p class="text-gray-500 text-sm mt-2">اختر صورة جديدة أو اتركها فارغة للحفاظ على الصورة الحالية</p>
+                        <p class="text-gray-500 text-sm mt-2">للمحافظة على التوافق مع المحتوى القديم</p>
                     </div>
                 </div>
-                
+            </div>
+            
+            <!-- قسم الرابط -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label class="block text-gray-700 font-medium mb-2">
                         <i class="fas fa-link mr-2"></i> رابط خارجي
                     </label>
                     {{ form.link }}
                     <p class="text-gray-500 text-sm mt-2">رابط الكورس أو المصدر الخارجي</p>
-                    
-                    <label class="block text-gray-700 font-medium mb-2 mt-4">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
                         <i class="fas fa-clock mr-2"></i> مدة الانتظار للرابط (ثانية)
                     </label>
                     {{ form.link_delay }}
-                    <p class="text-gray-500 text-sm mt-2">الوقت قبل ظهور الرابط للزوار</p>
+                    <p class="text-gray-500 text-sm mt-2">الوقت قبل ظهور الرابط للزوار (إفتراضي: 30 ثانية)</p>
                 </div>
             </div>
             
-            <!-- حالة المنشور -->
-            <div class="mb-6">
-                <label class="block text-gray-700 font-medium mb-2">
-                    <i class="fas fa-toggle-on mr-2"></i> حالة المنشور
-                </label>
-                <div class="flex space-x-4 space-x-reverse">
-                    <label class="flex items-center">
-                        <input type="radio" name="status" value="draft" class="ml-2" 
-                               {% if post.status == 'draft' %}checked{% endif %}>
-                        <span class="text-gray-700">مسودة</span>
+            <!-- SEO -->
+            <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-line mr-2"></i> إعدادات SEO
+                </h3>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">
+                        عنوان SEO
                     </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="status" value="published" class="ml-2"
-                               {% if post.status == 'published' %}checked{% endif %}>
-                        <span class="text-gray-700">منشور</span>
+                    {{ form.seo_title }}
+                    <p class="text-gray-500 text-sm mt-2">عنوان الصفحة في محركات البحث (اختياري)</p>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">
+                        وصف SEO
                     </label>
+                    {{ form.seo_description }}
+                    <p class="text-gray-500 text-sm mt-2">وصف الصفحة في محركات البحث (حد أقصى 300 حرف)</p>
+                    <div class="mt-1 text-sm text-gray-500" id="seo-desc-counter">{{ post.seo_description|length|default:"0" }}/300</div>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        كلمات مفتاحية SEO
+                    </label>
+                    {{ form.seo_keywords }}
+                    <p class="text-gray-500 text-sm mt-2">كلمات مفتاحية مفصولة بفواصل</p>
                 </div>
             </div>
             
-            <!-- تاريخ النشر -->
-            <div class="mb-8">
-                <label class="block text-gray-700 font-medium mb-2">
-                    <i class="fas fa-calendar-alt mr-2"></i> تاريخ النشر
-                </label>
-                <input type="datetime-local" name="publish_date" 
-                       value="{{ post.publish_date|date:'Y-m-d\TH:i' }}"
-                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <p class="text-gray-500 text-sm mt-2">يمكنك تعديل تاريخ النشر إذا أردت تأجيله</p>
+            <!-- حالة المنشور وتاريخ النشر -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-toggle-on mr-2"></i> حالة المنشور
+                    </label>
+                    {{ form.status }}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-calendar-alt mr-2"></i> تاريخ النشر
+                    </label>
+                    <div class="relative">
+                        {{ form.publish_date }}
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-calendar text-gray-400"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-2">اتركه فارغاً للنشر الفوري</p>
+                </div>
+            </div>
+            
+            <!-- البلوكات -->
+            <div class="mb-8 border border-gray-200 rounded-xl p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-th-large mr-2"></i> بلوكات المحتوى
+                </h3>
+                
+                {% if post_blocks %}
+                <div id="blocks-container" class="space-y-4 mb-4">
+                    {% for block in post_blocks %}
+                    <div class="border border-gray-300 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium">
+                                {{ forloop.counter }}. {{ block.get_block_type_display }}
+                            </span>
+                            <div class="flex space-x-2">
+                                <button type="button" class="text-blue-600 hover:text-blue-800" onclick="editBlock({{ block.id }})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="text-red-600 hover:text-red-800" onclick="deleteBlock({{ block.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if block.block_type == 'text' %}
+                        <div class="prose max-w-none">{{ block.text|safe|truncatechars_html:100 }}</div>
+                        {% elif block.block_type == 'image' and block.image %}
+                        <img src="{{ block.image.url }}" alt="Block Image" class="w-32 h-32 object-cover rounded">
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-gray-500">
+                    <i class="fas fa-th-large text-3xl mb-2"></i>
+                    <p>لا توجد بلوكات محتوى</p>
+                </div>
+                {% endif %}
+                
+                <div class="flex space-x-3 space-x-reverse">
+                    <button type="button" onclick="addTextBlock()" 
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
+                        <i class="fas fa-font mr-2"></i> إضافة نص
+                    </button>
+                    <button type="button" onclick="addImageBlock()" 
+                            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium">
+                        <i class="fas fa-image mr-2"></i> إضافة صورة
+                    </button>
+                </div>
             </div>
             
             <!-- إحصائيات المنشور -->
-            <div class="mb-8 p-4 bg-gray-50 rounded-lg">
-                <h4 class="font-bold text-gray-800 mb-3">
+            <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                <h4 class="font-bold text-gray-800 mb-4">
                     <i class="fas fa-chart-bar mr-2"></i> إحصائيات المنشور
                 </h4>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="text-center">
+                    <div class="text-center bg-white p-4 rounded-lg shadow-sm">
                         <div class="text-2xl font-bold text-blue-600">{{ post.views }}</div>
                         <div class="text-gray-600 text-sm">مشاهدة</div>
                     </div>
-                    <div class="text-center">
+                    <div class="text-center bg-white p-4 rounded-lg shadow-sm">
                         <div class="text-2xl font-bold text-green-600">{{ post.comments.count }}</div>
                         <div class="text-gray-600 text-sm">تعليق</div>
                     </div>
-                    <div class="text-center">
+                    <div class="text-center bg-white p-4 rounded-lg shadow-sm">
                         <div class="text-2xl font-bold text-purple-600">{{ post.created_at|timesince }}</div>
-                        <div class="text-gray-600 text-sm">منذ النشر</div>
+                        <div class="text-gray-600 text-sm">منذ الإنشاء</div>
                     </div>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-yellow-600">
-                            {% if post.status == 'published' %}
-                            <i class="fas fa-check-circle"></i>
-                            {% else %}
-                            <i class="fas fa-clock"></i>
-                            {% endif %}
+                    <div class="text-center bg-white p-4 rounded-lg shadow-sm">
+                        <div class="text-2xl font-bold {% if post.status == 'published' %}text-green-600{% else %}text-yellow-600{% endif %}">
+                            {{ post.get_status_display }}
                         </div>
                         <div class="text-gray-600 text-sm">الحالة</div>
                     </div>
@@ -179,7 +290,7 @@
             </div>
             
             <!-- أزرار الإجراء -->
-            <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+            <div class="flex flex-col md:flex-row justify-between items-center pt-6 border-t border-gray-200 gap-4">
                 <div class="flex space-x-3 space-x-reverse">
                     <a href="{% url 'post_detail' post.slug %}" class="text-gray-600 hover:text-gray-800 font-medium" target="_blank">
                         <i class="fas fa-eye mr-2"></i> معاينة
@@ -189,14 +300,14 @@
                     </a>
                 </div>
                 
-                <div class="flex space-x-3 space-x-reverse">
+                <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 space-x-reverse">
                     <button type="submit" name="save_draft" value="1" 
-                            class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-medium">
+                            class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-medium transition">
                         <i class="fas fa-save mr-2"></i> حفظ كمسودة
                     </button>
                     
-                    <button type="submit" name="publish" value="1" 
-                            class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 font-medium">
+                    <button type="submit" name="publish_now" value="1" 
+                            class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 font-medium transition">
                         <i class="fas fa-paper-plane mr-2"></i> حفظ وتحديث
                     </button>
                 </div>
@@ -212,7 +323,7 @@
         
         <div class="space-y-4">
             <!-- حذف المنشور -->
-            <div class="p-4 border border-red-200 rounded-lg">
+            <div class="p-4 border border-red-200 rounded-lg bg-red-50">
                 <div class="flex justify-between items-center">
                     <div>
                         <h4 class="font-bold text-red-700 mb-1">حذف المنشور</h4>
@@ -226,7 +337,7 @@
             </div>
             
             <!-- نسخ الرابط -->
-            <div class="p-4 border border-blue-200 rounded-lg">
+            <div class="p-4 border border-blue-200 rounded-lg bg-blue-50">
                 <div class="flex justify-between items-center">
                     <div>
                         <h4 class="font-bold text-blue-700 mb-1">نسخ رابط المنشور</h4>
@@ -242,97 +353,254 @@
     </div>
 </div>
 
-<script>
-// تأكيد الحذف
-function confirmDelete() {
-    if (confirm('هل أنت متأكد من حذف هذا المنشور؟ هذا الإجراء لا يمكن التراجع عنه.')) {
-        window.location.href = "{% url 'delete_post' post.id %}";
-    }
-}
-
-// نسخ رابط المنشور
-function copyPostLink() {
-    const link = "{{ request.scheme }}://{{ request.get_host }}{% url 'post_detail' post.slug %}";
-    navigator.clipboard.writeText(link).then(() => {
-        alert('تم نسخ رابط المنشور إلى الحافظة');
-    });
-}
-
-// عرض معاينة الصورة
-document.addEventListener('DOMContentLoaded', function() {
-    const imageInput = document.querySelector('input[name="image"]');
-    const previewDiv = document.getElementById('image-preview');
-    const previewImg = document.getElementById('preview-img');
-    
-    if (imageInput) {
-        imageInput.addEventListener('change', function(e) {
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
+<!-- Modal لإضافة/تعديل البلوك -->
+<div id="blockModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4" id="modalTitle">إضافة بلوك</h3>
                 
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewDiv.classList.remove('hidden');
-                }
+                <div id="modalContent">
+                    <!-- سيتم ملؤه بالجافاسكريبت -->
+                </div>
                 
-                reader.readAsDataURL(this.files[0]);
-            } else {
-                previewDiv.classList.add('hidden');
+                <div class="flex justify-end space-x-3 space-x-reverse mt-6">
+                    <button type="button" onclick="closeModal()" 
+                            class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
+                        إلغاء
+                    </button>
+                    <button type="button" onclick="saveBlock()" 
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
+                        حفظ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.tiny.cloud/1/YOUR_API_KEY/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script>
+        let blocksData = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // معاينة الصور
+            const featuredImageInput = document.querySelector('input[name="featured_image"]');
+            const featuredPreviewDiv = document.getElementById('featured-image-preview');
+            const featuredPreviewImg = document.getElementById('preview-featured-img');
+            
+            if (featuredImageInput) {
+                featuredImageInput.addEventListener('change', function(e) {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            featuredPreviewImg.src = e.target.result;
+                            featuredPreviewDiv.classList.remove('hidden');
+                        }
+                        
+                        reader.readAsDataURL(this.files[0]);
+                    } else {
+                        featuredPreviewDiv.classList.add('hidden');
+                    }
+                });
             }
+            
+            // عداد الأحرف
+            const excerptField = document.querySelector('[name="excerpt"]');
+            const excerptCounter = document.getElementById('excerpt-counter');
+            const seoDescField = document.querySelector('[name="seo_description"]');
+            const seoDescCounter = document.getElementById('seo-desc-counter');
+            
+            function updateCounter(field, counter) {
+                field.addEventListener('input', function() {
+                    const length = this.value.length;
+                    counter.textContent = `${length}/300`;
+                    
+                    if (length > 300) {
+                        counter.classList.add('text-red-500');
+                        counter.classList.remove('text-gray-500');
+                    } else {
+                        counter.classList.remove('text-red-500');
+                        counter.classList.add('text-gray-500');
+                    }
+                });
+                field.dispatchEvent(new Event('input'));
+            }
+            
+            if (excerptField && excerptCounter) updateCounter(excerptField, excerptCounter);
+            if (seoDescField && seoDescCounter) updateCounter(seoDescField, seoDescCounter);
+            
+            // تقويم تاريخ النشر
+            const publishDateField = document.querySelector('[name="publish_date"]');
+            if (publishDateField) {
+                flatpickr(publishDateField, {
+                    enableTime: true,
+                    dateFormat: "Y-m-d H:i",
+                    time_24hr: true,
+                    locale: "ar",
+                    minDate: "today",
+                    defaultDate: new Date()
+                });
+            }
+            
+            // تحميل البيانات القديمة للبلوكات
+            {% for block in post_blocks %}
+            blocksData.push({
+                id: {{ block.id }},
+                type: '{{ block.block_type }}',
+                text: `{{ block.text|escapejs|safe }}`,
+                image: '{{ block.image.url|default:"" }}',
+                order: {{ block.order }}
+            });
+            {% endfor %}
         });
-    }
-    
-    // إضافة فئة Tailwind لحقول النموذج
-    const inputs = document.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
-        if (!input.classList.contains('form-control')) {
-            input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
-                              'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500');
+
+        // وظائف البلوكات
+        function addTextBlock() {
+            document.getElementById('modalTitle').textContent = 'إضافة بلوك نصي';
+            document.getElementById('modalContent').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">النص</label>
+                        <textarea id="blockText" class="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+                    </div>
+                </div>
+            `;
+            
+            // تهيئة TinyMCE للتحرير
+            tinymce.init({
+                selector: '#blockText',
+                plugins: 'link image lists',
+                toolbar: 'formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image',
+                language: 'ar',
+                directionality: 'rtl'
+            });
+            
+            document.getElementById('blockModal').classList.remove('hidden');
         }
-    });
-});
-</script>
 
-<style>
-/* تنسيق إضافي لحقول النموذج */
-input[type="text"],
-input[type="url"],
-input[type="number"],
-input[type="datetime-local"],
-select,
-textarea {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    transition: all 0.3s;
-}
+        function addImageBlock() {
+            document.getElementById('modalTitle').textContent = 'إضافة بلوك صورة';
+            document.getElementById('modalContent').innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">الصورة</label>
+                        <input type="file" id="blockImage" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div id="imagePreview" class="hidden">
+                        <img id="previewImage" class="w-full h-48 object-cover rounded-lg">
+                    </div>
+                </div>
+            `;
+            
+            const imageInput = document.getElementById('blockImage');
+            imageInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    const preview = document.getElementById('previewImage');
+                    const previewDiv = document.getElementById('imagePreview');
+                    
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        previewDiv.classList.remove('hidden');
+                    }
+                    
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+            
+            document.getElementById('blockModal').classList.remove('hidden');
+        }
 
-input[type="text"]:focus,
-input[type="url"]:focus,
-input[type="number"]:focus,
-input[type="datetime-local"]:focus,
-select:focus,
-textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
+        function closeModal() {
+            document.getElementById('blockModal').classList.add('hidden');
+            tinymce.remove('#blockText');
+        }
 
-textarea {
-    min-height: 300px;
-    resize: vertical;
-}
+        function saveBlock() {
+            // حفظ البلوك في المصفوفة
+            // ثم إغلاق المودال
+            closeModal();
+        }
 
-/* تنسيق الأزرار */
-.btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 0.3s;
-}
+        // تأكيد الحذف
+        function confirmDelete() {
+            if (confirm('هل أنت متأكد من حذف هذا المنشور؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+                window.location.href = "{% url 'delete_post' post.id %}";
+            }
+        }
 
-.btn:hover {
-    transform: translateY(-2px);
-}
-</style>
+        // نسخ رابط المنشور
+        function copyPostLink() {
+            const link = "{{ request.scheme }}://{{ request.get_host }}{% url 'post_detail' post.slug %}";
+            navigator.clipboard.writeText(link).then(() => {
+                alert('تم نسخ رابط المنشور إلى الحافظة');
+            });
+        }
+
+
+
+        // دالة للحصول على CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // إضافة فئة Tailwind لحقول النموذج
+        const inputs = document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]), select, textarea');
+        inputs.forEach(input => {
+            input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
+                            'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500',
+                            'transition');
+        });
+    </script>
+
+    <style>
+        /* تنسيق إضافي */
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        /* تأثيرات المودال */
+        #blockModal {
+            transition: all 0.3s ease;
+        }
+
+        .modal-content {
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        #blockModal:not(.hidden) .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
 {% endblock %}

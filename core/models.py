@@ -8,7 +8,9 @@ from django.conf import settings
 from ckeditor.fields import RichTextField
 from PIL import Image
 import os
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+import datetime
 
 class Category(models.Model):
     CATEGORY_TYPES = [
@@ -31,6 +33,10 @@ class Category(models.Model):
     
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        # رابط البحث مع فلتر حسب نوع القسم
+        return f"{reverse('search')}?category={self.category_type}"
 
 class Post(models.Model):
 
@@ -56,8 +62,8 @@ class Post(models.Model):
 
     excerpt = models.TextField(max_length=300, blank=True)
 
-    link = models.URLField(blank=True)
-    link_delay = models.IntegerField(default=30)
+    link = models.URLField(blank=True, null=True)
+    link_delay = models.IntegerField(default=30, blank=True, null=True)
 
     views = models.PositiveIntegerField(default=0)
 
@@ -90,6 +96,7 @@ class Post(models.Model):
                 slug = f"{base}-{i}"
                 i += 1
             self.slug = slug
+        super().save(*args, **kwargs)
 
         # نشر تلقائي
         if self.status == self.Status.PUBLISHED and not self.publish_date:
@@ -131,59 +138,6 @@ class Post(models.Model):
     def display_description(self):
         return self.seo_description or self.excerpt or self.content[:160]
 
-class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-    content = models.TextField()
-    is_approved = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        verbose_name = 'تعليق'
-        verbose_name_plural = 'التعليقات'
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f'تعليق بواسطة {self.name} على {self.post.title}'
-
-class SiteSettings(models.Model):
-    site_name = models.CharField(max_length=100, default='موقع التعليم')
-    site_description = models.TextField(default='موقع تعليمي متكامل')
-    default_link_delay = models.IntegerField(default=30)
-    allow_comments = models.BooleanField(default=True)
-    maintenance_mode = models.BooleanField(default=False)
-    
-    class Meta:
-        verbose_name = 'إعدادات الموقع'
-        verbose_name_plural = 'إعدادات الموقع'
-    
-    def __str__(self):
-        return 'إعدادات الموقع'
-    
-    def save(self, *args, **kwargs):
-        # تأكد من وجود سجل واحد فقط
-        self.id = 1
-        super().save(*args, **kwargs)
-
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    bio = models.TextField(blank=True)
-    profile_picture = models.ImageField(upload_to='profiles/', blank=True)
-    phone = models.CharField(max_length=20, blank=True)
-    role = models.CharField(max_length=50, blank=True, default='مستخدم')
-    is_content_editor = models.BooleanField(default=False)
-    
-    
-    class Meta:
-        verbose_name = 'ملف المستخدم'
-        verbose_name_plural = 'ملفات المستخدمين'
-    
-    def __str__(self):
-        return self.user.username
-    
-
-
 
 class PostBlock(models.Model):
     class BlockType(models.TextChoices):
@@ -213,3 +167,114 @@ class PostBlock(models.Model):
 
     def __str__(self):
         return f"{self.post.title} - {self.block_type} ({self.order})"
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    content = models.TextField()
+    is_approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = 'تعليق'
+        verbose_name_plural = 'التعليقات'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f'تعليق بواسطة {self.name} على {self.post.title}'
+
+
+class SiteSettings(models.Model):
+    """إعدادات الموقع"""
+    site_name = models.CharField(max_length=200, default='موقع التعليم')
+    site_description = models.TextField(blank=True, null=True)
+    site_logo = models.ImageField(upload_to='site/', blank=True, null=True)
+    
+    # إعدادات المحتوى
+    default_link_delay = models.IntegerField(default=30, help_text='التأخير الافتراضي بالثواني')
+    allow_comments = models.BooleanField(default=True)
+    require_comment_approval = models.BooleanField(default=True)
+    
+    # إعدادات النظام
+    maintenance_mode = models.BooleanField(default=False)
+    contact_email = models.EmailField(default='contact@example.com')
+    
+    # وسائل التواصل الاجتماعي
+    facebook_url = models.URLField(blank=True, null=True)
+    twitter_url = models.URLField(blank=True, null=True)
+    instagram_url = models.URLField(blank=True, null=True)
+    youtube_url = models.URLField(blank=True, null=True)
+    
+    # التواريخ
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.site_name
+    
+    class Meta:
+        verbose_name = 'إعدادات الموقع'
+        verbose_name_plural = 'إعدادات الموقع'
+
+class SystemLog(models.Model):
+    """سجلات النظام"""
+    LOG_TYPES = (
+        ('info', 'معلومات'),
+        ('warning', 'تحذير'),
+        ('error', 'خطأ'),
+        ('security', 'أمني'),
+    )
+    
+    log_type = models.CharField(max_length=20, choices=LOG_TYPES, default='info')
+    message = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.get_log_type_display()} - {self.message[:50]}"
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'سجل النظام'
+        verbose_name_plural = 'سجلات النظام'
+
+# تحديث نموذج UserProfile الموجود
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    full_name = models.CharField(max_length=255, blank=True)
+    bio = models.TextField(blank=True, null=True)
+    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    birth_date = models.DateField(blank=True, null=True)
+    
+    # الصلاحيات
+    is_content_editor = models.BooleanField(default=False, verbose_name='محرر محتوى')
+    can_manage_comments = models.BooleanField(default=False, verbose_name='يمكنه إدارة التعليقات')
+    can_manage_categories = models.BooleanField(default=False, verbose_name='يمكنه إدارة الأقسام')
+
+    # الإحصائيات
+    posts_count = models.IntegerField(default=0)
+    comments_count = models.IntegerField(default=0)
+    last_active = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f'{self.user.username} Profile'
+    
+    class Meta:
+        verbose_name = 'ملف المستخدم'
+        verbose_name_plural = 'ملفات المستخدمين'
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()

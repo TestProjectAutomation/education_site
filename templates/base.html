@@ -1,7 +1,6 @@
 {% load static%}
 {% load i18n %}
 <!DOCTYPE html>
-{% comment %} <html lang="{{ request.LANGUAGE_CODE }}" dir="{% if request.LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}" class="{% if is_dark_mode %}dark{% endif %} {% if request.LANGUAGE_CODE == 'ar' %}rtl{% endif %}"> {% endcomment %}
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -101,72 +100,76 @@
                     </a>
                 </div>
                 
-<!-- أزرار المستخدم -->
-<div class="flex items-center space-x-4 space-x-reverse">
+    <!-- أزرار المستخدم -->
+    <div class="flex items-center space-x-4 space-x-reverse">
 
-{% if user.is_authenticated %}
-<div class="relative">
+    {% if user.is_authenticated %}
+    <div class="relative">
 
-    <!-- زر المستخدم -->
-    <button id="user-menu-btn"
-        class="flex items-center space-x-2 space-x-reverse focus:outline-none select-none">
-        <div class="w-9 h-9 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-            {{ user.first_name|default:user.username|first|upper }}
+            <!-- زر المستخدم -->
+            <button id="user-menu-btn"
+                class="flex items-center space-x-2 space-x-reverse focus:outline-none select-none">
+                <div class="w-9 h-9 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {{ user.first_name|default:user.username|first|upper }}
+                </div>
+                <span class="text-gray-700 hidden md:inline">
+                    {{ user.first_name|default:user.username }}
+                </span>
+                <i class="fas fa-chevron-down text-gray-500 text-sm"></i>
+            </button>
+
+            <!-- القائمة المنسدلة -->
+            <div id="user-menu"
+                class="absolute right-0 mt-3 w-52 bg-white rounded-xl shadow-2xl py-2
+                    border border-gray-100
+                    opacity-0 invisible scale-95
+                    transition-all duration-200 origin-top-right z-50">
+
+                <a href="{% url 'dashboard' %}" class="block px-4 py-2 hover:bg-gray-100">
+                    <i class="fas fa-tachometer-alt ml-2"></i> لوحة التحكم
+                </a>
+
+                <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100">
+                    <i class="fas fa-user ml-2"></i> الملف الشخصي
+                </a>
+
+                {% if user.is_staff or user.profile.is_content_editor %}
+                <a href="{% url 'create_post' %}" class="block px-4 py-2 hover:bg-gray-100">
+                    <i class="fas fa-plus-circle ml-2"></i> إنشاء منشور
+                </a>
+                {% endif %}
+
+                {% if user.is_staff %}
+                <a href="/admin/" class="block px-4 py-2 hover:bg-gray-100">
+                    <i class="fas fa-cog ml-2"></i> الإدارة
+                </a>
+                {% endif %}
+
+                <div class="border-t my-2"></div>
+
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="block px-4 py-2 text-red-600 hover:bg-red-50">
+                        <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+                    </button>
+                </form>
+
+
+            </div>
         </div>
-        <span class="text-gray-700 hidden md:inline">
-            {{ user.first_name|default:user.username }}
-        </span>
-        <i class="fas fa-chevron-down text-gray-500 text-sm"></i>
-    </button>
 
-    <!-- القائمة المنسدلة -->
-    <div id="user-menu"
-        class="absolute right-0 mt-3 w-52 bg-white rounded-xl shadow-2xl py-2
-               border border-gray-100
-               opacity-0 invisible scale-95
-               transition-all duration-200 origin-top-right z-50">
-
-        <a href="{% url 'dashboard' %}" class="block px-4 py-2 hover:bg-gray-100">
-            <i class="fas fa-tachometer-alt ml-2"></i> لوحة التحكم
+        {% else %}
+        <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600 font-medium">
+            <i class="fas fa-sign-in-alt ml-1"></i> تسجيل الدخول
         </a>
 
-        <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100">
-            <i class="fas fa-user ml-2"></i> الملف الشخصي
-        </a>
-
-        {% if user.is_staff or user.profile.is_content_editor %}
-        <a href="{% url 'create_post' %}" class="block px-4 py-2 hover:bg-gray-100">
-            <i class="fas fa-plus-circle ml-2"></i> إنشاء منشور
+        <a href="{% url 'register' %}"
+        class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
+            <i class="fas fa-user-plus ml-1"></i> إنشاء حساب
         </a>
         {% endif %}
 
-        {% if user.is_staff %}
-        <a href="/admin/" class="block px-4 py-2 hover:bg-gray-100">
-            <i class="fas fa-cog ml-2"></i> الإدارة
-        </a>
-        {% endif %}
-
-        <div class="border-t my-2"></div>
-
-        <a href="{% url 'logout' %}" class="block px-4 py-2 text-red-600 hover:bg-red-50">
-            <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
-        </a>
-    </div>
-</div>
-
-{% else %}
-<a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600 font-medium">
-    <i class="fas fa-sign-in-alt ml-1"></i> تسجيل الدخول
-</a>
-
-<a href="{% url 'register' %}"
-   class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
-    <i class="fas fa-user-plus ml-1"></i> إنشاء حساب
-</a>
-{% endif %}
-
-</div>
-
+                </div>
             </div>
         </div>
     </nav>
@@ -181,26 +184,25 @@
         {% endfor %}
     </div>
     {% endif %}
-    {% comment %} <!-- Loading Overlay -->
+    <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-white dark:bg-gray-900 z-[100] flex items-center justify-center transition-opacity duration-500">
         <div class="text-center">
             <div class="relative w-32 h-32 mx-auto mb-6">
-                <div class="absolute inset-0 bg-gradient-to-r from-primary-500 to-purple-500 rounded-full animate-pulse"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-teal-600 rounded-full animate-pulse"></div>
                 <div class="absolute inset-4 bg-white dark:bg-gray-900 rounded-full"></div>
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <i class="fas fa-book-open text-4xl text-primary-600 dark:text-primary-400"></i>
+                    <i class="fas fa-book-open text-4xl text-green-600 dark:text-green-400"></i>
                 </div>
             </div>
-            <div class="text-2xl font-bold text-gray-800 dark:text-white mb-2">مكتبة الكتب</div>
+            <div class="text-2xl font-bold text-gray-800 dark:text-white mb-2">مكتبة كنوز</div>
             <div class="text-gray-600 dark:text-gray-300">جاري التحميل...</div>
         </div>
-    </div> {% endcomment %}
-
+    </div>
 
     <!-- المحتوى الرئيسي -->
     <main class="min-h-screen">   
     <!-- Progress Bar -->
-    <div id="progressBar" class="fixed top-0 left-0 right-0 h-1 bg-primary-600 origin-left transform scale-x-0 z-[9998] transition-transform duration-200"></div>
+<div id="progressBar" class="fixed top-0 left-0 right-0 h-1 bg-green-600 origin-left transform scale-x-0 z-[9998] transition-transform duration-200"></div>
 
     <!-- خلفية GSAP المتحركة -->
     <div id="animated-background">
@@ -254,18 +256,22 @@
                 <div>
                     <h4 class="text-xl font-bold mb-4">تابعنا</h4>
                     <div class="flex space-x-4 space-x-reverse">
-                        <a href="#" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700">
+                        
+                        <a href="{{ url_media.facebook_url }}" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700">
+                        <a href="{{ url_media.instagram_url }}" class="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500">
                             <i class="fab fa-instagram"></i>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700">
+                        <a href="{{ url_media.youtube_url }}" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700">
                             <i class="fab fa-youtube"></i>
                         </a>
+                        <a href="{{ url_media.twitter_url }}" class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+
+
+
                     </div>
                     <p class="mt-4 text-gray-300">
                         اشترك في نشرتنا البريدية للحصول على آخر التحديثات
@@ -370,15 +376,50 @@
     {% block extra_js %}{% endblock %}
 
     <script>
-        document.addEventListener("mousemove", function(e) {
+        document.addEventListener("DOMContentLoaded", function() {
             const bg = document.getElementById("hero-bg");
+            const overlay = document.getElementById("loading-overlay");
+            const progressBar = document.getElementById("progressBar");
 
-            const x = (window.innerWidth / 2 - e.clientX) / 15;
-            const y = (window.innerHeight / 2 - e.clientY) / 15;
+            // تحريك الخلفية مع الماوس
+            if (bg) {
+                document.addEventListener("mousemove", function(e) {
+                    const x = (window.innerWidth / 2 - e.clientX) / 15;
+                    const y = (window.innerHeight / 2 - e.clientY) / 15;
+                    bg.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
+                });
+            }
 
-            bg.style.transform = `translate(${x}px, ${y}px) scale(1.1)`;
+            // اختفاء الـ overlay بعد تحميل الصفحة
+            window.addEventListener("load", function() {
+                if (overlay) {
+                    overlay.classList.add("opacity-0");
+                    setTimeout(() => overlay.style.display = "none", 500);
+                }
+            });
+
+            // شريط التقدم حسب scroll
+            if (progressBar) {
+                const updateProgress = () => {
+                    const scrollTop = window.scrollY;
+                    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) : 0;
+                    progressBar.style.transform = `scaleX(${scrollPercent})`;
+
+                    // لو عايز الشريط يختفي عند نهاية الصفحة
+                    // if (scrollPercent >= 1) progressBar.style.display = "none";
+                };
+
+                // تحديث عند scroll أو resize
+                window.addEventListener("scroll", updateProgress);
+                window.addEventListener("resize", updateProgress);
+
+                // تحديث أولي
+                updateProgress();
+            }
         });
     </script>
+   
     <script>
         const btn = document.getElementById("user-menu-btn");
         const menu = document.getElementById("user-menu");
@@ -395,7 +436,48 @@
             }
         });
     </script>
+   
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const suggestionsBox = document.getElementById('search-suggestions');
 
+        searchInput.addEventListener('input', function() {
+            const term = this.value.trim();
+            if (!term) {
+                suggestionsBox.innerHTML = '';
+                suggestionsBox.classList.add('hidden');
+                return;
+            }
+
+            fetch(`/autocomplete_search/?term=${encodeURIComponent(term)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        suggestionsBox.innerHTML = '<div class="px-4 py-2 text-gray-500">لا توجد نتائج</div>';
+                    } else {
+                        suggestionsBox.innerHTML = data.map(item => `
+                            <a href="${item.url}" 
+                            class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition">
+                                ${item.title}
+                            </a>
+                        `).join('');
+                    }
+                    suggestionsBox.classList.remove('hidden');
+                })
+                .catch(err => {
+                    console.error(err);
+                    suggestionsBox.classList.add('hidden');
+                });
+        });
+
+        // إخفاء الاقتراحات إذا ضغط المستخدم خارج الـ input
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.classList.add('hidden');
+            }
+        });
+
+    </script>
 
 </body>
 </html>

@@ -263,23 +263,27 @@ class PostBlockAdmin(admin.ModelAdmin):
         
         super().save_model(request, obj, form, change)
 
-
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'category_type', 'get_icon', 'post_count', 'created_at')
-    list_filter = ('category_type',)
+    list_filter = ('category_type', 'created_at')
     search_fields = ('name', 'description')
-    prepopulated_fields = {}  # No slug field in your model
-    
+    prepopulated_fields = {}  # لا يوجد حقل slug في النموذج
+
     def get_icon(self, obj):
         if obj.icon:
-            return format_html(f'<i class="{obj.icon}"></i> {obj.icon}')
+            return format_html('<i class="{}"></i> {}'.format(obj.icon, obj.icon))
         return '-'
     get_icon.short_description = _('الأيقونة')
-    
+
     def post_count(self, obj):
+        # تصحيح reverse ليناسب app core و model Post
+        try:
+            url = reverse('admin:core_post_changelist') + f'?category__id__exact={obj.id}'
+        except Exception:
+            url = '#'
         count = obj.posts.count()
-        url = reverse('admin:blog_post_changelist') + f'?category__id__exact={obj.id}'
-        return format_html(f'<a href="{url}">{count}</a>')
+        return format_html('<a href="{}">{}</a>', url, count)
     post_count.short_description = _('عدد المنشورات')
 
 
@@ -319,21 +323,25 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'role', 'is_content_editor', 'phone')
-    list_filter = ('role', 'is_content_editor')
-    search_fields = ('user__username', 'user__email', 'phone', 'role')
-    
-    def get_profile_picture(self, obj):
-        if obj.profile_picture:
-            return format_html(
-                f'<img src="{obj.profile_picture.url}" style="width: 50px; height: 50px; border-radius: 50%;" />'
-            )
-        return '-'
-    get_profile_picture.short_description = _('الصورة الشخصية')
+    list_display = (
+        'user',
+        'is_content_editor',
+        'can_manage_comments',
+        'can_manage_categories',
+        'posts_count',
+        'last_active',
+    )
+
+    list_filter = (
+        'is_content_editor',
+        'can_manage_comments',
+        'can_manage_categories',
+    )
+
+    search_fields = ('user__username', 'full_name')
 
 
 # التسجيل التقليدي للنماذج (عدا SiteSettings الذي سجلناه أعلاه)
-admin.site.register(Category, CategoryAdmin)
 admin.site.register(Comment, CommentAdmin)
 
 # تحسين واجهة الإدارة

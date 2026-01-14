@@ -2,7 +2,7 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}الملف الشخصي - موقع التعليم{% endblock %}
+{% block title %}الملف الشخصي - كنوز{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
@@ -59,7 +59,7 @@
                         </div>
                         <div class="text-center">
                             <div class="text-lg font-bold text-green-600">
-                                {{ user.posts.filter.status='published'|length }}
+                                {{ published_posts_count  }}
                             </div>
                             <div class="text-gray-500 text-sm">منشور</div>
                         </div>
@@ -270,7 +270,7 @@
                     <i class="fas fa-key mr-2"></i> تغيير كلمة المرور
                 </h3>
                 
-                <form method="post" action="{% url 'password_change' %}">
+                <form method="post" action="{% url 'change_password' %}">
                     {% csrf_token %}
                     
                     <div class="space-y-4">
@@ -305,84 +305,84 @@
 </div>
 
 <script>
-// إضافة فئات Tailwind لحقول النموذج
-document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
-        if (!input.classList.contains('custom-input')) {
-            input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
-                              'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500');
-        }
-    });
-    
-    // معاينة صورة الملف الشخصي
-    const profilePicInput = document.getElementById('id_profile_picture');
-    if (profilePicInput) {
-        profilePicInput.addEventListener('change', function(e) {
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                const profilePic = document.querySelector('.rounded-full img') || 
-                                   document.querySelector('.rounded-full div');
-                
-                reader.onload = function(e) {
-                    if (profilePic.tagName === 'IMG') {
-                        profilePic.src = e.target.result;
-                    } else {
-                        // إذا كان div نستبدله بصور
-                        const parent = profilePic.parentElement;
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = 'w-32 h-32 rounded-full object-cover border-4 border-white shadow';
-                        parent.replaceChild(img, profilePic);
-                    }
-                }
-                
-                reader.readAsDataURL(this.files[0]);
+    // إضافة فئات Tailwind لحقول النموذج
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (!input.classList.contains('custom-input')) {
+                input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
+                                'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500');
             }
         });
-    }
-});
+        
+        // معاينة صورة الملف الشخصي
+        const profilePicInput = document.getElementById('id_profile_picture');
+        if (profilePicInput) {
+            profilePicInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    const profilePic = document.querySelector('.rounded-full img') || 
+                                    document.querySelector('.rounded-full div');
+                    
+                    reader.onload = function(e) {
+                        if (profilePic.tagName === 'IMG') {
+                            profilePic.src = e.target.result;
+                        } else {
+                            // إذا كان div نستبدله بصور
+                            const parent = profilePic.parentElement;
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'w-32 h-32 rounded-full object-cover border-4 border-white shadow';
+                            parent.replaceChild(img, profilePic);
+                        }
+                    }
+                    
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    });
 </script>
 
 <style>
-/* تنسيق إضافي */
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="password"],
-select,
-textarea {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    transition: all 0.3s;
-}
+    /* تنسيق إضافي */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        transition: all 0.3s;
+    }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="tel"]:focus,
-input[type="password"]:focus,
-select:focus,
-textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    input[type="password"]:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
 
-textarea {
-    min-height: 120px;
-    resize: vertical;
-}
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
 
-/* تنسيق مفتاح التبديل */
-.toggle-checkbox:checked {
-    right: 0;
-    border-color: #3b82f6;
-}
+    /* تنسيق مفتاح التبديل */
+    .toggle-checkbox:checked {
+        right: 0;
+        border-color: #3b82f6;
+    }
 
-.toggle-checkbox:checked + .toggle-label {
-    background-color: #3b82f6;
-}
+    .toggle-checkbox:checked + .toggle-label {
+        background-color: #3b82f6;
+    }
 </style>
 {% endblock %}
