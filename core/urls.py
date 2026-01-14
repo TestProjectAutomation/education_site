@@ -21,6 +21,7 @@ urlpatterns = [
     # لوحة التحكم للمحتوى
     path('create-post/', views.create_post, name='create_post'),
     path('edit-post/<int:id>/', views.edit_post, name='edit_post'),
+    path('delete-post/<int:id>/', views.delete_post, name='delete_post'),
     
     # لوحة الإدارة
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),

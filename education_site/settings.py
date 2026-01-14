@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,8 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # التطبيقات المضافة
-    'core',
     'crispy_forms',
+    'ckeditor',
+    
+    'core',
+    'advertisements',
 ]
 
 MIDDLEWARE = [
@@ -105,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'ar'
+LANGUAGE_CODE = 'en'
 TIME_ZONE = 'Africa/Cairo'
 USE_I18N = True
 USE_TZ = True
@@ -133,3 +137,75 @@ LOGIN_URL = '/login/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+# إعدادات CKEditor
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'full',
+        'height': 300,
+        'width': '100%',
+    },
+}
+
+
+# =========================
+# Jazzmin
+# =========================
+JAZZMIN_SETTINGS = {
+    "site_title": "Konoz Admin",
+    "site_header": "Konoz",
+    "site_brand": "Konoz",
+    "welcome_sign": "مرحباً بك في لوحة تحكم Konoz",
+    "copyright": "Konoz © 2026",
+    "search_model": ["blog.Post", "blog.Category"],
+    "user_avatar": None,
+    # "language_chooser": True,
+    "topmenu_links": [
+        {"name": "الرئيسية", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "عرض الموقع", "url": "/", "new_window": True},
+    ],
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "blog.Category": "fas fa-tags",
+        "blog.Post": "fas fa-newspaper",
+        "pages.Page": "fas fa-file",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": False,
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}

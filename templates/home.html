@@ -1,56 +1,166 @@
-<!-- templates/home.html -->
 {% extends 'base.html' %}
+
+{% load static %}
 
 {% block title %}الرئيسية - موقع التعليم{% endblock %}
 
 {% block content %}
-<!-- قسم الهيرو -->
-<section class="hero-gradient text-white py-20">
-    <div class="container mx-auto px-4 text-center">
+
+<section class="relative hero-gradient text-white min-h-[60vh] flex items-center overflow-hidden">
+
+    {% comment %} <!-- Background Image -->
+    <div class="absolute inset-0">
+        <img src="{% static 'images/hero.jpeg' %}"
+             class="w-full h-full object-cover opacity-20"
+             alt="Hero Background">
+    </div> {% endcomment %}
+    <div class="absolute inset-0 overflow-hidden">
+        <img id="hero-bg"
+            src="{% static 'images/hero.jpeg' %}"
+            class="w-full h-full object-cover opacity-30 scale-110 transition-transform duration-300 ease-out"
+            alt="Hero Background">
+    </div>
+    <!-- Dark overlay for better readability -->
+    <div class="absolute inset-0 bg-black/40"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 container mx-auto px-4 text-center">
+
         <h1 class="text-4xl md:text-6xl font-bold mb-6 animate__animated animate__fadeIn">
             منصة التعليم العربية الشاملة
         </h1>
+
         <p class="text-xl md:text-2xl mb-8 opacity-90">
             اكتشف عالم المعرفة مع كورسات، مقالات، منح تدريبية، كتب وملخصات
         </p>
+
         <div class="flex flex-wrap justify-center gap-4">
             <a href="{% url 'courses' %}" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
                 <i class="fas fa-play-circle mr-2"></i> ابدأ التعلم الآن
             </a>
+
             <a href="{% url 'register' %}" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-bold text-lg hover:bg-white hover:text-blue-600 transition">
                 <i class="fas fa-user-plus mr-2"></i> انضم إلينا
             </a>
         </div>
+
+        <!-- Search -->
+        <div class="flex justify-center w-full pt-6">
+            <form method="get" action="{% url 'search' %}"
+                class="flex items-center w-full max-w-xl bg-white dark:bg-gray-800
+                       rounded-full shadow-md border border-gray-200 dark:border-gray-700
+                       overflow-hidden transition focus-within:ring-2 focus-within:ring-blue-500">
+
+                <input
+                    type="text"
+                    name="query"
+                    placeholder="ابحث عن كورسات، مقالات، منح، كتب وملخصات"
+                    class="flex-1 px-5 py-3 text-gray-700 dark:text-white
+                           bg-transparent outline-none placeholder-gray-400 dark:placeholder-gray-500">
+
+                <button
+                    type="submit"
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white
+                           flex items-center justify-center transition">
+                    <i class="fas fa-search text-lg"></i>
+                </button>
+            </form>
+        </div>
+
     </div>
 </section>
 
-<!-- الإحصائيات -->
-<section class="py-12 bg-white">
+    {% comment %} !-- الإحصائيات -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="stat-card text-white p-6 rounded-xl text-center">
+                    <i class="fas fa-video text-4xl mb-4"></i>
+                    <h3 class="text-3xl font-bold">{{ courses_posts.count }}+</h3>
+                    <p class="opacity-90">كورس تعليمي</p>
+                </div>
+                <div class="bg-gradient-to-r from-green-400 to-blue-500 text-white p-6 rounded-xl text-center">
+                    <i class="fas fa-newspaper text-4xl mb-4"></i>
+                    <h3 class="text-3xl font-bold">{{ articles_posts.count }}+</h3>
+                    <p class="opacity-90">مقال تعليمي</p>
+                </div>
+                <div class="bg-gradient-to-r from-yellow-400 to-red-500 text-white p-6 rounded-xl text-center">
+                    <i class="fas fa-award text-4xl mb-4"></i>
+                    <h3 class="text-3xl font-bold">{{ grants_posts.count }}+</h3>
+                    <p class="opacity-90">منحة تدريبية</p>
+                </div>
+                <div class="bg-gradient-to-r from-purple-400 to-pink-500 text-white p-6 rounded-xl text-center">
+                    <i class="fas fa-book text-4xl mb-4"></i>
+                    <h3 class="text-3xl font-bold">{{ books_posts.count }}+</h3>
+                    <p class="opacity-90">كتاب وملخص</p>
+                </div>
+            </div>
+        </div>
+    </section>  {% endcomment %}
+
+<<!-- الإحصائيات -->
+<section class="py-14 bg-white">
     <div class="container mx-auto px-4">
+
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="stat-card text-white p-6 rounded-xl text-center">
-                <i class="fas fa-video text-4xl mb-4"></i>
-                <h3 class="text-3xl font-bold">{{ courses_posts.count }}+</h3>
-                <p class="opacity-90">كورس تعليمي</p>
+
+            <!-- كورسات -->
+            <div class="relative overflow-hidden rounded-2xl text-white p-6 text-center shadow-xl group">
+                <img src="{% static 'images/courses-bg.jpg' %}"
+                     class="absolute inset-0 w-full h-full object-cover scale-110 group-hover:scale-125 transition duration-700"
+                     alt="">
+                <div class="absolute inset-0 bg-black/60"></div>
+                <div class="relative z-10">
+                    <i class="fas fa-video text-4xl mb-4 text-blue-400"></i>
+                    <h3 class="text-4xl font-extrabold">{{ courses_posts.count }}+</h3>
+                    <p class="opacity-90 mt-1">كورس تعليمي</p>
+                </div>
             </div>
-            <div class="bg-gradient-to-r from-green-400 to-blue-500 text-white p-6 rounded-xl text-center">
-                <i class="fas fa-newspaper text-4xl mb-4"></i>
-                <h3 class="text-3xl font-bold">{{ articles_posts.count }}+</h3>
-                <p class="opacity-90">مقال تعليمي</p>
+
+            <!-- مقالات -->
+            <div class="relative overflow-hidden rounded-2xl text-white p-6 text-center shadow-xl group">
+                <img src="{% static 'images/articles-bg.jpg' %}"
+                     class="absolute inset-0 w-full h-full object-cover scale-110 group-hover:scale-125 transition duration-700"
+                     alt="">
+                <div class="absolute inset-0 bg-black/60"></div>
+                <div class="relative z-10">
+                    <i class="fas fa-newspaper text-4xl mb-4 text-green-400"></i>
+                    <h3 class="text-4xl font-extrabold">{{ articles_posts.count }}+</h3>
+                    <p class="opacity-90 mt-1">مقال تعليمي</p>
+                </div>
             </div>
-            <div class="bg-gradient-to-r from-yellow-400 to-red-500 text-white p-6 rounded-xl text-center">
-                <i class="fas fa-award text-4xl mb-4"></i>
-                <h3 class="text-3xl font-bold">{{ grants_posts.count }}+</h3>
-                <p class="opacity-90">منحة تدريبية</p>
+
+            <!-- منح -->
+            <div class="relative overflow-hidden rounded-2xl text-white p-6 text-center shadow-xl group">
+                <img src="{% static 'images/grants-bg.jpg' %}"
+                     class="absolute inset-0 w-full h-full object-cover scale-110 group-hover:scale-125 transition duration-700"
+                     alt="">
+                <div class="absolute inset-0 bg-black/60"></div>
+                <div class="relative z-10">
+                    <i class="fas fa-award text-4xl mb-4 text-yellow-400"></i>
+                    <h3 class="text-4xl font-extrabold">{{ grants_posts.count }}+</h3>
+                    <p class="opacity-90 mt-1">منحة تدريبية</p>
+                </div>
             </div>
-            <div class="bg-gradient-to-r from-purple-400 to-pink-500 text-white p-6 rounded-xl text-center">
-                <i class="fas fa-book text-4xl mb-4"></i>
-                <h3 class="text-3xl font-bold">{{ books_posts.count }}+</h3>
-                <p class="opacity-90">كتاب وملخص</p>
+
+            <!-- كتب -->
+            <div class="relative overflow-hidden rounded-2xl text-white p-6 text-center shadow-xl group">
+                <img src="{% static 'images/books-bg.jpg' %}"
+                     class="absolute inset-0 w-full h-full object-cover scale-110 group-hover:scale-125 transition duration-700"
+                     alt="">
+                <div class="absolute inset-0 bg-black/60"></div>
+                <div class="relative z-10">
+                    <i class="fas fa-book text-4xl mb-4 text-pink-400"></i>
+                    <h3 class="text-4xl font-extrabold">{{ books_posts.count }}+</h3>
+                    <p class="opacity-90 mt-1">كتاب وملخص</p>
+                </div>
             </div>
+
         </div>
     </div>
 </section>
+
+
 
 <!-- الأقسام -->
 <section class="py-16 bg-gray-50">

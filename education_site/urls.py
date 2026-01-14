@@ -15,6 +15,9 @@ urlpatterns = [
     
     # تطبيق core
     path('', include('core.urls')),
+    
+    path('ads/', include('advertisements.urls')),
+
 ]
 
 if settings.DEBUG:

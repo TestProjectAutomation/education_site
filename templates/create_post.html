@@ -22,6 +22,13 @@
             {% if form.errors %}
             <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
                 <strong>خطأ!</strong> يرجى تصحيح الأخطاء أدناه.
+                <ul class="mt-2 list-disc list-inside">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ field.label }}: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
             </div>
             {% endif %}
             
@@ -32,9 +39,6 @@
                         <i class="fas fa-heading mr-2"></i> عنوان المنشور *
                     </label>
                     {{ form.title }}
-                    {% if form.title.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ form.title.errors.0 }}</p>
-                    {% endif %}
                 </div>
                 
                 <div>
@@ -42,88 +46,150 @@
                         <i class="fas fa-folder mr-2"></i> القسم *
                     </label>
                     {{ form.category }}
-                    {% if form.category.errors %}
-                    <p class="text-red-500 text-sm mt-1">{{ form.category.errors.0 }}</p>
-                    {% endif %}
                 </div>
+            </div>
+            
+            <!-- الملخص -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-align-left mr-2"></i> ملخص المنشور
+                </label>
+                {{ form.excerpt }}
+                <p class="text-gray-500 text-sm mt-2">ملخص قصير يظهر في صفحة العرض الرئيسية (حد أقصى 300 حرف)</p>
+                <div class="mt-1 text-sm text-gray-500" id="excerpt-counter">0/300</div>
             </div>
             
             <!-- محتوى المنشور -->
             <div class="mb-6">
                 <label class="block text-gray-700 font-medium mb-2">
-                    <i class="fas fa-align-left mr-2"></i> محتوى المنشور *
+                    <i class="fas fa-edit mr-2"></i> محتوى المنشور *
                 </label>
                 {{ form.content }}
-                {% if form.content.errors %}
-                <p class="text-red-500 text-sm mt-1">{{ form.content.errors.0 }}</p>
-                {% endif %}
-                <p class="text-gray-500 text-sm mt-2">يمكنك استخدام HTML tags للتنسيق</p>
+                <p class="text-gray-500 text-sm mt-2">المحتوى الرئيسي للمنشور</p>
             </div>
             
-            <!-- قسم الصورة والرابط -->
+            <!-- قسم الصور -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- الصورة الرئيسية -->
                 <div>
                     <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-image mr-2"></i> صورة المنشور
+                        <i class="fas fa-image mr-2"></i> الصورة الرئيسية (Featured Image)
                     </label>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                        <div id="image-preview" class="hidden mb-4">
-                            <img id="preview-img" class="w-full h-48 object-cover rounded-lg">
+                        <div id="featured-image-preview" class="hidden mb-4">
+                            <img id="preview-featured-img" class="w-full h-48 object-cover rounded-lg">
                         </div>
-                        {{ form.image }}
-                        <p class="text-gray-500 text-sm mt-2">الحجم الأمثل: 1200×600 بكسل</p>
+                        {{ form.featured_image }}
+                        <p class="text-gray-500 text-sm mt-2">الحجم الأمثل: 1200×600 بكسل - سيتم إنشاء thumbnail تلقائياً</p>
                     </div>
+                    {% if form.featured_image.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ form.featured_image.errors.0 }}</p>
+                    {% endif %}
                 </div>
                 
+                <!-- الصورة القديمة (للتوافق) -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-image mr-2"></i> الصورة القديمة (Legacy)
+                    </label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        {{ form.image }}
+                        <p class="text-gray-500 text-sm mt-2">استخدم هذا الحقل للمحافظة على التوافق مع المحتوى القديم</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم الرابط -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label class="block text-gray-700 font-medium mb-2">
                         <i class="fas fa-link mr-2"></i> رابط خارجي
                     </label>
                     {{ form.link }}
                     <p class="text-gray-500 text-sm mt-2">رابط الكورس أو المصدر الخارجي</p>
-                    
-                    <label class="block text-gray-700 font-medium mb-2 mt-4">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
                         <i class="fas fa-clock mr-2"></i> مدة الانتظار للرابط (ثانية)
                     </label>
                     {{ form.link_delay }}
-                    <p class="text-gray-500 text-sm mt-2">الوقت قبل ظهور الرابط للزوار</p>
+                    <p class="text-gray-500 text-sm mt-2">الوقت قبل ظهور الرابط للزوار (إفتراضي: 30 ثانية)</p>
                 </div>
             </div>
             
-            <!-- حالة المنشور -->
-            <div class="mb-8">
-                <label class="block text-gray-700 font-medium mb-2">
-                    <i class="fas fa-toggle-on mr-2"></i> حالة المنشور
-                </label>
-                <div class="flex space-x-4 space-x-reverse">
-                    <label class="flex items-center">
-                        <input type="radio" name="status" value="draft" class="ml-2" checked>
-                        <span class="text-gray-700">مسودة</span>
+            <!-- SEO -->
+            <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-chart-line mr-2"></i> إعدادات SEO
+                </h3>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">
+                        عنوان SEO
                     </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="status" value="published" class="ml-2">
-                        <span class="text-gray-700">نشر مباشرة</span>
+                    {{ form.seo_title }}
+                    <p class="text-gray-500 text-sm mt-2">عنوان الصفحة في محركات البحث (اختياري)</p>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">
+                        وصف SEO
                     </label>
+                    {{ form.seo_description }}
+                    <p class="text-gray-500 text-sm mt-2">وصف الصفحة في محركات البحث (حد أقصى 300 حرف)</p>
+                    <div class="mt-1 text-sm text-gray-500" id="seo-desc-counter">0/300</div>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        كلمات مفتاحية SEO
+                    </label>
+                    {{ form.seo_keywords }}
+                    <p class="text-gray-500 text-sm mt-2">كلمات مفتاحية مفصولة بفواصل</p>
+                </div>
+            </div>
+            
+            <!-- حالة المنشور وتاريخ النشر -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-toggle-on mr-2"></i> حالة المنشور
+                    </label>
+                    {{ form.status }}
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        <i class="fas fa-calendar-alt mr-2"></i> تاريخ النشر
+                    </label>
+                    <div class="relative">
+                        {{ form.publish_date }}
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-calendar text-gray-400"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-2">اتركه فارغاً للنشر الفوري</p>
                 </div>
             </div>
             
             <!-- أزرار الإجراء -->
-            <div class="flex justify-between items-center pt-6 border-t border-gray-200">
-                <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-gray-800 font-medium">
-                    <i class="fas fa-arrow-right mr-2"></i> إلغاء والعودة
-                </a>
-                
+            <div class="flex flex-col md:flex-row justify-between items-center pt-6 border-t border-gray-200 gap-4">
                 <div class="flex space-x-3 space-x-reverse">
                     <button type="submit" name="save_draft" value="1" 
-                            class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-medium">
+                            class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-medium transition">
                         <i class="fas fa-save mr-2"></i> حفظ كمسودة
                     </button>
                     
-                    <button type="submit" name="publish" value="1" 
-                            class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 font-medium">
+                    <button type="submit" name="publish_now" value="1" 
+                            class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 font-medium transition">
                         <i class="fas fa-paper-plane mr-2"></i> نشر الآن
                     </button>
                 </div>
+                
+                <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-gray-800 font-medium transition">
+                    <i class="fas fa-arrow-right mr-2"></i> إلغاء والعودة
+                </a>
             </div>
         </form>
     </div>
@@ -136,15 +202,19 @@
         <ul class="space-y-2 text-blue-700">
             <li class="flex items-start">
                 <i class="fas fa-check-circle mt-1 ml-2 text-green-500"></i>
-                <span>استخدم عناوين واضحة وجذابة</span>
+                <span>استخدم عناوين واضحة وجذابة تحتوي على كلمات مفتاحية</span>
             </li>
             <li class="flex items-start">
                 <i class="fas fa-check-circle mt-1 ml-2 text-green-500"></i>
-                <span>اختر فئة مناسبة للمحتوى</span>
+                <span>اكتب ملخصاً مختصراً وجذاباً يعطي فكرة عن المحتوى</span>
             </li>
             <li class="flex items-start">
                 <i class="fas fa-check-circle mt-1 ml-2 text-green-500"></i>
-                <span>استخدم صور عالية الجودة تناسب المحتوى</span>
+                <span>استخدم صوراً عالية الجودة تناسب المحتوى (سيتم إنشاء thumbnail تلقائياً)</span>
+            </li>
+            <li class="flex items-start">
+                <i class="fas fa-check-circle mt-1 ml-2 text-green-500"></i>
+                <span>أضف إعدادات SEO لتحسين ظهور المنشور في محركات البحث</span>
             </li>
             <li class="flex items-start">
                 <i class="fas fa-check-circle mt-1 ml-2 text-green-500"></i>
@@ -154,68 +224,142 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script>
-// عرض معاينة الصورة
 document.addEventListener('DOMContentLoaded', function() {
-    const imageInput = document.querySelector('input[name="image"]');
-    const previewDiv = document.getElementById('image-preview');
-    const previewImg = document.getElementById('preview-img');
+    // معاينة الصورة الرئيسية
+    const featuredImageInput = document.querySelector('input[name="featured_image"]');
+    const featuredPreviewDiv = document.getElementById('featured-image-preview');
+    const featuredPreviewImg = document.getElementById('preview-featured-img');
     
-    if (imageInput) {
-        imageInput.addEventListener('change', function(e) {
+    if (featuredImageInput) {
+        featuredImageInput.addEventListener('change', function(e) {
             if (this.files && this.files[0]) {
                 const reader = new FileReader();
                 
                 reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewDiv.classList.remove('hidden');
+                    featuredPreviewImg.src = e.target.result;
+                    featuredPreviewDiv.classList.remove('hidden');
                 }
                 
                 reader.readAsDataURL(this.files[0]);
             } else {
-                previewDiv.classList.add('hidden');
+                featuredPreviewDiv.classList.add('hidden');
             }
         });
     }
     
+    // عداد الأحرف للملخص
+    const excerptField = document.querySelector('[name="excerpt"]');
+    const excerptCounter = document.getElementById('excerpt-counter');
+    
+    if (excerptField && excerptCounter) {
+        excerptField.addEventListener('input', function() {
+            const length = this.value.length;
+            excerptCounter.textContent = `${length}/300`;
+            
+            if (length > 300) {
+                excerptCounter.classList.add('text-red-500');
+                excerptCounter.classList.remove('text-gray-500');
+            } else {
+                excerptCounter.classList.remove('text-red-500');
+                excerptCounter.classList.add('text-gray-500');
+            }
+        });
+        
+        // تحديث العداد الأولي
+        excerptField.dispatchEvent(new Event('input'));
+    }
+    
+    // عداد الأحرف لوصف SEO
+    const seoDescField = document.querySelector('[name="seo_description"]');
+    const seoDescCounter = document.getElementById('seo-desc-counter');
+    
+    if (seoDescField && seoDescCounter) {
+        seoDescField.addEventListener('input', function() {
+            const length = this.value.length;
+            seoDescCounter.textContent = `${length}/300`;
+            
+            if (length > 300) {
+                seoDescCounter.classList.add('text-red-500');
+                seoDescCounter.classList.remove('text-gray-500');
+            } else {
+                seoDescCounter.classList.remove('text-red-500');
+                seoDescCounter.classList.add('text-gray-500');
+            }
+        });
+        
+        // تحديث العداد الأولي
+        seoDescField.dispatchEvent(new Event('input'));
+    }
+    
+    // تقويم لاختيار تاريخ النشر
+    const publishDateField = document.querySelector('[name="publish_date"]');
+    if (publishDateField) {
+        flatpickr(publishDateField, {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+            locale: "ar",
+            minDate: "today",
+            defaultDate: new Date()
+        });
+    }
+    
     // إضافة فئة Tailwind لحقول النموذج
-    const inputs = document.querySelectorAll('input, select, textarea');
+    const inputs = document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]), select, textarea');
     inputs.forEach(input => {
-        if (!input.classList.contains('form-control')) {
-            input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
-                              'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500');
-        }
+        input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
+                          'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500',
+                          'transition');
+    });
+    
+    // تنسيق خاص لحقول الـ radio (الحالة)
+    const statusRadios = document.querySelectorAll('input[name="status"]');
+    statusRadios.forEach(radio => {
+        radio.classList.remove('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg');
     });
 });
 </script>
 
 <style>
 /* تنسيق إضافي لحقول النموذج */
-input[type="text"],
-input[type="url"],
-input[type="number"],
-select,
-textarea {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    transition: all 0.3s;
-}
-
-input[type="text"]:focus,
-input[type="url"]:focus,
-input[type="number"]:focus,
-select:focus,
-textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
 textarea {
     min-height: 200px;
     resize: vertical;
+}
+
+/* تنسيق لحقول الـ select */
+select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* تنسيق لحقول الـ radio */
+input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* تنسيق مجموعة الـ radio buttons */
+.status-group {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.status-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 </style>
 {% endblock %}

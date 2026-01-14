@@ -2,6 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
+from django.conf import settings
+from ckeditor.fields import RichTextField
+from PIL import Image
+import os
+
 
 class Category(models.Model):
     CATEGORY_TYPES = [
@@ -26,48 +33,103 @@ class Category(models.Model):
         return self.name
 
 class Post(models.Model):
-    STATUS_CHOICES = [
-        ('draft', 'مسودة'),
-        ('published', 'منشور'),
-    ]
-    
+
+    class Status(models.TextChoices):
+        DRAFT = 'draft', 'مسودة'
+        PUBLISHED = 'published', 'منشور'
+        PRIVATE = 'private', 'خاص'
+        ARCHIVED = 'archived', 'مؤرشف'
+
     title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=250, unique_for_date='publish_date')
+    slug = models.SlugField(max_length=250, unique=True)
+
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
-    content = models.TextField()
-    image = models.ImageField(upload_to='posts/%Y/%m/%d/', blank=True)
-    link = models.URLField(blank=True, help_text='رابط خارجي للمنشور')
-    link_delay = models.IntegerField(default=30, help_text='مدة الانتظار قبل ظهور الرابط (بالثواني)')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
+
+    # القديم
+    content = models.TextField(blank=True)
+    image = models.ImageField(upload_to='posts/featured/%Y/%m/%d/', blank=True)
+
+    # الجديد
+    featured_image = models.ImageField(upload_to='posts/featured/%Y/%m/', blank=True)
+    thumbnail = models.ImageField(upload_to='posts/thumbnails/%Y/%m/', blank=True)
+
+    excerpt = models.TextField(max_length=300, blank=True)
+
+    link = models.URLField(blank=True)
+    link_delay = models.IntegerField(default=30)
+
     views = models.PositiveIntegerField(default=0)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
-    publish_date = models.DateTimeField(default=timezone.now)
+
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
+
+    publish_date = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
+    # SEO
+    seo_title = models.CharField(max_length=200, blank=True)
+    seo_description = models.TextField(max_length=300, blank=True)
+    seo_keywords = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = 'منشور'
+        verbose_name_plural = 'المنشورات'
+        ordering = ['-publish_date', '-created_at']
+
+    def __str__(self):
+        return self.title
+
+    # slug ذكي بدون كسر القديم
     def save(self, *args, **kwargs):
         if not self.slug:
             base = slugify(self.title, allow_unicode=True) or "post"
             slug = base
             i = 1
             while Post.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                i += 1
                 slug = f"{base}-{i}"
+                i += 1
             self.slug = slug
+
+        # نشر تلقائي
+        if self.status == self.Status.PUBLISHED and not self.publish_date:
+            self.publish_date = timezone.now()
+
         super().save(*args, **kwargs)
 
+        # إنشاء thumbnail تلقائي
+        if self.featured_image and not self.thumbnail:
+            self.create_thumbnail()
 
-    class Meta:
-        verbose_name = 'منشور'
-        verbose_name_plural = 'المنشورات'
-        ordering = ['-publish_date']
-    
-    def __str__(self):
-        return self.title
-    
+    def create_thumbnail(self):
+        if not self.featured_image:
+            return
+
+        image = Image.open(self.featured_image.path)
+        image.thumbnail((400, 300), Image.Resampling.LANCZOS)
+
+        thumb_path = self.featured_image.path.replace("featured", "thumbnails")
+        os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
+        image.save(thumb_path)
+
+        self.thumbnail.name = thumb_path.split("media/")[-1]
+        super().save(update_fields=["thumbnail"])
+
+    # روابط وعدادات
+    def get_absolute_url(self):
+        return reverse("post_detail", kwargs={"slug": self.slug})
+
     def increment_views(self):
-        self.views += 1
-        self.save()
+        Post.objects.filter(pk=self.pk).update(views=models.F("views") + 1)
+
+    # عرض ذكي
+    @property
+    def display_title(self):
+        return self.seo_title or self.title
+
+    @property
+    def display_description(self):
+        return self.seo_description or self.excerpt or self.content[:160]
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
@@ -119,3 +181,35 @@ class UserProfile(models.Model):
     
     def __str__(self):
         return self.user.username
+    
+
+
+
+class PostBlock(models.Model):
+    class BlockType(models.TextChoices):
+        TEXT = 'text', _('نص')
+        IMAGE = 'image', _('صورة')
+
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='blocks',
+        verbose_name=_("المقال")
+    )
+
+    block_type = models.CharField(
+        max_length=10,
+        choices=BlockType.choices,
+        verbose_name=_("نوع البلوك")
+    )
+
+    text = RichTextField(blank=True, null=True, verbose_name=_("النص"))
+    image = models.ImageField(upload_to='blog/blocks/%Y/%m/', blank=True, null=True, verbose_name=_("الصورة"))
+
+    order = models.PositiveIntegerField(default=0, verbose_name=_("الترتيب"))
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.post.title} - {self.block_type} ({self.order})"

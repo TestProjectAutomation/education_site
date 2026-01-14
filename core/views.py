@@ -259,6 +259,15 @@ def edit_post(request, id):
     
     return render(request, 'edit_post.html', {'form': form, 'post': post})
 
+@user_passes_test(is_content_editor)
+@login_required
+def delete_post(request, id):
+    post = get_object_or_404(Post, id=id, author=request.user)
+    post.delete()
+    messages.success(request, 'تم حذف المنشور بنجاح!')
+
+    return redirect('dashboard')
+
 @staff_member_required
 def admin_dashboard(request):
     # إحصائيات عامة
