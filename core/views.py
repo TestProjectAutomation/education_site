@@ -1518,3 +1518,5 @@ def handler403(request, exception):
 
 def handler400(request, exception):
     return render(request, 'errors/400.html', status=400)
+
+
