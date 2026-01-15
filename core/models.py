@@ -277,6 +277,8 @@ class UserProfile(models.Model):
         self.save(update_fields=['posts_count', 'comments_count'])
 
 
+
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

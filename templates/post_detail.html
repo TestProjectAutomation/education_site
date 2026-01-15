@@ -1,15 +1,43 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ post.display_title }} - كنوز{% endblock %}
+{% block extra_head %}
+    <script type="application/ld+json">
+        {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "{{ post.display_title }}",
+        "image": "{{ post.get_main_image.url }}",
+        "author": {
+        "@type": "Person",
+        "name": "{{ post.author }}"
+        },
+        "datePublished": "{{ post.publish_date|date:'Y-m-d' }}",
+        "dateModified": "{{ post.updated_at|date:'Y-m-d' }}",
+        "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ request.build_absolute_uri }}"
+        }
+        }
+    </script>
+{% endblock %}
 
 {% block meta %}
-<meta name="description" content="{{ post.display_description }}">
-<meta name="keywords" content="{{ post.seo_keywords|default:'' }}">
-<meta property="og:title" content="{{ post.display_title }}">
-<meta property="og:description" content="{{ post.display_description }}">
-<meta property="og:image" content="{% if post.featured_image %}{{ post.featured_image.url }}{% elif post.image %}{{ post.image.url }}{% endif %}">
-<meta property="og:url" content="{{ request.build_absolute_uri }}">
-<meta name="twitter:card" content="summary_large_image">
+    <meta name="description" content="{{ post.display_description }}">
+    <meta name="keywords" content="{{ post.seo_keywords|default:'' }}">
+    <meta property="og:title" content="{{ post.display_title }}">
+    <meta property="og:description" content="{{ post.display_description }}">
+    <meta property="og:image" content="{% if post.featured_image %}{{ post.featured_image.url }}{% elif post.image %}{{ post.image.url }}{% endif %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <title>{{ post.display_title }}</title>
+
+    <meta name="description" content="{{ post.display_description }}">
+    <meta name="keywords" content="{{ post.seo_keywords }}">
+
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
 {% endblock %}
 
 {% block content %}
@@ -30,10 +58,11 @@
         </div>
     </div>
 </div>
-
 <!-- المقال الرئيسي -->
 <article class="py-8">
     <div class="container mx-auto px-4 max-w-4xl">
+        <div id="ad-in-content" class="my-6 text-center mx-auto items-center">
+
         <!-- العنوان -->
         <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4 leading-tight">{{ post.title }}</h1>
         
@@ -91,30 +120,31 @@
                  class="w-full h-auto max-h-[500px] object-cover">
         </div>
         {% endif %}
-        
+            {% comment %} <iframe src="/ads/render/in_content/" style="border:none;width:100%;height:300px;" allow loading="lazy"></iframe> {% endcomment %}
+    </div>
         <!-- الملخص -->
         {% if post.excerpt %}
-        <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-l-4 border-blue-500 dark:border-blue-400">
+        <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-l-4 border-blue-500 dark:border-blue-400 transition-colors duration-300">
             <div class="flex items-start">
                 <i class="fas fa-quote-right text-blue-500 dark:text-blue-400 text-2xl ml-4 mt-1"></i>
                 <div>
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">ملخص المقال</h3>
-                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ post.excerpt }}</p>
-                </div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2 transition-colors duration-300">ملخص المقال</h3>
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed transition-colors duration-300">{{ post.excerpt }}</p>
             </div>
         </div>
+    </div>
         {% endif %}
         
         <!-- محتوى المقال - التعديل هنا -->
-        <div class="post-content prose prose-lg max-w-none mb-12 dark:prose-invert">
+        <div class="post-content prose prose-lg max-w-none mb-12 dark:prose-invert transition-colors duration-300">
             {{ post.content|safe }}
         </div>
         
         <!-- البلوكات -->
         {% if post_blocks %}
-        <div class="mb-12 space-y-8">
+        <div class="mb-12 space-y-8 transition-colors duration-300">
             {% for block in post_blocks %}
-            <div class="{% if block.block_type == 'text' %}prose prose-lg max-w-none dark:prose-invert{% endif %}">
+            <div class="{% if block.block_type == 'text' %}prose prose-lg max-w-none dark:prose-invert transition-colors duration-300{% endif %}">
                 {% if block.block_type == 'text' %}
                     {{ block.text|safe }}
                 {% elif block.block_type == 'image' and block.image %}
@@ -122,7 +152,7 @@
                         <img src="{{ block.image.url }}" alt="Block Image {{ forloop.counter }}" 
                              class="w-full max-w-2xl mx-auto rounded-lg shadow-md">
                         {% if block.text %}
-                        <p class="text-gray-600 dark:text-gray-300 mt-2 text-sm">{{ block.text|safe }}</p>
+                        <p class="text-gray-600 dark:text-gray-300 mt-2 text-sm transition-colors duration-300">{{ block.text|safe }}</p>
                         {% endif %}
                     </div>
                 {% endif %}
@@ -133,7 +163,7 @@
         
         <!-- رابط المنشور -->
         {% if post.link %}
-        <div class="mb-12">
+        <div class="mb-12 transition-colors duration-300">
             <div class="link-delay-container bg-gradient-to-r from-purple-600 to-indigo-700 text-white p-8 rounded-2xl text-center shadow-xl">
                 <div class="max-w-2xl mx-auto">
                     <h3 class="text-2xl font-bold mb-4">
@@ -193,8 +223,8 @@
         {% endif %}
         
         <!-- المشاركة -->
-        <div class="mb-12 p-8 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6 text-center">
+        <div class="mb-12 p-8 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg transition-colors duration-300">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6 text-center transition-colors duration-300">
                 <i class="fas fa-share-alt mr-2"></i> شارك هذا المنشور
             </h3>
             <div class="flex justify-center space-x-4 space-x-reverse">
@@ -217,34 +247,34 @@
         </div>
         
         <!-- التعليقات -->
-        <div class="mb-12" id="comments">
+        <div class="mb-12 transition-colors duration-300" id="comments">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-white transition-colors duration-300">
                     <i class="fas fa-comments mr-2"></i> التعليقات ({{ comments.count }})
                 </h3>
                 
-                <button onclick="scrollToCommentForm()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
+                <button onclick="scrollToCommentForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300">
                     <i class="fas fa-comment-plus mr-2"></i> أضف تعليقك
                 </button>
             </div>
             
             <!-- نموذج إضافة تعليق -->
-            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg mb-8 border border-gray-100 dark:border-gray-700" id="commentForm">
-                <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-6">أضف تعليقك</h4>
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg mb-8 border border-gray-100 dark:border-gray-700 transition-colors duration-300" id="commentForm">
+                <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-6 transition-colors duration-300">أضف تعليقك</h4>
                 <form method="post">
                     {% csrf_token %}
                     <input type="hidden" name="comment_form" value="1">
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label class="block text-gray-700 dark:text-gray-300 mb-3 font-medium">الاسم *</label>
+                            <label class="block text-gray-700 dark:text-gray-300 mb-3 font-medium transition-colors duration-300">الاسم *</label>
                             {{ comment_form.name }}
                             {% if comment_form.name.errors %}
                             <p class="text-red-500 text-sm mt-1">{{ comment_form.name.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="block text-gray-700 dark:text-gray-300 mb-3 font-medium">البريد الإلكتروني *</label>
+                            <label class="block text-gray-700 dark:text-gray-300 mb-3 font-medium transition-colors duration-300">البريد الإلكتروني *</label>
                             {{ comment_form.email }}
                             {% if comment_form.email.errors %}
                             <p class="text-red-500 text-sm mt-1">{{ comment_form.email.errors.0 }}</p>
@@ -253,7 +283,7 @@
                     </div>
                     
                     <div class="mb-6">
-                        <label class="block text-gray-700 dark:text-gray-300 mb-3 font-medium">التعليق *</label>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-3 font-medium transition-colors duration-300">التعليق *</label>
                         {{ comment_form.content }}
                         {% if comment_form.content.errors %}
                         <p class="text-red-500 text-sm mt-1">{{ comment_form.content.errors.0 }}</p>
@@ -261,7 +291,7 @@
                     </div>
                     
                     <div class="flex items-center justify-between">
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">
                             <i class="fas fa-info-circle ml-1"></i> سيظهر تعليقك بعد المراجعة
                         </p>
                         <button type="submit" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-3 rounded-lg hover:opacity-90 font-medium shadow-lg transform hover:-translate-y-0.5 transition">
@@ -273,9 +303,9 @@
             
             <!-- قائمة التعليقات -->
             {% if comments %}
-            <div class="space-y-6">
+            <div class="space-y-6 transition-colors duration-300">
                 {% for comment in comments %}
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition" id="comment-{{ comment.id }}">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-colors duration-300" id="comment-{{ comment.id }}">
                     <div class="flex items-start">
                         <div class="w-14 h-14 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow ml-4 flex-shrink-0">
                             {{ comment.name|first|upper }}
@@ -283,11 +313,11 @@
                         <div class="flex-grow">
                             <div class="flex justify-between items-start mb-3">
                                 <div>
-                                    <h5 class="font-bold text-gray-800 dark:text-white">{{ comment.name }}</h5>
-                                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ comment.email }}</p>
+                                    <h5 class="font-bold text-gray-800 dark:text-white transition-colors duration-300">{{ comment.name }}</h5>
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1 transition-colors duration-300">{{ comment.email }}</p>
                                 </div>
                                 <div class="flex items-center">
-                                    <span class="text-gray-500 dark:text-gray-400 text-sm ml-4">{{ comment.created_at|timesince }}</span>
+                                    <span class="text-gray-500 dark:text-gray-400 text-sm ml-4 transition-colors duration-300">{{ comment.created_at|timesince }}</span>
                                     {% if comment.is_approved %}
                                     <span class="text-green-500 text-sm mr-4">
                                         <i class="fas fa-check-circle"></i>
@@ -295,18 +325,18 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">{{ comment.content|linebreaks }}</p>
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-700 p-4 rounded-lg transition-colors duration-300">{{ comment.content|linebreaks }}</p>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="text-center py-12 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+            <div class="text-center py-12 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 transition-colors duration-300">
                 <i class="fas fa-comment-slash text-gray-300 dark:text-gray-600 text-5xl mb-4"></i>
-                <h4 class="text-xl font-bold text-gray-600 dark:text-gray-400 mb-2">لا توجد تعليقات بعد</h4>
-                <p class="text-gray-500 dark:text-gray-500 mb-6">كن أول من يعلق على هذا المنشور!</p>
-                <button onclick="scrollToCommentForm()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
+                <h4 class="text-xl font-bold text-gray-600 dark:text-gray-400 mb-2 transition-colors duration-300">لا توجد تعليقات بعد</h4>
+                <p class="text-gray-500 dark:text-gray-500 mb-6 transition-colors duration-300">كن أول من يعلق على هذا المنشور!</p>
+                <button onclick="scrollToCommentForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300">
                     <i class="fas fa-comment-plus mr-2"></i> أضف تعليقك الآن
                 </button>
             </div>
@@ -315,8 +345,8 @@
         
         <!-- منشورات مشابهة -->
         {% if similar_posts %}
-        <div class="mb-12">
-            <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-8">
+        <div class="mb-12 transition-colors duration-300">
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-8 transition-colors duration-300">
                 <i class="fas fa-th-large mr-2"></i> منشورات مشابهة
             </h3>
             
@@ -340,12 +370,12 @@
                     {% endif %}
                     
                     <div class="p-5">
-                        <h5 class="font-bold text-gray-800 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-2">
+                        <h5 class="font-bold text-gray-800 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-2 transition-colors duration-300">
                             {{ similar.title }}
                         </h5>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">{{ similar.excerpt|default:similar.content|truncatechars:80 }}</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 transition-colors duration-300">{{ similar.excerpt|default:similar.content|truncatechars:80 }}</p>
                         
-                        <div class="flex items-center justify-between text-gray-500 dark:text-gray-500 text-sm pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center justify-between text-gray-500 dark:text-gray-500 text-sm pt-4 border-t border-gray-100 dark:border-gray-700 transition-colors duration-300">
                             <div class="flex items-center">
                                 <i class="fas fa-calendar ml-1"></i>
                                 <span>{{ similar.publish_date|date:"Y/m/d" }}</span>
@@ -372,7 +402,7 @@
         font-size: 1.125rem;
     }
 
-    .dark-mode .post-content {
+    .dark .post-content {
         color: #d1d5db;
     }
 
@@ -386,7 +416,7 @@
         padding-right: 1rem;
     }
 
-    .dark-mode .post-content h2 {
+    .dark .post-content h2 {
         color: #e5e7eb;
         border-right: 4px solid #60a5fa;
     }
@@ -399,7 +429,7 @@
         margin-bottom: 0.75rem;
     }
 
-    .dark-mode .post-content h3 {
+    .dark .post-content h3 {
         color: #d1d5db;
     }
 
@@ -423,7 +453,7 @@
         color: #6b7280;
     }
 
-    .dark-mode .post-content blockquote {
+    .dark .post-content blockquote {
         border-right: 4px solid #4b5563;
         color: #9ca3af;
     }
@@ -437,11 +467,11 @@
         color: #1d4ed8;
     }
 
-    .dark-mode .post-content a {
+    .dark .post-content a {
         color: #60a5fa;
     }
 
-    .dark-mode .post-content a:hover {
+    .dark .post-content a:hover {
         color: #3b82f6;
     }
 
@@ -491,13 +521,13 @@
         border: 1px solid #d1d5db;
     }
 
-    .dark-mode input, .dark-mode textarea {
+    .dark input, .dark textarea {
         background-color: #374151;
         color: #d1d5db;
         border: 1px solid #4b5563;
     }
 
-    .dark-mode input:focus, .dark-mode textarea:focus {
+    .dark input:focus, .dark textarea:focus {
         border-color: #60a5fa;
         box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
     }

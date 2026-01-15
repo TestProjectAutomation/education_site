@@ -1,7 +1,15 @@
 {% load static%}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="{% if request.COOKIES.theme == 'dark' %}dark{% elif request.COOKIES.theme == 'light' %}light{% endif %}">
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-XXXXX"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-XXXXX');
+</script>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -14,6 +22,7 @@
     <meta property="og:image" content="{% block og_image %}{{ site_settings.og_image.url|default:'' }}{% endblock %}">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:type" content="website">
+
 
     <title>{% block title %}كنوز{% endblock %}</title>
 
@@ -45,6 +54,10 @@
             background-color: #f8fafc;
             overflow-x: hidden;
             transition: background-color 0.5s ease;
+        }
+        
+        .dark body {
+            background-color: #0f172a !important;
         }
         
         .hero-gradient {
@@ -119,6 +132,11 @@
             overflow-y: auto;
         }
         
+        .dark .mobile-menu {
+            background: #1e293b !important;
+            color: #f1f5f9 !important;
+        }
+        
         .mobile-menu.active {
             right: 0;
         }
@@ -134,6 +152,10 @@
             visibility: hidden;
             transition: all 0.3s ease;
             z-index: 999;
+        }
+        
+        .dark .mobile-menu-overlay {
+            background: rgba(0, 0, 0, 0.7) !important;
         }
         
         .mobile-menu-overlay.active {
@@ -210,151 +232,11 @@
             }
         }
 
-        /* Dark Mode Styles */
-        .dark-mode {
-            background-color: #0f172a !important;
-            color: #f1f5f9 !important;
-        }
-
-        .dark-mode nav {
-            background-color: #1e293b !important;
-            border-color: #475569 !important;
-        }
-
-        .dark-mode .bg-white {
-            background-color: #1e293b !important;
-        }
-
-        .dark-mode .text-gray-700,
-        .dark-mode .text-gray-800,
-        .dark-mode .text-gray-900 {
-            color: #f1f5f9 !important;
-        }
-
-        .dark-mode .text-gray-600,
-        .dark-mode .text-gray-500 {
-            color: #cbd5e1 !important;
-        }
-
-        .dark-mode .bg-gray-50 {
-            background-color: #0f172a !important;
-        }
-
-        .dark-mode .bg-gray-100 {
-            background-color: #1e293b !important;
-        }
-
-        .dark-mode .border-gray-200,
-        .dark-mode .border-gray-300 {
-            border-color: #475569 !important;
-        }
-
-        .dark-mode .shadow-lg {
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
-        }
-
-        .dark-mode .shadow-md {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-        }
-
-        .dark-mode .mobile-menu {
-            background-color: #1e293b !important;
-            color: #f1f5f9 !important;
-        }
-
-        .dark-mode .mobile-menu a {
-            color: #cbd5e1 !important;
-        }
-
-        .dark-mode .mobile-menu a:hover {
-            color: #60a5fa !important;
-        }
-
-        .dark-mode .mobile-menu-overlay {
-            background: rgba(0, 0, 0, 0.7) !important;
-        }
-
-        .dark-mode footer {
-            background-color: #111827 !important;
-        }
-
-        .dark-mode .card-hover {
-            background-color: #1e293b !important;
-            border: 1px solid #475569 !important;
-        }
-
-        .dark-mode input,
-        .dark-mode textarea,
-        .dark-mode select {
-            background-color: #334155 !important;
-            color: #f1f5f9 !important;
-            border-color: #475569 !important;
-        }
-
-        .dark-mode input:focus,
-        .dark-mode textarea:focus,
-        .dark-mode select:focus {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
-        }
-
-        .dark-mode .bg-green-100 {
-            background-color: rgba(16, 185, 129, 0.2) !important;
-            border-color: rgba(16, 185, 129, 0.4) !important;
-            color: #a7f3d0 !important;
-        }
-
-        .dark-mode .bg-blue-100 {
-            background-color: rgba(59, 130, 246, 0.2) !important;
-            border-color: rgba(59, 130, 246, 0.4) !important;
-            color: #93c5fd !important;
-        }
-
-        .dark-mode .bg-red-100 {
-            background-color: rgba(239, 68, 68, 0.2) !important;
-            border-color: rgba(239, 68, 68, 0.4) !important;
-            color: #fca5a5 !important;
-        }
-
-        .dark-mode #user-menu {
-            background-color: #334155 !important;
-            border-color: #475569 !important;
-        }
-
-        .dark-mode #user-menu a {
-            color: #cbd5e1 !important;
-        }
-
-        .dark-mode #user-menu a:hover {
-            background-color: #1e293b !important;
-            color: #f1f5f9 !important;
-        }
-
-        .dark-mode .bg-gray-900 {
-            background-color: #111827 !important;
-        }
-
-        .dark-mode .border-gray-800 {
-            border-color: #475569 !important;
-        }
-
-        .dark-mode #loading-overlay {
-            background-color: #0f172a !important;
-        }
-
-        .dark-mode .dark-mode-toggle {
-            background: linear-gradient(135deg, #f59e0b, #f97316) !important;
-        }
-
-        .dark-mode .back-to-top {
-            background: linear-gradient(135deg, #3b82f6, #10b981) !important;
-        }
-
         /* Toggle Buttons */
         .dark-mode-toggle {
             position: fixed;
             bottom: 5rem;
-            left: 127.5rem;
+            left: 114.5rem;
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -369,6 +251,10 @@
             z-index: 999;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark .dark-mode-toggle {
+            background: linear-gradient(135deg, #f59e0b, #f97316) !important;
         }
 
         .dark-mode-toggle:hover {
@@ -392,22 +278,22 @@
             border: 1px solid #475569;
         }
 
-        .dark-mode-toggle:hover .tooltip {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .dark-mode .dark-mode-toggle .tooltip {
+        .dark .dark-mode-toggle .tooltip {
             background: #0f172a;
             color: #cbd5e1;
             border-color: #334155;
+        }
+
+        .dark-mode-toggle:hover .tooltip {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         /* Back to Top Button */
         .back-to-top {
             position: fixed;
             bottom: 1.5rem;
-            left: 127.5rem;
+            left: 114.5rem;
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -425,6 +311,10 @@
             opacity: 0;
             transform: translateY(20px);
             visibility: hidden;
+        }
+
+        .dark .back-to-top {
+            background: linear-gradient(135deg, #3b82f6, #10b981) !important;
         }
 
         .back-to-top.visible {
@@ -454,15 +344,15 @@
             border: 1px solid #475569;
         }
 
-        .back-to-top:hover .tooltip {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .dark-mode .back-to-top .tooltip {
+        .dark .back-to-top .tooltip {
             background: #0f172a;
             color: #cbd5e1;
             border-color: #334155;
+        }
+
+        .back-to-top:hover .tooltip {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         /* System Badge */
@@ -483,32 +373,32 @@
             transition: all 0.3s ease;
         }
 
-        .dark-mode .system-badge {
+        .dark .system-badge {
             background: #1e293b;
             color: #cbd5e1;
             border-color: #475569;
         }
 
         /* Custom Scrollbar */
-        .dark-mode ::-webkit-scrollbar {
+        .dark ::-webkit-scrollbar {
             width: 10px;
         }
 
-        .dark-mode ::-webkit-scrollbar-track {
+        .dark ::-webkit-scrollbar-track {
             background: #1e293b;
         }
 
-        .dark-mode ::-webkit-scrollbar-thumb {
+        .dark ::-webkit-scrollbar-thumb {
             background: #475569;
             border-radius: 5px;
         }
 
-        .dark-mode ::-webkit-scrollbar-thumb:hover {
+        .dark ::-webkit-scrollbar-thumb:hover {
             background: #3b82f6;
         }
 
         /* Selection Color */
-        .dark-mode ::selection {
+        .dark ::selection {
             background-color: #3b82f6;
             color: white;
         }
@@ -553,17 +443,8 @@
         }
 
         /* Smooth Dark Mode Transition */
-        .dark-mode-transition {
-            animation: darkModeFade 0.5s ease;
-        }
-
-        @keyframes darkModeFade {
-            from {
-                opacity: 0.8;
-            }
-            to {
-                opacity: 1;
-            }
+        .dark-mode-transition * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
         }
 
         /* Print Styles */
@@ -612,7 +493,6 @@
             }
         }
     </style>
-    
     
     <style>
         /* أضف هذه الأنماط في قسم extra_css */
@@ -732,7 +612,7 @@
  
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
     <!-- زر Dark Mode -->
     <button class="dark-mode-toggle" id="darkModeToggle">
         <i class="fas fa-moon"></i>
@@ -768,31 +648,31 @@
         </div>
         
         <div class="space-y-4">
-            <a href="{% url 'home' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+            <a href="{% url 'home' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
                 <i class="fas fa-home ml-2"></i> الرئيسية
             </a>
-            <a href="{% url 'courses' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+            <a href="{% url 'courses' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
                 <i class="fas fa-video ml-2"></i> الكورسات
             </a>
-            <a href="{% url 'articles' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+            <a href="{% url 'articles' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
                 <i class="fas fa-newspaper ml-2"></i> المقالات
             </a>
-            <a href="{% url 'grants' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+            <a href="{% url 'grants' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
                 <i class="fas fa-award ml-2"></i> المنح والتدريبات
             </a>
-            <a href="{% url 'books' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+            <a href="{% url 'books' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
                 <i class="fas fa-book ml-2"></i> الكتب والملخصات
             </a>
             
             {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                <a href="{% url 'dashboard' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
                     <i class="fas fa-tachometer-alt ml-2"></i> لوحة التحكم
                 </a>
-                <a href="{% url 'profile' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                <a href="{% url 'profile' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
                     <i class="fas fa-user ml-2"></i> الملف الشخصي
                 </a>
                 {% if user.is_staff or user.profile.is_content_editor %}
-                <a href="{% url 'create_post' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
+                <a href="{% url 'create_post' %}" class="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-2 border-b border-gray-100 dark:border-gray-700">
                     <i class="fas fa-plus-circle ml-2"></i> إنشاء منشور
                 </a>
                 {% endif %}
@@ -804,10 +684,10 @@
                 </form>
             {% else %}
                 <div class="pt-4 space-y-2">
-                    <a href="{% url 'login' %}" class="block text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium py-2 border border-gray-300 dark:border-gray-700 rounded-lg">
+                    <a href="{% url 'login' %}" class="block text-center text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-2 border border-gray-300 dark:border-gray-700 rounded-lg">
                         <i class="fas fa-sign-in-alt ml-2"></i> تسجيل الدخول
                     </a>
-                    <a href="{% url 'register' %}" class="block text-center bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:opacity-90 font-medium">
+                    <a href="{% url 'register' %}" class="block text-center bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:opacity-90 font-medium" onclick="gtag('event','conversion')">
                         <i class="fas fa-user-plus ml-2"></i> إنشاء حساب
                     </a>
                 </div>
@@ -833,19 +713,19 @@
                 
                 <!-- روابط التنقل -->
                 <div class="hidden md:flex space-x-8 space-x-reverse nav-links">
-                    <a href="{% url 'home' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if request.path == '/' %}text-blue-600{% endif %}">
+                    <a href="{% url 'home' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium {% if request.path == '/' %}text-blue-600 dark:text-blue-400{% endif %}">
                         <i class="fas fa-home mr-1"></i> الرئيسية
                     </a>
-                    <a href="{% url 'courses' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if '/courses/' in request.path %}text-blue-600{% endif %}">
+                    <a href="{% url 'courses' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium {% if '/courses/' in request.path %}text-blue-600 dark:text-blue-400{% endif %}">
                         <i class="fas fa-video mr-1"></i> الكورسات
                     </a>
-                    <a href="{% url 'articles' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if '/articles/' in request.path %}text-blue-600{% endif %}">
+                    <a href="{% url 'articles' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium {% if '/articles/' in request.path %}text-blue-600 dark:text-blue-400{% endif %}">
                         <i class="fas fa-newspaper mr-1"></i> المقالات
                     </a>
-                    <a href="{% url 'grants' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if '/grants/' in request.path %}text-blue-600{% endif %}">
+                    <a href="{% url 'grants' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium {% if '/grants/' in request.path %}text-blue-600 dark:text-blue-400{% endif %}">
                         <i class="fas fa-award mr-1"></i> المنح والتدريبات
                     </a>
-                    <a href="{% url 'books' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium {% if '/books/' in request.path %}text-blue-600{% endif %}">
+                    <a href="{% url 'books' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium {% if '/books/' in request.path %}text-blue-600 dark:text-blue-400{% endif %}">
                         <i class="fas fa-book mr-1"></i> الكتب والملخصات
                     </a>
                 </div>
@@ -873,22 +753,22 @@
                                 opacity-0 invisible scale-95
                                 transition-all duration-200 origin-top-right z-50">
 
-                            <a href="{% url 'dashboard' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
+                            <a href="{% url 'dashboard' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
                                 <i class="fas fa-tachometer-alt ml-2"></i> لوحة التحكم
                             </a>
 
-                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
+                            <a href="{% url 'profile' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
                                 <i class="fas fa-user ml-2"></i> الملف الشخصي
                             </a>
 
                             {% if user.is_staff or user.profile.is_content_editor %}
-                            <a href="{% url 'create_post' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
+                            <a href="{% url 'create_post' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
                                 <i class="fas fa-plus-circle ml-2"></i> إنشاء منشور
                             </a>
                             {% endif %}
 
                             {% if user.is_staff %}
-                            <a href="/admin/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300">
+                            <a href="/admin/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
                                 <i class="fas fa-cog ml-2"></i> الإدارة
                             </a>
                             {% endif %}
@@ -904,11 +784,11 @@
                         </div>
                     </div>
                     {% else %}
-                    <a href="{% url 'login' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 font-medium">
+                    <a href="{% url 'login' %}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium">
                         <i class="fas fa-sign-in-alt ml-1"></i> تسجيل الدخول
                     </a>
 
-                    <a href="{% url 'register' %}"
+                    <a href="{% url 'register' %}" onclick="gtag('event','conversion')"
                     class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
                         <i class="fas fa-user-plus ml-1"></i> إنشاء حساب
                     </a>
@@ -939,7 +819,7 @@
                     <i class="fas fa-book-open text-4xl text-green-600 dark:text-green-400"></i>
                 </div>
             </div>
-            <div class="text-2xl font-bold text-gray-800 dark:text-white mb-2">مكتبة كنوز</div>
+            <div class="text-2xl font-bold text-gray-800 dark:text-white mb-2">منصة كنوز</div>
             <div class="text-gray-600 dark:text-gray-300">جاري التحميل...</div>
         </div>
     </div>
@@ -954,13 +834,25 @@
         <div class="floating-element"></div>
     </div>
     
+{% comment %} <!-- Left Ad -->
+<div class="hidden xl:block fixed left-2 top-24 z-40">
+    <iframe src="/ads/render/left_sidebar/"
+            class="w-[160px] h-[600px] border-0"></iframe>
+</div> {% endcomment %}
+
     <!-- المحتوى الرئيسي -->
-    <main class="min-h-screen">   
+    <main class="min-h-screen transition-colors duration-300">   
         {% block content %}{% endblock %}
     </main>
      
+{% comment %} <!-- Right Ad -->
+<div class="hidden xl:block fixed right-2 top-24 z-40">
+    <iframe src="/ads/render/right_sidebar/"
+            class="w-[160px] h-[600px] border-0"></iframe>
+</div> {% endcomment %}
+
     <!-- التذييل -->
-    <footer class="bg-gray-900 dark:bg-gray-950 text-white py-12">
+    <footer class="bg-gray-900 dark:bg-gray-950 text-white py-12 transition-colors duration-300">
         <div class="container mx-auto px-4">
             <div class="footer-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- معلومات الموقع -->
@@ -1027,7 +919,8 @@
                     </div>
                 </div>
             </div>
-            
+            {% comment %} <iframe src="/ads/render/header/" class="w-full" style="border:none;width:100%;height:90px;"></iframe> {% endcomment %}
+
             <!-- حقوق النشر -->
             <div class="border-t border-gray-800 dark:border-gray-700 mt-8 pt-8 text-center text-gray-400">
                 <p>© {% now "Y" %} موقع كنوز . جميع الحقوق محفوظة.</p> 
@@ -1159,48 +1052,56 @@
             });
         });
         
-        // Dark Mode System
+        // Dark Mode System - Simplified and Fixed
         const darkModeToggle = document.getElementById('darkModeToggle');
-        const body = document.body;
+        const htmlElement = document.documentElement;
         const systemBadge = document.getElementById('systemBadge');
         const modeIndicator = document.getElementById('modeIndicator');
-        
-        // التحقق من تفضيل النظام والمخزن المحلي
-        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-        const storedTheme = localStorage.getItem('theme');
-        
-        // تحديد الثيم بناءً على التخزين أو تفضيل النظام
+
+        // Function to set theme
         function setTheme(theme) {
-            const isDark = theme === 'dark' || (!storedTheme && prefersDarkScheme.matches);
+            const isDark = theme === 'dark';
             
             if (isDark) {
-                body.classList.add('dark-mode');
+                htmlElement.classList.add('dark');
                 darkModeToggle.innerHTML = '<i class="fas fa-sun"></i><span class="tooltip">الوضع الفاتح</span>';
                 modeIndicator.textContent = 'داكن';
                 localStorage.setItem('theme', 'dark');
+                document.cookie = "theme=dark; path=/; max-age=31536000";
             } else {
-                body.classList.remove('dark-mode');
+                htmlElement.classList.remove('dark');
                 darkModeToggle.innerHTML = '<i class="fas fa-moon"></i><span class="tooltip">الوضع الداكن</span>';
                 modeIndicator.textContent = 'فاتح';
                 localStorage.setItem('theme', 'light');
+                document.cookie = "theme=light; path=/; max-age=31536000";
             }
-            
-            // إضافة animation مؤقت
-            body.classList.add('dark-mode-transition');
-            setTimeout(() => {
-                body.classList.remove('dark-mode-transition');
-            }, 500);
         }
-        
-        // تهيئة الثيم
-        setTheme(storedTheme);
-        
-        // تبديل الثيم عند النقر على الزر
+
+        // Initialize theme from localStorage or cookie
+        function initTheme() {
+            const cookieTheme = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('theme='))
+                ?.split('=')[1];
+            
+            const storedTheme = localStorage.getItem('theme') || cookieTheme;
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (storedTheme) {
+                setTheme(storedTheme);
+            } else if (prefersDarkScheme) {
+                setTheme('dark');
+            } else {
+                setTheme('light');
+            }
+        }
+
+        // Toggle theme
         darkModeToggle.addEventListener('click', () => {
-            const isDark = body.classList.contains('dark-mode');
+            const isDark = htmlElement.classList.contains('dark');
             setTheme(isDark ? 'light' : 'dark');
             
-            // تأثير animation إضافي
+            // Animation effect
             gsap.to(darkModeToggle, {
                 rotation: 360,
                 duration: 0.5,
@@ -1210,19 +1111,24 @@
                 }
             });
         });
-        
-        // الاستماع لتغيرات تفضيل النظام
-        prefersDarkScheme.addEventListener('change', (e) => {
-            if (!localStorage.getItem('theme')) {
+
+        // Initialize theme
+        initTheme();
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme') && !document.cookie.includes('theme=')) {
                 setTheme(e.matches ? 'dark' : 'light');
             }
         });
-        
-        // عرض badge بناءً على مصدر الثيم
+
+        // Update system badge
         function updateSystemBadge() {
-            if (localStorage.getItem('theme')) {
+            const hasStoredTheme = localStorage.getItem('theme') || document.cookie.includes('theme=');
+            
+            if (hasStoredTheme) {
                 systemBadge.innerHTML = '<i class="fas fa-user-cog"></i><span id="modeIndicator">مخصص</span>';
-            } else if (prefersDarkScheme.matches) {
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 systemBadge.innerHTML = '<i class="fas fa-desktop"></i><span id="modeIndicator">النظام</span>';
             } else {
                 systemBadge.innerHTML = '<i class="fas fa-desktop"></i><span id="modeIndicator">النظام</span>';
@@ -1298,8 +1204,7 @@
         });
     </script>
 
-<!-- Search Stats (When typing) -->
-{% comment %} 
+    <!-- Search Stats (When typing) -->
     <script>
         const searchInput = document.getElementById('search-input');
         const suggestionsBox = document.getElementById('search-suggestions');
@@ -1341,11 +1246,9 @@
         });
 
     </script>
- {% endcomment %}
 
 
-
-    <!-- Search JavaScript -->
+ <!-- Search JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('search-input');
@@ -1667,6 +1570,9 @@
         `;
         document.head.appendChild(style);
     </script>
+ 
+    
+    {% comment %} home eficts {% endcomment %}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const bg = document.getElementById("hero-bg");
@@ -1712,7 +1618,7 @@
         });
     </script>
 
-
+    {% comment %} نظام عداد الأحرف التلقائي {% endcomment %}
     <script>
         // ============ نظام عداد الأحرف التلقائي ============
         document.addEventListener('DOMContentLoaded', function() {
@@ -2058,8 +1964,37 @@
 
     </script>
     
-    <script src="{% static 'js/clean-paste.js' %}"></script>
+    {% comment %} # Open Graph Meta Tags {% endcomment %}
+    <script type="application/ld+json">
+        {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "My Django Website",
+        "url": "https://yoursite.com",
+        "logo": "https://yoursite.com/static/logo.png"
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "{{ post.display_title }}",
+        "image": "{{ post.get_main_image.url }}",
+        "author": {
+        "@type": "Person",
+        "name": "{{ post.author }}"
+        },
+        "datePublished": "{{ post.publish_date|date:'Y-m-d' }}",
+        "dateModified": "{{ post.updated_at|date:'Y-m-d' }}",
+        "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ request.build_absolute_uri }}"
+        }
+        }
+    </script>
 
+
+    <script src="{% static 'js/clean-paste.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js" async></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 

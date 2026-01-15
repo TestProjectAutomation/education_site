@@ -773,16 +773,75 @@ def logout_view(request):
     
     return render(request, 'auth/logout.html')
 
-
 @login_required
 def profile(request):
     """الملف الشخصي"""
-    comments_count = request.user.profile.comments_count
-
     try:
         user_profile = UserProfile.objects.get(user=request.user)
     except UserProfile.DoesNotExist:
         user_profile = UserProfile.objects.create(user=request.user)
+    
+    # جلب مقالات المستخدم مع الترقيم
+    user_posts = Post.objects.filter(author=request.user).order_by('-created_at')
+    
+    # الترقيم
+    paginator = Paginator(user_posts, 9)  # 9 مقالات لكل صفحة
+    page_number = request.GET.get('page')
+    posts_page = paginator.get_page(page_number)
+    
+    # إحصائيات المستخدم
+    published_posts_count = request.user.posts.filter(status='published').count()
+    draft_posts_count = request.user.posts.filter(status='draft').count()
+    total_posts = user_posts.count()
+    total_views = user_posts.aggregate(total_views=Sum('views'))['total_views'] or 0
+    comments_count = Comment.objects.filter(post__author=request.user).count()
+    
+    # حساب الأيام النشطة
+    days_active = (timezone.now() - request.user.date_joined).days
+    days_active = max(days_active, 1)  # على الأقل يوم واحد
+    
+    # حساب متوسط المشاهدات لكل مقال
+    avg_views_per_post = total_views / total_posts if total_posts > 0 else 0
+    
+    # حساب نسبة التعليقات للإنجازات
+    comments_width = min((comments_count / 10) * 100, 100) if comments_count > 0 else 0
+    
+    # النشاط الأخير
+    recent_activities = []
+    
+    # إضافة المنشورات الجديدة كنشاط
+    recent_posts = user_posts[:5]
+    for post in recent_posts:
+        recent_activities.append({
+            'message': f'أنشأت مقال جديد: "{post.title[:30]}..."',
+            'details': f'في {post.category.name}',
+            'time': post.created_at,
+            'icon': 'newspaper'
+        })
+    
+    # إضافة التعليقات كنشاط
+    recent_comments = Comment.objects.filter(post__author=request.user).order_by('-created_at')[:3]
+    for comment in recent_comments:
+        recent_activities.append({
+            'message': f'تلقيت تعليق جديد على "{comment.post.title[:20]}..."',
+            'details': f'بواسطة {comment.name}',
+            'time': comment.created_at,
+            'icon': 'comment'
+        })
+    
+    # إضافة المشاهدات كنشاط
+    popular_posts = user_posts.order_by('-views')[:2]
+    for post in popular_posts:
+        if post.views > 0:
+            recent_activities.append({
+                'message': f'مقالك "{post.title[:20]}..." حصل على {post.views} مشاهدة',
+                'details': f'آخر تحديث: {post.updated_at.strftime("%Y-%m-%d")}',
+                'time': post.updated_at,
+                'icon': 'eye'
+            })
+    
+    # ترتيب النشاط حسب الوقت
+    recent_activities.sort(key=lambda x: x['time'], reverse=True)
     
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=user_profile)
@@ -794,18 +853,24 @@ def profile(request):
             messages.error(request, 'يرجى تصحيح الأخطاء أدناه.')
     else:
         form = UserProfileForm(instance=user_profile)
-
-    published_posts_count = request.user.posts.filter(status='published').count()
     
     return render(request, 'auth/profile.html', {
         'title': 'ملفي الشخصي',
         'user': request.user,
         'profile': user_profile,
         'form': form,
+        'posts': posts_page,  # المنشورات مع الترقيم
+        'total_posts': total_posts,
         'published_posts_count': published_posts_count,
+        'draft_posts_count': draft_posts_count,
+        'total_views': total_views,
         'comments_count': comments_count,
+        'days_active': days_active,
+        'avg_views_per_post': round(avg_views_per_post, 1),
+        'comments_width': comments_width,
+        'recent_activities': recent_activities[:5],  # آخر 5 نشاطات
+        'recent_comments_count': recent_comments.count(),
     })
-
 
 @login_required
 def change_password(request):
@@ -823,6 +888,37 @@ def change_password(request):
         form = ChangePasswordForm(request.user)
     
     return render(request, 'auth/change_password.html', {'form': form})
+
+def password_reset_confirm(request, uidb64, token):
+    if request.user.is_authenticated:
+        messages.info(request, 'أنت مسجل الدخول بالفعل!')
+        return redirect('home')
+
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            form = SetPasswordForm(user, request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'تم تعيين كلمة المرور الجديدة بنجاح!')
+                return redirect('password_reset_complete')
+            else:
+                messages.error(request, 'يرجى تصحيح الأخطاء أدناه.')
+        else:
+            form = SetPasswordForm(user)
+
+        return render(request, 'auth/password_reset_confirm.html', {
+            'form': form,
+            'validlink': True
+        })
+    else:
+        messages.error(request, 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية!')
+        return render(request, 'auth/password_reset_confirm.html', {'validlink': False})
 
 
 # ======== استعادة كلمة المرور ========
@@ -888,61 +984,6 @@ def password_reset_request(request):
     return render(request, 'auth/password_reset.html', {'form': form})
 
 
-def password_reset_confirm(request, uidb64, token):
-    """تأكيد إعادة تعيين كلمة المرور"""
-    if request.user.is_authenticated:
-        messages.info(request, 'أنت مسجل الدخول بالفعل!')
-        return redirect('home')
-    
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-    
-    if user is not None and default_token_generator.check_token(user, token):
-        if request.method == 'POST':
-            form = CustomSetPasswordForm(user, request.POST)
-            if form.is_valid():
-                form.save()
-                
-                subject = "تم تغيير كلمة المرور - موقع التعليم"
-                context = {
-                    'username': user.username,
-                    'site_name': 'موقع التعليم'
-                }
-                
-                html_message = render_to_string('emails/password_changed_email.html', context)
-                plain_message = strip_tags(html_message)
-                
-                try:
-                    send_mail(
-                        subject=subject,
-                        message=plain_message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[user.email],
-                        html_message=html_message,
-                        fail_silently=True,
-                    )
-                except:
-                    pass
-                
-                messages.success(request, 'تم تعيين كلمة المرور الجديدة بنجاح!')
-                return redirect('password_reset_complete')
-            else:
-                messages.error(request, 'يرجى تصحيح الأخطاء أدناه.')
-        else:
-            form = CustomSetPasswordForm(user)
-        
-        return render(request, 'auth/password_reset_confirm.html', {
-            'form': form,
-            'validlink': True
-        })
-    else:
-        messages.error(request, 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية!')
-        return render(request, 'auth/password_reset_confirm.html', {'validlink': False})
-
-
 def password_reset_complete(request):
     """اكتمال إعادة تعيين كلمة المرور"""
     return render(request, 'auth/password_reset_complete.html')
@@ -972,18 +1013,22 @@ def dashboard(request):
 
 @login_required
 def my_posts(request):
-    """صفحة منشورات المستخدم"""
+    """صفحة منشورات المستخدم الشخصية"""
     posts = Post.objects.filter(author=request.user).order_by('-created_at')
     
-    paginator = Paginator(posts, 15)
+    # الترقيم
+    paginator = Paginator(posts, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     return render(request, 'my_posts.html', {
         'posts': page_obj,
-        'title': 'منشوراتي'
+        'title': 'منشوراتي',
+        'total_posts': posts.count(),
+        'published_posts': posts.filter(status='published').count(),
+        'draft_posts': posts.filter(status='draft').count(),
+        'archived_posts': posts.filter(status='archived').count(),
     })
-
 
 @login_required
 def content_dashboard(request):

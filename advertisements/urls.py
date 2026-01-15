@@ -4,6 +4,8 @@ from . import views
 app_name = 'advertisements'
 
 urlpatterns = [
+    path("render/<str:code>/", views.render_ad_placement, name="render"),
+
     # تتبع الإعلانات
     path('impression/<int:ad_id>/', views.record_impression, name='record_impression'),
     path('click/<int:ad_id>/', views.record_click, name='record_click'),
@@ -23,6 +25,7 @@ urlpatterns = [
     path('bulk-actions/', views.bulk_actions, name='bulk_actions'),
 
     path('create-with-targeting/', views.create_ad_with_targeting, name='create_with_targeting'),
+
 
     
     # API والتقارير

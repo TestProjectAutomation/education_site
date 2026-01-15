@@ -18,6 +18,32 @@ from .models import Advertisement, AdPlacement
 # وظائف تتبع الإعلانات (غير محمية بالصلاحيات)
 # ==============================================
 
+
+def render_ad_placement(request, code):
+    cache_key = f"ad_render_{code}"
+    html = cache.get(cache_key)
+
+    if not html:
+        ads = Advertisement.objects.filter(
+            placement__code=code,
+            active=True,
+            start_date__lte=timezone.now(),
+            end_date__gte=timezone.now()
+        ).select_related("placement").order_by("-priority")[:5]
+
+        html = ""
+        for ad in ads:
+            ad.record_impression()
+            html += ad.get_display_html()
+
+        if not html:
+            html = "<!-- no ads -->"
+
+        cache.set(cache_key, html, 60)
+
+    return HttpResponse(html)
+
+
 def record_impression(request, ad_id):
     """تسجيل ظهور الإعلان"""
     try:

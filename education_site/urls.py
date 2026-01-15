@@ -6,9 +6,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
+from django.contrib.sitemaps.views import sitemap
+from core.sitemaps import PostSitemap
+
+sitemaps = {
+    "posts": PostSitemap,
+}
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}),
+
     # صفحات المصادقة
     path('login/', auth_views.LoginView.as_view(template_name='auth/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
