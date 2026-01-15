@@ -41,38 +41,6 @@ def get_search_suggestions(query):
     
     return list(suggestions)
 
-def create_post_blocks(post, blocks_data, files):
-    """إنشاء وإدارة بلوكات المحتوى"""
-    existing_blocks = {b.order: b for b in post.blocks.all()}
-
-    for i, block_data in enumerate(blocks_data):
-        block_type = block_data.get('type', 'text')
-        text_content = block_data.get('text', '')
-
-        # إذا كان البلوك موجوداً، قم بتحديثه
-        if i in existing_blocks:
-            post_block = existing_blocks[i]
-            post_block.block_type = block_type
-        else:
-            # إنشاء بلوك جديد
-            post_block = PostBlock(post=post, order=i, block_type=block_type)
-
-        if block_type == 'text':
-            post_block.text = text_content
-        elif block_type == 'image':
-            image_name = block_data.get('image_name', '')
-            if image_name:
-                for file_key in files:
-                    file = files[file_key]
-                    if hasattr(file, 'name') and file.name == image_name:
-                        post_block.image = file
-                        break
-
-        post_block.save()
-
-    return True
-
-
 # ======== الصفحات الرئيسية ========
 def home(request):
     """الصفحة الرئيسية"""
@@ -107,51 +75,224 @@ def home(request):
     })
 
 
-def courses(request):
-    """صفحة الكورسات"""
-    category = get_object_or_404(Category, category_type='courses')
-    posts_list = Post.objects.filter(
-        category__category_type='courses',
-        status='published'
-    ).order_by('-publish_date')
-    
-    paginator = Paginator(posts_list, 12)
-    page_number = request.GET.get('page')
-    posts = paginator.get_page(page_number)
-    
-    return render(request, 'courses.html', {
-        'category': category,
-        'posts': posts,
-        'title': 'الكورسات'
-    })
-
+# ======== تحديث دوال الصفحات الرئيسية ========
 
 def articles(request):
-    """صفحة المقالات"""
+    """صفحة المقالات مع إحصائيات متقدمة"""
     category = get_object_or_404(Category, category_type='articles')
     posts_list = Post.objects.filter(
         category__category_type='articles',
         status='published'
     ).order_by('-publish_date')
     
+    # إحصائيات حقيقية
+    total_posts = posts_list.count()
+    total_authors = User.objects.filter(
+        posts__category__category_type='articles',
+        posts__status='published'
+    ).distinct().count()
+    total_views = posts_list.aggregate(total_views=Sum('views'))['total_views'] or 0
+    total_comments = Comment.objects.filter(
+        post__category__category_type='articles',
+        post__status='published',
+        is_approved=True
+    ).count()
+    
+    # المقالات المميزة
+    featured_posts = posts_list.filter(views__gte=100)[:2]
+    
+    # التصفية
+    category_filter = request.GET.get('category', '')
+    sort_by = request.GET.get('sort', 'newest')
+    
+    if category_filter:
+        posts_list = posts_list.filter(category__name=category_filter)
+    
+    if sort_by == 'popular':
+        posts_list = posts_list.order_by('-views')
+    elif sort_by == 'commented':
+        posts_list = posts_list.annotate(comment_count=Count('comments')).order_by('-comment_count')
+    
     paginator = Paginator(posts_list, 12)
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
     
+    # التصنيفات المتاحة
+    available_categories = Category.objects.filter(
+        category_type='articles'
+    ).annotate(post_count=Count('posts')).order_by('-post_count')
+    
     return render(request, 'articles.html', {
         'category': category,
         'posts': posts,
-        'title': 'المقالات'
+        'title': 'المقالات',
+        'total_posts': total_posts,
+        'total_authors': total_authors,
+        'total_views': total_views,
+        'total_comments': total_comments,
+        'featured_posts': featured_posts,
+        'available_categories': available_categories,
+        'current_category_filter': category_filter,
+        'current_sort': sort_by,
+    })
+
+
+def books(request):
+    """صفحة الكتب والملخصات مع تصنيفات متقدمة"""
+    category = get_object_or_404(Category, category_type='books')
+    posts_list = Post.objects.filter(
+        category__category_type='books',
+        status='published'
+    ).order_by('-publish_date')
+    
+    # إحصائيات حقيقية
+    total_books = posts_list.filter(
+        Q(seo_keywords__icontains='كتاب') | Q(title__icontains='كتاب')
+    ).count()
+    
+    total_summaries = posts_list.filter(
+        Q(seo_keywords__icontains='ملخص') | Q(title__icontains='ملخص')
+    ).count()
+    
+    total_downloads = posts_list.aggregate(total_downloads=Sum('views'))['total_downloads'] or 0
+    total_authors = User.objects.filter(
+        posts__category__category_type='books',
+        posts__status='published'
+    ).distinct().count()
+    
+    # التصفية
+    book_type = request.GET.get('type', '')
+    book_category = request.GET.get('category', '')
+    sort_by = request.GET.get('sort', 'newest')
+    
+    if book_type:
+        if book_type == 'book':
+            posts_list = posts_list.filter(
+                Q(seo_keywords__icontains='كتاب') | Q(title__icontains='كتاب')
+            )
+        elif book_type == 'summary':
+            posts_list = posts_list.filter(
+                Q(seo_keywords__icontains='ملخص') | Q(title__icontains='ملخص')
+            )
+    
+    if book_category:
+        posts_list = posts_list.filter(category__name=book_category)
+    
+    if sort_by == 'downloads':
+        posts_list = posts_list.order_by('-views')
+    elif sort_by == 'popular':
+        posts_list = posts_list.order_by('-views')
+    
+    paginator = Paginator(posts_list, 12)
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
+    
+    # الكتب الموصى بها (الأكثر مشاهدة)
+    recommended_books = posts_list.order_by('-views')[:2]
+    
+    # التصنيفات المتاحة
+    available_categories = Category.objects.filter(
+        category_type='books'
+    ).annotate(post_count=Count('posts')).order_by('-post_count')
+    
+    return render(request, 'books.html', {
+        'category': category,
+        'posts': posts,
+        'title': 'الكتب والملخصات',
+        'total_books': total_books,
+        'total_summaries': total_summaries,
+        'total_downloads': total_downloads,
+        'total_authors': total_authors,
+        'recommended_books': recommended_books,
+        'available_categories': available_categories,
+        'current_type': book_type,
+        'current_category': book_category,
+        'current_sort': sort_by,
+    })
+
+
+def courses(request):
+    """صفحة الكورسات مع تصفية متقدمة"""
+    category = get_object_or_404(Category, category_type='courses')
+    posts_list = Post.objects.filter(
+        category__category_type='courses',
+        status='published'
+    ).order_by('-publish_date')
+    
+    # التصفية
+    course_category = request.GET.get('category', '')
+    sort_by = request.GET.get('sort', 'newest')
+    
+    if course_category:
+        posts_list = posts_list.filter(category__id=course_category)
+    
+    if sort_by == 'popular':
+        posts_list = posts_list.order_by('-views')
+    elif sort_by == 'commented':
+        posts_list = posts_list.annotate(comment_count=Count('comments')).order_by('-comment_count')
+    
+    paginator = Paginator(posts_list, 12)
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
+    
+    # التصنيفات المتاحة
+    categories = Category.objects.filter(
+        category_type='courses'
+    ).annotate(post_count=Count('posts')).order_by('-post_count')
+    
+    return render(request, 'courses.html', {
+        'category': category,
+        'posts': posts,
+        'title': 'الكورسات',
+        'categories': categories,
+        'current_category': course_category,
+        'current_sort': sort_by,
     })
 
 
 def grants(request):
-    """صفحة المنح والتدريبات"""
+    """صفحة المنح والتدريبات مع تصفية متقدمة"""
     category = get_object_or_404(Category, category_type='grants')
     posts_list = Post.objects.filter(
         category__category_type='grants',
         status='published'
     ).order_by('-publish_date')
+    
+    # المنح المميزة (التي تحتوي على كلمات مفتاحية مميزة)
+    featured_grants = posts_list.filter(
+        Q(seo_keywords__icontains='مميز') | Q(seo_keywords__icontains='ممولة')
+    )[:2]
+    
+    # التصفية
+    grant_type = request.GET.get('type', '')
+    sort_by = request.GET.get('sort', 'deadline')
+    
+    if grant_type == 'scholarship':
+        posts_list = posts_list.filter(
+            Q(title__icontains='منحة') | Q(seo_keywords__icontains='منحة')
+        )
+    elif grant_type == 'training':
+        posts_list = posts_list.filter(
+            Q(title__icontains='تدريب') | Q(seo_keywords__icontains='تدريب')
+        )
+    
+    if sort_by == 'newest':
+        posts_list = posts_list.order_by('-publish_date')
+    elif sort_by == 'funding':
+        posts_list = posts_list.filter(seo_keywords__icontains='ممولة').order_by('-publish_date')
+    
+    # إحصاءات سريعة
+    upcoming_deadlines = posts_list.filter(
+        publish_date__gte=timezone.now() - timezone.timedelta(days=30)
+    ).count()
+    
+    free_opportunities = posts_list.filter(
+        Q(title__icontains='مجاني') | Q(seo_keywords__icontains='مجاني')
+    ).count()
+    
+    fully_funded = posts_list.filter(
+        Q(title__icontains='ممولة') | Q(seo_keywords__icontains='ممولة')
+    ).count()
     
     paginator = Paginator(posts_list, 12)
     page_number = request.GET.get('page')
@@ -160,27 +301,15 @@ def grants(request):
     return render(request, 'grants.html', {
         'category': category,
         'posts': posts,
-        'title': 'المنح والتدريبات'
+        'title': 'المنح والتدريبات',
+        'featured_grants': featured_grants,
+        'upcoming_deadlines': upcoming_deadlines,
+        'free_opportunities': free_opportunities,
+        'fully_funded': fully_funded,
+        'current_type': grant_type,
+        'current_sort': sort_by,
     })
 
-
-def books(request):
-    """صفحة الكتب والملخصات"""
-    category = get_object_or_404(Category, category_type='books')
-    posts_list = Post.objects.filter(
-        category__category_type='books',
-        status='published'
-    ).order_by('-publish_date')
-    
-    paginator = Paginator(posts_list, 12)
-    page_number = request.GET.get('page')
-    posts = paginator.get_page(page_number)
-    
-    return render(request, 'books.html', {
-        'category': category,
-        'posts': posts,
-        'title': 'الكتب والملخصات'
-    })
 
 
 # ======== تفاصيل المنشور ========
@@ -313,6 +442,37 @@ def create_post(request):
     })
 
 
+def create_post_blocks(post, blocks_data, files):
+    """إنشاء وإدارة بلوكات المحتوى"""
+    existing_blocks = {b.order: b for b in post.blocks.all()}
+
+    for i, block_data in enumerate(blocks_data):
+        block_type = block_data.get('type', 'text')
+        text_content = block_data.get('text', '')
+
+        # إذا كان البلوك موجوداً، قم بتحديثه
+        if i in existing_blocks:
+            post_block = existing_blocks[i]
+            post_block.block_type = block_type
+        else:
+            # إنشاء بلوك جديد
+            post_block = PostBlock(post=post, order=i, block_type=block_type)
+
+        if block_type == 'text':
+            post_block.text = text_content
+        elif block_type == 'image':
+            image_name = block_data.get('image_name', '')
+            if image_name:
+                for file_key in files:
+                    file = files[file_key]
+                    if hasattr(file, 'name') and file.name == image_name:
+                        post_block.image = file
+                        break
+
+        post_block.save()
+
+    return True
+
 @login_required
 @user_passes_test(is_content_editor)
 def edit_post(request, id):
@@ -345,16 +505,37 @@ def edit_post(request, id):
                     post.save()
                     
                     # معالجة البلوكات
-                    if 'blocks_data' in request.POST:
-                        try:
-                            # حذف البلوكات القديمة
-                            post.blocks.all().delete()
+                    blocks_data_str = request.POST.get('blocks_data', '[]')
+                    try:
+                        blocks_data = json.loads(blocks_data_str)
+                        
+                        # حذف البلوكات القديمة
+                        post.blocks.all().delete()
+                        
+                        # إنشاء البلوكات الجديدة
+                        for i, block_data in enumerate(blocks_data):
+                            post_block = PostBlock(
+                                post=post,
+                                block_type=block_data.get('type', 'text'),
+                                order=i
+                            )
                             
-                            # إنشاء البلوكات الجديدة
-                            blocks_data = json.loads(request.POST.get('blocks_data'))
-                            create_post_blocks(post, blocks_data, request.FILES)
-                        except json.JSONDecodeError:
-                            pass
+                            if block_data['type'] == 'text':
+                                post_block.text = block_data.get('text', '')
+                            elif block_data['type'] == 'image':
+                                # معالجة الصور من خلال حقل مخفي
+                                image_name = block_data.get('image_name', '')
+                                if image_name:
+                                    # البحث عن الملف المرفق بالاسم
+                                    for file_key in request.FILES:
+                                        if request.FILES[file_key].name == image_name:
+                                            post_block.image = request.FILES[file_key]
+                                            break
+                            
+                            post_block.save()
+                            
+                    except (json.JSONDecodeError, KeyError) as e:
+                        print(f"Error processing blocks: {e}")
                     
                     messages.success(request, f'تم تحديث المنشور "{post.title}" بنجاح!')
                     
@@ -366,6 +547,7 @@ def edit_post(request, id):
                         
             except Exception as e:
                 messages.error(request, f'حدث خطأ أثناء تحديث المنشور: {str(e)}')
+                print(f"Error: {e}")
     else:
         form = PostForm(instance=post)
     

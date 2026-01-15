@@ -1,620 +1,1089 @@
-<!-- templates/edit_post.html -->
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}تعديل المنشور - كنوز{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root {
+        --primary-color: #3b82f6;
+        --primary-dark: #2563eb;
+        --secondary-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --light-bg: #f9fafb;
+        --border-color: #e5e7eb;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --card-bg: #ffffff;
+    }
+
+    .dark-mode {
+        --primary-color: #60a5fa;
+        --primary-dark: #3b82f6;
+        --secondary-color: #34d399;
+        --danger-color: #f87171;
+        --warning-color: #fbbf24;
+        --light-bg: #111827;
+        --border-color: #374151;
+        --text-primary: #f9fafb;
+        --text-secondary: #d1d5db;
+        --card-bg: #1f2937;
+    }
+
+    body {
+        background: var(--light-bg);
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    .edit-post-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: var(--light-bg);
+        min-height: 100vh;
+    }
+
+    .header-section {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-right: 4px solid var(--primary-color);
+        border: 1px solid var(--border-color);
+    }
+
+    .header-title {
+        color: var(--text-primary);
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .content-wrapper {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+    }
+
+    .main-form-section {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-color);
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 15px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: var(--card-bg);
+        color: var(--text-primary);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .dark-mode .form-control:focus {
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    /* إدارة البلوكات */
+    .blocks-section {
+        margin-top: 32px;
+    }
+
+    .blocks-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .add-block-btn {
+        background: var(--secondary-color);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.3s ease;
+    }
+
+    .add-block-btn:hover {
+        background: #0da271;
+    }
+
+    .blocks-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .block-item {
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        padding: 20px;
+        position: relative;
+    }
+
+    .block-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .block-type {
+        font-weight: 600;
+        color: var(--primary-color);
+        padding: 6px 12px;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .dark-mode .block-type {
+        background: rgba(96, 165, 250, 0.1);
+    }
+
+    .block-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: color 0.2s ease;
+        padding: 4px;
+    }
+
+    .action-btn:hover {
+        color: var(--danger-color);
+    }
+
+    .block-content {
+        margin-top: 16px;
+    }
+
+    /* الشريط الجانبي */
+    .sidebar-section {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .sidebar-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-color);
+    }
+
+    .sidebar-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .status-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .status-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--card-bg);
+    }
+
+    .status-option:hover {
+        border-color: var(--primary-color);
+        background: rgba(59, 130, 246, 0.05);
+    }
+
+    .dark-mode .status-option:hover {
+        background: rgba(96, 165, 250, 0.05);
+    }
+
+    .status-option.selected {
+        border-color: var(--primary-color);
+        background: rgba(59, 130, 246, 0.1);
+    }
+
+    .dark-mode .status-option.selected {
+        background: rgba(96, 165, 250, 0.1);
+    }
+
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .status-dot.draft {
+        background: var(--warning-color);
+    }
+
+    .status-dot.published {
+        background: var(--secondary-color);
+    }
+
+    .status-dot.private {
+        background: #8b5cf6;
+    }
+
+    .status-dot.archived {
+        background: var(--text-secondary);
+    }
+
+    .status-text {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .status-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+    }
+
+    /* أزرار الإجراءات */
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 2px solid var(--border-color);
+    }
+
+    .btn {
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+        background: var(--card-bg);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--light-bg);
+        border-color: var(--text-secondary);
+    }
+
+    .btn-warning {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background: #d97706;
+        transform: translateY(-2px);
+    }
+
+    /* التنبيهات */
+    .alert {
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-info {
+        background: rgba(59, 130, 246, 0.1);
+        border-right: 4px solid var(--primary-color);
+        color: var(--primary-dark);
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        border-right: 4px solid var(--secondary-color);
+        color: #047857;
+    }
+
+    .alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border-right: 4px solid var(--warning-color);
+        color: #92400e;
+    }
+
+    @media (max-width: 1024px) {
+        .content-wrapper {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .edit-post-container {
+            padding: 12px;
+        }
+
+        .header-section {
+            padding: 20px;
+        }
+
+        .main-form-section {
+            padding: 20px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mx-auto px-4 py-8 max-w-4xl">
-    <!-- عنوان الصفحة -->
-    <div class="mb-8">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">
-                    <i class="fas fa-edit mr-2"></i> تعديل المنشور
-                </h1>
-                <p class="text-gray-600">قم بتعديل المنشور "{{ post.title }}"</p>
-            </div>
-            <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-gray-800 font-medium">
-                <i class="fas fa-arrow-right mr-2"></i> العودة للوحة التحكم
-            </a>
-        </div>
+<div class="edit-post-container">
+    <!-- قسم العنوان الرئيسي -->
+    <div class="header-section">
+        <h1 class="header-title">
+            <i class="fas fa-edit"></i>
+            تعديل المنشور: {{ post.title }}
+        </h1>
     </div>
 
-    <!-- نموذج تعديل المنشور -->
-    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
-        <form method="post" enctype="multipart/form-data" novalidate>
-            {% csrf_token %}
-            
-            {% if form.errors %}
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                <strong>خطأ!</strong> يرجى تصحيح الأخطاء أدناه.
-                <ul class="mt-2 list-disc list-inside">
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <li>{{ field.label }}: {{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                </ul>
+    <!-- قسم التنبيهات -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <i class="fas fa-info-circle"></i>
+                {{ message }}
             </div>
-            {% endif %}
-            
-            <!-- قسم العنوان والفئة -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-heading mr-2"></i> عنوان المنشور *
+        {% endfor %}
+    {% endif %}
+
+    <!-- المحتوى الرئيسي -->
+    <form method="POST" enctype="multipart/form-data" id="postForm">
+        {% csrf_token %}
+        
+        <!-- حقل مخفي لحفظ بيانات البلوكات -->
+        <input type="hidden" name="blocks_data" id="blocksDataField" value="[]">
+        
+        <div class="content-wrapper">
+            <!-- الجانب الأيسر: النموذج الرئيسي -->
+            <div class="main-form-section">
+                <!-- عنوان المنشور -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        عنوان المنشور
                     </label>
                     {{ form.title }}
+                    {% if form.title.errors %}
+                    <div class="text-danger mt-1 small">
+                        {% for error in form.title.errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-                
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-folder mr-2"></i> القسم *
+
+                <!-- الفئة -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        الفئة
                     </label>
                     {{ form.category }}
-                </div>
-            </div>
-            
-            <!-- الملخص -->
-            <div class="mb-6">
-                <label class="block text-gray-700 font-medium mb-2">
-                    <i class="fas fa-align-left mr-2"></i> ملخص المنشور
-                </label>
-                {{ form.excerpt }}
-                <p class="text-gray-500 text-sm mt-2">ملخص قصير يظهر في صفحة العرض الرئيسية (حد أقصى 300 حرف)</p>
-                <div class="mt-1 text-sm text-gray-500" id="excerpt-counter">{{ post.excerpt|length|default:"0" }}/300</div>
-            </div>
-            
-            <!-- محتوى المنشور -->
-            <div class="mb-6">
-                <label class="block text-gray-700 font-medium mb-2">
-                    <i class="fas fa-edit mr-2"></i> محتوى المنشور *
-                </label>
-                {{ form.content }}
-            </div>
-            
-            <!-- قسم الصور -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <!-- الصورة الرئيسية -->
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-image mr-2"></i> الصورة الرئيسية
-                    </label>
-                    
-                    <!-- معاينة الصورة الحالية -->
-                    {% if post.featured_image %}
-                    <div class="mb-4">
-                        <img src="{{ post.featured_image.url }}" alt="الصورة الحالية" 
-                             class="w-full h-48 object-cover rounded-lg mb-2 border border-gray-200">
-                        <div class="flex items-center">
-                            <input type="checkbox" name="clear_featured_image" id="clear_featured_image" class="ml-2">
-                            <label for="clear_featured_image" class="text-gray-700 text-sm">حذف الصورة الحالية</label>
-                        </div>
-                        {% if post.thumbnail %}
-                        <div class="mt-2">
-                            <p class="text-gray-500 text-sm">الصورة المصغرة:</p>
-                            <img src="{{ post.thumbnail.url }}" alt="Thumbnail" 
-                                 class="w-24 h-24 object-cover rounded border border-gray-200 mt-1">
-                        </div>
-                        {% endif %}
+                    {% if form.category.errors %}
+                    <div class="text-danger mt-1 small">
+                        {% for error in form.category.errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
                     </div>
                     {% endif %}
-                    
-                    <!-- تحميل صورة جديدة -->
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                        <div id="featured-image-preview" class="hidden mb-4">
-                            <img id="preview-featured-img" class="w-full h-48 object-cover rounded-lg">
-                        </div>
-                        {{ form.featured_image }}
-                        <p class="text-gray-500 text-sm mt-2">الحجم الأمثل: 1200×600 بكسل</p>
-                    </div>
                 </div>
-                
-                <!-- الصورة القديمة (للتوافق) -->
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-image mr-2"></i> الصورة القديمة (Legacy)
+
+                <!-- المحتوى -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <span class="required">*</span>
+                        محتوى المنشور
                     </label>
-                    
-                    <!-- معاينة الصورة الحالية -->
-                    {% if post.image %}
-                    <div class="mb-4">
-                        <img src="{{ post.image.url }}" alt="الصورة القديمة" 
-                             class="w-full h-48 object-cover rounded-lg mb-2 border border-gray-200">
-                        <div class="flex items-center">
-                            <input type="checkbox" name="clear_image" id="clear_image" class="ml-2">
-                            <label for="clear_image" class="text-gray-700 text-sm">حذف الصورة الحالية</label>
-                        </div>
+                    {{ form.content }}
+                    {% if form.content.errors %}
+                    <div class="text-danger mt-1 small">
+                        {% for error in form.content.errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
                     </div>
                     {% endif %}
-                    
-                    <!-- تحميل صورة جديدة -->
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                        {{ form.image }}
-                        <p class="text-gray-500 text-sm mt-2">للمحافظة على التوافق مع المحتوى القديم</p>
+                </div>
+
+                <!-- الملخص -->
+                <div class="form-group">
+                    <label class="form-label">
+                        ملخص المنشور
+                    </label>
+                    {{ form.excerpt }}
+                    {% if form.excerpt.errors %}
+                    <div class="text-danger mt-1 small">
+                        {% for error in form.excerpt.errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
-            </div>
-            
-            <!-- قسم الرابط -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-link mr-2"></i> رابط خارجي
-                    </label>
-                    {{ form.link }}
-                    <p class="text-gray-500 text-sm mt-2">رابط الكورس أو المصدر الخارجي</p>
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-clock mr-2"></i> مدة الانتظار للرابط (ثانية)
-                    </label>
-                    {{ form.link_delay }}
-                    <p class="text-gray-500 text-sm mt-2">الوقت قبل ظهور الرابط للزوار (إفتراضي: 30 ثانية)</p>
-                </div>
-            </div>
-            
-            <!-- SEO -->
-            <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">
-                    <i class="fas fa-chart-line mr-2"></i> إعدادات SEO
-                </h3>
-                
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">
-                        عنوان SEO
-                    </label>
-                    {{ form.seo_title }}
-                    <p class="text-gray-500 text-sm mt-2">عنوان الصفحة في محركات البحث (اختياري)</p>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">
-                        وصف SEO
-                    </label>
-                    {{ form.seo_description }}
-                    <p class="text-gray-500 text-sm mt-2">وصف الصفحة في محركات البحث (حد أقصى 300 حرف)</p>
-                    <div class="mt-1 text-sm text-gray-500" id="seo-desc-counter">{{ post.seo_description|length|default:"0" }}/300</div>
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">
-                        كلمات مفتاحية SEO
-                    </label>
-                    {{ form.seo_keywords }}
-                    <p class="text-gray-500 text-sm mt-2">كلمات مفتاحية مفصولة بفواصل</p>
-                </div>
-            </div>
-            
-            <!-- حالة المنشور وتاريخ النشر -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-toggle-on mr-2"></i> حالة المنشور
-                    </label>
-                    {{ form.status }}
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-calendar-alt mr-2"></i> تاريخ النشر
-                    </label>
-                    <div class="relative">
-                        {{ form.publish_date }}
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fas fa-calendar text-gray-400"></i>
+
+                <!-- البلوكات -->
+                <div class="blocks-section">
+                    <div class="blocks-header">
+                        <h3 class="section-title">بلوكات المحتوى</h3>
+                        <div class="block-actions">
+                            <button type="button" class="add-block-btn" onclick="addTextBlock()">
+                                <i class="fas fa-paragraph"></i>
+                                إضافة نص
+                            </button>
+                            <button type="button" class="add-block-btn" onclick="addImageBlock()">
+                                <i class="fas fa-image"></i>
+                                إضافة صورة
+                            </button>
                         </div>
                     </div>
-                    <p class="text-gray-500 text-sm mt-2">اتركه فارغاً للنشر الفوري</p>
-                </div>
-            </div>
-            
-            <!-- البلوكات -->
-            <div class="mb-8 border border-gray-200 rounded-xl p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">
-                    <i class="fas fa-th-large mr-2"></i> بلوكات المحتوى
-                </h3>
-                
-                {% if post_blocks %}
-                <div id="blocks-container" class="space-y-4 mb-4">
-                    {% for block in post_blocks %}
-                    <div class="border border-gray-300 rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-medium">
-                                {{ forloop.counter }}. {{ block.get_block_type_display }}
-                            </span>
-                            <div class="flex space-x-2">
-                                <button type="button" class="text-blue-600 hover:text-blue-800" onclick="editBlock({{ block.id }})">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button type="button" class="text-red-600 hover:text-red-800" onclick="deleteBlock({{ block.id }})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                    
+                    <div class="blocks-container" id="blocksContainer">
+                        {% for block in post_blocks %}
+                        <div class="block-item" data-id="{{ block.id }}">
+                            <div class="block-header">
+                                <span class="block-type">{{ block.get_block_type_display }}</span>
+                                <div class="block-actions">
+                                    <button type="button" class="action-btn move-up" title="تحريك لأعلى" onclick="moveBlockUp(this)">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </button>
+                                    <button type="button" class="action-btn move-down" title="تحريك لأسفل" onclick="moveBlockDown(this)">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </button>
+                                    <button type="button" class="action-btn delete-block" title="حذف" onclick="deleteBlock(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="block-content">
+                                {% if block.block_type == 'text' %}
+                                <textarea class="form-control block-text" rows="4" 
+                                          placeholder="أدخل النص هنا..." 
+                                          oninput="updateBlockData(this)">{{ block.text }}</textarea>
+                                {% elif block.block_type == 'image' %}
+                                <div class="image-block">
+                                    {% if block.image %}
+                                    <img src="{{ block.image.url }}" alt="Block Image" 
+                                         style="max-width: 300px; height: auto; margin-bottom: 10px;">
+                                    {% endif %}
+                                    <input type="file" class="form-control block-image" 
+                                           accept="image/*" 
+                                           onchange="handleImageUpload(this, '{{ block.image.name|default:"" }}')">
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
+                        {% endfor %}
                         
-                        {% if block.block_type == 'text' %}
-                        <div class="prose max-w-none">{{ block.text|safe|truncatechars_html:100 }}</div>
-                        {% elif block.block_type == 'image' and block.image %}
-                        <img src="{{ block.image.url }}" alt="Block Image" class="w-32 h-32 object-cover rounded">
+                        {% if not post_blocks %}
+                        <div class="empty-state">
+                            <i class="fas fa-cubes fa-3x"></i>
+                            <p>لم تقم بإضافة أي بلوكات بعد</p>
+                            <small>استخدم الأزرار أعلاه لإضافة بلوكات نصية أو صور</small>
+                        </div>
                         {% endif %}
                     </div>
-                    {% endfor %}
                 </div>
-                {% else %}
-                <div class="text-center py-4 text-gray-500">
-                    <i class="fas fa-th-large text-3xl mb-2"></i>
-                    <p>لا توجد بلوكات محتوى</p>
+
+                <!-- SEO -->
+                <div class="form-group">
+                    <label class="form-label">عنوان SEO</label>
+                    {{ form.seo_title }}
                 </div>
-                {% endif %}
-                
-                <div class="flex space-x-3 space-x-reverse">
-                    <button type="button" onclick="addTextBlock()" 
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
-                        <i class="fas fa-font mr-2"></i> إضافة نص
-                    </button>
-                    <button type="button" onclick="addImageBlock()" 
-                            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium">
-                        <i class="fas fa-image mr-2"></i> إضافة صورة
-                    </button>
+
+                <div class="form-group">
+                    <label class="form-label">وصف SEO</label>
+                    {{ form.seo_description }}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">كلمات مفتاحية</label>
+                    {{ form.seo_keywords }}
                 </div>
             </div>
-            
-            <!-- إحصائيات المنشور -->
-            <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
-                <h4 class="font-bold text-gray-800 mb-4">
-                    <i class="fas fa-chart-bar mr-2"></i> إحصائيات المنشور
-                </h4>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="text-center bg-white p-4 rounded-lg shadow-sm">
-                        <div class="text-2xl font-bold text-blue-600">{{ post.views }}</div>
-                        <div class="text-gray-600 text-sm">مشاهدة</div>
-                    </div>
-                    <div class="text-center bg-white p-4 rounded-lg shadow-sm">
-                        <div class="text-2xl font-bold text-green-600">{{ post.comments.count }}</div>
-                        <div class="text-gray-600 text-sm">تعليق</div>
-                    </div>
-                    <div class="text-center bg-white p-4 rounded-lg shadow-sm">
-                        <div class="text-2xl font-bold text-purple-600">{{ post.created_at|timesince }}</div>
-                        <div class="text-gray-600 text-sm">منذ الإنشاء</div>
-                    </div>
-                    <div class="text-center bg-white p-4 rounded-lg shadow-sm">
-                        <div class="text-2xl font-bold {% if post.status == 'published' %}text-green-600{% else %}text-yellow-600{% endif %}">
-                            {{ post.get_status_display }}
-                        </div>
-                        <div class="text-gray-600 text-sm">الحالة</div>
+
+            <!-- الجانب الأيمن: الشريط الجانبي -->
+            <div class="sidebar-section">
+                <!-- حالة النشر -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-paper-plane"></i>
+                        حالة النشر
+                    </h3>
+                    <div class="status-options">
+                        {% for value, label in post_statuses %}
+                        <label class="status-option {% if form.status.value == value %}selected{% endif %}" 
+                               onclick="selectStatus('{{ value }}')">
+                            <input type="radio" name="status" value="{{ value }}" 
+                                   {% if form.status.value == value %}checked{% endif %} hidden>
+                            <span class="status-dot {{ value }}"></span>
+                            <div>
+                                <div class="status-text">{{ label }}</div>
+                            </div>
+                        </label>
+                        {% endfor %}
                     </div>
                 </div>
-            </div>
-            
-            <!-- أزرار الإجراء -->
-            <div class="flex flex-col md:flex-row justify-between items-center pt-6 border-t border-gray-200 gap-4">
-                <div class="flex space-x-3 space-x-reverse">
-                    <a href="{% url 'post_detail' post.slug %}" class="text-gray-600 hover:text-gray-800 font-medium" target="_blank">
-                        <i class="fas fa-eye mr-2"></i> معاينة
-                    </a>
-                    <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-gray-800 font-medium">
-                        <i class="fas fa-arrow-right mr-2"></i> إلغاء
-                    </a>
-                </div>
-                
-                <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 space-x-reverse">
-                    <button type="submit" name="save_draft" value="1" 
-                            class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 font-medium transition">
-                        <i class="fas fa-save mr-2"></i> حفظ كمسودة
-                    </button>
+
+                <!-- الصور -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-image"></i>
+                        الصور
+                    </h3>
                     
-                    <button type="submit" name="publish_now" value="1" 
-                            class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg hover:opacity-90 font-medium transition">
-                        <i class="fas fa-paper-plane mr-2"></i> حفظ وتحديث
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-    
-    <!-- خيارات متقدمة -->
-    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
-        <h3 class="text-xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-cogs mr-2"></i> خيارات متقدمة
-        </h3>
-        
-        <div class="space-y-4">
-            <!-- حذف المنشور -->
-            <div class="p-4 border border-red-200 rounded-lg bg-red-50">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h4 class="font-bold text-red-700 mb-1">حذف المنشور</h4>
-                        <p class="text-red-600 text-sm">هذا الإجراء لا يمكن التراجع عنه</p>
+                    <!-- الصورة الرئيسية -->
+                    <div class="form-group">
+                        <label class="form-label">الصورة الرئيسية</label>
+                        {{ form.featured_image }}
+                        {% if post.featured_image %}
+                        <div class="current-image mt-2">
+                            <img src="{{ post.featured_image.url }}" alt="Current" 
+                                 style="max-width: 100%; height: auto; border-radius: 8px;">
+                        </div>
+                        {% endif %}
                     </div>
-                    <button type="button" onclick="confirmDelete()" 
-                            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-medium">
-                        <i class="fas fa-trash mr-2"></i> حذف المنشور
-                    </button>
-                </div>
-            </div>
-            
-            <!-- نسخ الرابط -->
-            <div class="p-4 border border-blue-200 rounded-lg bg-blue-50">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h4 class="font-bold text-blue-700 mb-1">نسخ رابط المنشور</h4>
-                        <p class="text-blue-600 text-sm">انسخ رابط المنشور للمشاركة</p>
+
+                    <!-- الصورة القديمة -->
+                    <div class="form-group">
+                        <label class="form-label">الصورة القديمة</label>
+                        {{ form.image }}
+                        {% if post.image %}
+                        <div class="current-image mt-2">
+                            <img src="{{ post.image.url }}" alt="Current" 
+                                 style="max-width: 100%; height: auto; border-radius: 8px;">
+                        </div>
+                        {% endif %}
                     </div>
-                    <button type="button" onclick="copyPostLink()" 
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
-                        <i class="fas fa-copy mr-2"></i> نسخ الرابط
-                    </button>
+                </div>
+
+                <!-- الروابط -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-link"></i>
+                        الروابط
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label">رابط خارجي</label>
+                        {{ form.link }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">تأخير الرابط (ثانية)</label>
+                        {{ form.link_delay }}
+                    </div>
+                </div>
+
+                <!-- تاريخ النشر -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-calendar"></i>
+                        تاريخ النشر
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label">تاريخ النشر</label>
+                        {{ form.publish_date }}
+                    </div>
+                </div>
+
+                <!-- أزرار الإجراءات -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-play-circle"></i>
+                        الإجراءات
+                    </h3>
+                    <div class="action-buttons">
+                        <button type="submit" name="save_draft" class="btn btn-secondary">
+                            <i class="fas fa-save"></i>
+                            حفظ كمسودة
+                        </button>
+                        <button type="submit" name="publish_now" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            حفظ ونشر
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-warning" onclick="window.open('{% url "post_detail" post.slug %}', '_blank')">
+                            <i class="fas fa-eye"></i>
+                            معاينة المنشور
+                        </button>
+                    </div>
+                </div>
+
+                <!-- إحصائيات -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">
+                        <i class="fas fa-chart-bar"></i>
+                        إحصائيات
+                    </h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ post.views }}</div>
+                            <div class="stat-label">مشاهدة</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ post.comments.count }}</div>
+                            <div class="stat-label">تعليق</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ post.created_at|date:"Y/m/d" }}</div>
+                            <div class="stat-label">تاريخ الإنشاء</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
 
-<!-- Modal لإضافة/تعديل البلوك -->
-<div id="blockModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
-            <div class="p-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-4" id="modalTitle">إضافة بلوك</h3>
-                
-                <div id="modalContent">
-                    <!-- سيتم ملؤه بالجافاسكريبت -->
-                </div>
-                
-                <div class="flex justify-end space-x-3 space-x-reverse mt-6">
-                    <button type="button" onclick="closeModal()" 
-                            class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium">
-                        إلغاء
-                    </button>
-                    <button type="button" onclick="saveBlock()" 
-                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
-                        حفظ
-                    </button>
-                </div>
-            </div>
+<!-- Modal لتحرير النص -->
+<div id="textEditorModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div class="modal-content" style="background-color: var(--card-bg); margin: 5% auto; padding: 20px; border-radius: 12px; width: 80%; max-width: 800px;">
+        <span class="close" onclick="closeTextEditor()" style="float: left; font-size: 28px; cursor: pointer; color: var(--text-primary);">&times;</span>
+        <h3>محرر النص</h3>
+        <textarea id="textEditor" style="width: 100%; height: 300px; padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-primary);"></textarea>
+        <div style="margin-top: 20px; text-align: left;">
+            <button onclick="saveText()" class="btn btn-primary">حفظ</button>
+            <button onclick="closeTextEditor()" class="btn btn-secondary">إلغاء</button>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% block extra_js %}
 <script>
     let blocksData = [];
-
+    let currentBlockIndex = null;
+    
+    // تحميل البلوكات الموجودة
     document.addEventListener('DOMContentLoaded', function() {
-        // معاينة الصور
-        const featuredImageInput = document.querySelector('input[name="featured_image"]');
-        const featuredPreviewDiv = document.getElementById('featured-image-preview');
-        const featuredPreviewImg = document.getElementById('preview-featured-img');
-        
-        if (featuredImageInput) {
-            featuredImageInput.addEventListener('change', function(e) {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        featuredPreviewImg.src = e.target.result;
-                        featuredPreviewDiv.classList.remove('hidden');
-                    }
-                    
-                    reader.readAsDataURL(this.files[0]);
-                } else {
-                    featuredPreviewDiv.classList.add('hidden');
-                }
-            });
-        }
-        
-        // عداد الأحرف
-        const excerptField = document.querySelector('[name="excerpt"]');
-        const excerptCounter = document.getElementById('excerpt-counter');
-        const seoDescField = document.querySelector('[name="seo_description"]');
-        const seoDescCounter = document.getElementById('seo-desc-counter');
-        
-        function updateCounter(field, counter) {
-            field.addEventListener('input', function() {
-                const length = this.value.length;
-                counter.textContent = `${length}/300`;
-                
-                if (length > 300) {
-                    counter.classList.add('text-red-500');
-                    counter.classList.remove('text-gray-500');
-                } else {
-                    counter.classList.remove('text-red-500');
-                    counter.classList.add('text-gray-500');
-                }
-            });
-            field.dispatchEvent(new Event('input'));
-        }
-        
-        if (excerptField && excerptCounter) updateCounter(excerptField, excerptCounter);
-        if (seoDescField && seoDescCounter) updateCounter(seoDescField, seoDescCounter);
-        
-        // تقويم تاريخ النشر
-        const publishDateField = document.querySelector('[name="publish_date"]');
-        if (publishDateField) {
-            flatpickr(publishDateField, {
-                enableTime: true,
-                dateFormat: "Y-m-d H:i",
-                time_24hr: true,
-                locale: "ar",
-                minDate: "today",
-                defaultDate: new Date()
-            });
-        }
-        
-        // تحميل البيانات القديمة للبلوكات
+        // تحميل البلوكات الحالية
         {% for block in post_blocks %}
         blocksData.push({
-            id: {{ block.id }},
+            id: '{{ block.id }}',
             type: '{{ block.block_type }}',
             text: `{{ block.text|escapejs|safe }}`,
-            image: '{{ block.image.url|default:"" }}',
+            image_name: '{{ block.image.name|default:"" }}',
             order: {{ block.order }}
         });
         {% endfor %}
         
-        // إضافة فئة Tailwind لحقول النموذج
-        const inputs = document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]), select, textarea');
-        inputs.forEach(input => {
-            input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
-                            'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500',
-                            'transition');
-        });
+        updateBlocksDataField();
+        
+        // إضافة Dark Mode support
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        }
     });
-
-    // وظائف البلوكات
+    
+    // تحديث حقل البيانات المخفية
+    function updateBlocksDataField() {
+        document.getElementById('blocksDataField').value = JSON.stringify(blocksData);
+    }
+    
+    // إضافة بلوك نصي
     function addTextBlock() {
-        document.getElementById('modalTitle').textContent = 'إضافة بلوك نصي';
-        document.getElementById('modalContent').innerHTML = `
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-gray-700 mb-2">النص</label>
-                    <textarea id="blockText" class="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+        const blockId = Date.now().toString();
+        const blockElement = document.createElement('div');
+        blockElement.className = 'block-item';
+        blockElement.setAttribute('data-id', blockId);
+        
+        blockElement.innerHTML = `
+            <div class="block-header">
+                <span class="block-type">نص</span>
+                <div class="block-actions">
+                    <button type="button" class="action-btn move-up" title="تحريك لأعلى" onclick="moveBlockUp(this)">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button type="button" class="action-btn move-down" title="تحريك لأسفل" onclick="moveBlockDown(this)">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button type="button" class="action-btn delete-block" title="حذف" onclick="deleteBlock(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
+            </div>
+            <div class="block-content">
+                <textarea class="form-control block-text" rows="4" 
+                          placeholder="أدخل النص هنا..." 
+                          oninput="updateBlockData(this)"></textarea>
+                <button type="button" class="btn btn-sm mt-2" onclick="openTextEditor(this)" 
+                        style="background: var(--primary-color); color: white; padding: 5px 10px; border-radius: 4px;">
+                    <i class="fas fa-edit"></i> محرر متقدم
+                </button>
             </div>
         `;
         
-        document.getElementById('blockModal').classList.remove('hidden');
+        document.getElementById('blocksContainer').appendChild(blockElement);
+        
+        // إزالة empty state إذا كان موجوداً
+        const emptyState = document.querySelector('.empty-state');
+        if (emptyState) {
+            emptyState.remove();
+        }
+        
+        // إضافة إلى blocksData
+        blocksData.push({
+            id: blockId,
+            type: 'text',
+            text: '',
+            order: blocksData.length
+        });
+        
+        updateBlocksDataField();
     }
-
+    
+    // إضافة بلوك صورة
     function addImageBlock() {
-        document.getElementById('modalTitle').textContent = 'إضافة بلوك صورة';
-        document.getElementById('modalContent').innerHTML = `
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-gray-700 mb-2">الصورة</label>
-                    <input type="file" id="blockImage" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+        const blockId = Date.now().toString();
+        const blockElement = document.createElement('div');
+        blockElement.className = 'block-item';
+        blockElement.setAttribute('data-id', blockId);
+        
+        blockElement.innerHTML = `
+            <div class="block-header">
+                <span class="block-type">صورة</span>
+                <div class="block-actions">
+                    <button type="button" class="action-btn move-up" title="تحريك لأعلى" onclick="moveBlockUp(this)">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button type="button" class="action-btn move-down" title="تحريك لأسفل" onclick="moveBlockDown(this)">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button type="button" class="action-btn delete-block" title="حذف" onclick="deleteBlock(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
-                <div id="imagePreview" class="hidden">
-                    <img id="previewImage" class="w-full h-48 object-cover rounded-lg">
+            </div>
+            <div class="block-content">
+                <div class="image-block">
+                    <input type="file" class="form-control block-image" 
+                           accept="image/*" 
+                           onchange="handleImageUpload(this, '')">
+                    <div class="image-preview mt-2" style="display: none;">
+                        <img src="" alt="Preview" style="max-width: 300px; height: auto; border-radius: 8px;">
+                    </div>
                 </div>
             </div>
         `;
         
-        const imageInput = document.getElementById('blockImage');
-        imageInput.addEventListener('change', function(e) {
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                const preview = document.getElementById('previewImage');
-                const previewDiv = document.getElementById('imagePreview');
-                
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    previewDiv.classList.remove('hidden');
-                }
-                
-                reader.readAsDataURL(this.files[0]);
+        document.getElementById('blocksContainer').appendChild(blockElement);
+        
+        // إزالة empty state إذا كان موجوداً
+        const emptyState = document.querySelector('.empty-state');
+        if (emptyState) {
+            emptyState.remove();
+        }
+        
+        // إضافة إلى blocksData
+        blocksData.push({
+            id: blockId,
+            type: 'image',
+            image_name: '',
+            order: blocksData.length
+        });
+        
+        updateBlocksDataField();
+    }
+    
+    // تحديث بيانات البلوك
+    function updateBlockData(element) {
+        const blockItem = element.closest('.block-item');
+        const blockId = blockItem.getAttribute('data-id');
+        const blockIndex = blocksData.findIndex(block => block.id === blockId);
+        
+        if (blockIndex !== -1) {
+            if (element.classList.contains('block-text')) {
+                blocksData[blockIndex].text = element.value;
+            }
+            updateBlocksDataField();
+        }
+    }
+    
+    // معالجة رفع الصور
+    function handleImageUpload(element, currentImageName) {
+        const file = element.files[0];
+        const blockItem = element.closest('.block-item');
+        const blockId = blockItem.getAttribute('data-id');
+        const blockIndex = blocksData.findIndex(block => block.id === blockId);
+        
+        if (file && blockIndex !== -1) {
+            // عرض معاينة الصورة
+            const reader = new FileReader();
+            const previewDiv = blockItem.querySelector('.image-preview');
+            const previewImg = blockItem.querySelector('.image-preview img');
+            
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewDiv.style.display = 'block';
+            };
+            
+            reader.readAsDataURL(file);
+            
+            // تحديث blocksData
+            blocksData[blockIndex].image_name = file.name;
+            updateBlocksDataField();
+        }
+    }
+    
+    // حذف بلوك
+    function deleteBlock(button) {
+        if (confirm('هل أنت متأكد من حذف هذا البلوك؟')) {
+            const blockItem = button.closest('.block-item');
+            const blockId = blockItem.getAttribute('data-id');
+            
+            // حذف من المصفوفة
+            blocksData = blocksData.filter(block => block.id !== blockId);
+            
+            // حذف من الواجهة
+            blockItem.remove();
+            
+            // إعادة ترتيب البلوكات المتبقية
+            reorderBlocks();
+            
+            // إذا لم يعد هناك بلوكات، عرض empty state
+            if (document.getElementById('blocksContainer').children.length === 0) {
+                document.getElementById('blocksContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-cubes fa-3x"></i>
+                        <p>لم تقم بإضافة أي بلوكات بعد</p>
+                        <small>استخدم الأزرار أعلاه لإضافة بلوكات نصية أو صور</small>
+                    </div>
+                `;
+            }
+            
+            updateBlocksDataField();
+        }
+    }
+    
+    // تحريك بلوك لأعلى
+    function moveBlockUp(button) {
+        const blockItem = button.closest('.block-item');
+        const prevBlock = blockItem.previousElementSibling;
+        
+        if (prevBlock) {
+            blockItem.parentNode.insertBefore(blockItem, prevBlock);
+            reorderBlocks();
+        }
+    }
+    
+    // تحريك بلوك لأسفل
+    function moveBlockDown(button) {
+        const blockItem = button.closest('.block-item');
+        const nextBlock = blockItem.nextElementSibling;
+        
+        if (nextBlock) {
+            blockItem.parentNode.insertBefore(nextBlock, blockItem);
+            reorderBlocks();
+        }
+    }
+    
+    // إعادة ترتيب البلوكات
+    function reorderBlocks() {
+        const blockItems = document.querySelectorAll('.block-item');
+        blockItems.forEach((item, index) => {
+            const blockId = item.getAttribute('data-id');
+            const blockIndex = blocksData.findIndex(block => block.id === blockId);
+            
+            if (blockIndex !== -1) {
+                blocksData[blockIndex].order = index;
             }
         });
         
-        document.getElementById('blockModal').classList.remove('hidden');
+        // إعادة ترتيب المصفوفة
+        blocksData.sort((a, b) => a.order - b.order);
+        updateBlocksDataField();
     }
-
-    function closeModal() {
-        document.getElementById('blockModal').classList.add('hidden');
+    
+    // محرر النص المتقدم
+    function openTextEditor(button) {
+        const blockItem = button.closest('.block-item');
+        const textarea = blockItem.querySelector('.block-text');
+        const blockId = blockItem.getAttribute('data-id');
+        
+        currentBlockIndex = blocksData.findIndex(block => block.id === blockId);
+        document.getElementById('textEditor').value = textarea.value;
+        document.getElementById('textEditorModal').style.display = 'block';
     }
-
-    function saveBlock() {
-        // حفظ البلوك في المصفوفة
-        // ثم إغلاق المودال
-        closeModal();
+    
+    function closeTextEditor() {
+        document.getElementById('textEditorModal').style.display = 'none';
+        currentBlockIndex = null;
     }
-
-    function editBlock(blockId) {
-        // يمكن تنفيذ التعديل هنا
-        alert('ميزة تعديل البلوكات قيد التطوير');
-    }
-
-    function deleteBlock(blockId) {
-        if (confirm('هل أنت متأكد من حذف هذا البلوك؟')) {
-            // إرسال طلب AJAX لحذف البلوك
-            fetch(`/api/blocks/${blockId}/delete/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('حدث خطأ أثناء حذف البلوك');
-                }
-            });
-        }
-    }
-
-    // تأكيد الحذف
-    function confirmDelete() {
-        if (confirm('هل أنت متأكد من حذف هذا المنشور؟ هذا الإجراء لا يمكن التراجع عنه.')) {
-            window.location.href = "{% url 'delete_post' post.id %}";
-        }
-    }
-
-    // نسخ رابط المنشور
-    function copyPostLink() {
-        const link = "{{ request.scheme }}://{{ request.get_host }}{% url 'post_detail' post.slug %}";
-        navigator.clipboard.writeText(link).then(() => {
-            alert('تم نسخ رابط المنشور إلى الحافظة');
-        });
-    }
-
-    // دالة للحصول على CSRF token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+    
+    function saveText() {
+        if (currentBlockIndex !== null) {
+            const newText = document.getElementById('textEditor').value;
+            blocksData[currentBlockIndex].text = newText;
+            
+            // تحديث textarea في الواجهة
+            const blockId = blocksData[currentBlockIndex].id;
+            const blockItem = document.querySelector(`.block-item[data-id="${blockId}"]`);
+            if (blockItem) {
+                const textarea = blockItem.querySelector('.block-text');
+                textarea.value = newText;
             }
+            
+            updateBlocksDataField();
+            closeTextEditor();
         }
-        return cookieValue;
     }
-
+    
+    // تحديد حالة النشر
+    function selectStatus(status) {
+        const statusOptions = document.querySelectorAll('.status-option');
+        statusOptions.forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        event.target.closest('.status-option').classList.add('selected');
+        
+        const radioInput = event.target.closest('.status-option').querySelector('input[type="radio"]');
+        radioInput.checked = true;
+    }
+    
+    // قبل إرسال النموذج
+    document.getElementById('postForm').addEventListener('submit', function(e) {
+        // تأكد من تحديث جميع بيانات البلوكات
+        const textareas = document.querySelectorAll('.block-text');
+        textareas.forEach(textarea => {
+            updateBlockData(textarea);
+        });
+        
+        console.log('Blocks data to save:', blocksData);
+        console.log('Form data length:', new FormData(this).get('blocks_data').length);
+    });
+    
+    // Dark Mode Toggle
+    const darkModeToggle = document.createElement('button');
+    darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    darkModeToggle.style.position = 'fixed';
+    darkModeToggle.style.top = '100px';
+    darkModeToggle.style.right = '20px';
+    darkModeToggle.style.zIndex = '1000';
+    darkModeToggle.style.background = 'var(--primary-color)';
+    darkModeToggle.style.color = 'white';
+    darkModeToggle.style.border = 'none';
+    darkModeToggle.style.borderRadius = '50%';
+    darkModeToggle.style.width = '50px';
+    darkModeToggle.style.height = '50px';
+    darkModeToggle.style.cursor = 'pointer';
+    darkModeToggle.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+    
+    darkModeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDark);
+        darkModeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+    
+    document.body.appendChild(darkModeToggle);
 </script>
-
-<style>
-    /* تنسيق إضافي */
-    textarea {
-        min-height: 200px;
-        resize: vertical;
-    }
-
-    select {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-        background-position: right 0.5rem center;
-        background-repeat: no-repeat;
-        background-size: 1.5em 1.5em;
-        padding-right: 2.5rem;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-    }
-
-    /* تأثيرات المودال */
-    #blockModal {
-        transition: all 0.3s ease;
-    }
-
-    .modal-content {
-        transform: translateY(-20px);
-        opacity: 0;
-        transition: all 0.3s ease;
-    }
-
-    #blockModal:not(.hidden) .modal-content {
-        transform: translateY(0);
-        opacity: 1;
-    }
-</style>
 {% endblock %}

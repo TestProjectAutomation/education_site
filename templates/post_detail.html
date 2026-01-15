@@ -1,4 +1,3 @@
-<!-- templates/post_detail.html -->
 {% extends 'base.html' %}
 
 {% block title %}{{ post.display_title }} - كنوز{% endblock %}
@@ -17,15 +16,15 @@
 <!-- رابط العودة -->
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center">
-        <a href="{% url 'home' %}" class="text-blue-600 hover:text-blue-800 font-medium">
+        <a href="{% url 'home' %}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
             <i class="fas fa-arrow-right mr-2"></i> العودة للرئيسية
         </a>
         
         <div class="flex items-center space-x-3 space-x-reverse">
-            <span class="text-gray-500 text-sm">
+            <span class="text-gray-500 dark:text-gray-400 text-sm">
                 <i class="fas fa-eye ml-1"></i> {{ post.views }} مشاهدة
             </span>
-            <span class="text-gray-500 text-sm">
+            <span class="text-gray-500 dark:text-gray-400 text-sm">
                 <i class="fas fa-comment ml-1"></i> {{ comments.count }} تعليق
             </span>
         </div>
@@ -36,23 +35,23 @@
 <article class="py-8">
     <div class="container mx-auto px-4 max-w-4xl">
         <!-- العنوان -->
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4 leading-tight">{{ post.title }}</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4 leading-tight">{{ post.title }}</h1>
         
         <!-- معلومات النشر -->
-        <div class="flex flex-wrap items-center justify-between mb-8 pb-6 border-b border-gray-200">
+        <div class="flex flex-wrap items-center justify-between mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center space-x-4 space-x-reverse mb-4 md:mb-0">
                 <!-- صورة المؤلف -->
-                {% if post.author.profile.profile_picture %}
-                <img src="{{ post.author.profile.profile_picture.url }}" alt="{{ post.author.get_full_name }}" 
-                     class="w-12 h-12 rounded-full object-cover border-2 border-white shadow">
+                {% if post.author.profile.profile_image %}
+                <img src="{{ post.author.profile.profile_image.url }}" alt="{{ post.author.get_full_name }}" 
+                     class="w-12 h-12 rounded-full object-cover border-2 border-white dark:border-gray-800 shadow">
                 {% else %}
                 <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow">
                     {{ post.author.first_name|default:post.author.username|first|upper }}
                 </div>
                 {% endif %}
                 <div>
-                    <h4 class="font-bold text-gray-800">{{ post.author.get_full_name|default:post.author.username }}</h4>
-                    <div class="flex items-center text-gray-500 text-sm">
+                    <h4 class="font-bold text-gray-800 dark:text-white">{{ post.author.get_full_name|default:post.author.username }}</h4>
+                    <div class="flex items-center text-gray-500 dark:text-gray-400 text-sm">
                         <i class="fas fa-calendar ml-2"></i>
                         <span>{{ post.publish_date|date:"Y/m/d" }}</span>
                         <i class="fas fa-clock mr-2 ml-4"></i>
@@ -65,7 +64,7 @@
             
             <!-- مشاركة -->
             <div class="flex items-center space-x-2">
-                <span class="text-gray-500 text-sm ml-2">شارك:</span>
+                <span class="text-gray-500 dark:text-gray-400 text-sm ml-2">شارك:</span>
                 <div class="flex space-x-2">
                     <button onclick="shareOnFacebook()" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition">
                         <i class="fab fa-facebook-f"></i>
@@ -95,27 +94,27 @@
         
         <!-- الملخص -->
         {% if post.excerpt %}
-        <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-l-4 border-blue-500">
+        <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-l-4 border-blue-500 dark:border-blue-400">
             <div class="flex items-start">
-                <i class="fas fa-quote-right text-blue-500 text-2xl ml-4 mt-1"></i>
+                <i class="fas fa-quote-right text-blue-500 dark:text-blue-400 text-2xl ml-4 mt-1"></i>
                 <div>
-                    <h3 class="text-lg font-bold text-gray-800 mb-2">ملخص المقال</h3>
-                    <p class="text-gray-700 leading-relaxed">{{ post.excerpt }}</p>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">ملخص المقال</h3>
+                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">{{ post.excerpt }}</p>
                 </div>
             </div>
         </div>
         {% endif %}
         
-        <!-- محتوى المقال -->
-        <div class="prose prose-lg max-w-none mb-12">
-            {{ post.content|linebreaks }}
+        <!-- محتوى المقال - التعديل هنا -->
+        <div class="post-content prose prose-lg max-w-none mb-12 dark:prose-invert">
+            {{ post.content|safe }}
         </div>
         
         <!-- البلوكات -->
         {% if post_blocks %}
         <div class="mb-12 space-y-8">
             {% for block in post_blocks %}
-            <div class="{% if block.block_type == 'text' %}prose prose-lg max-w-none{% endif %}">
+            <div class="{% if block.block_type == 'text' %}prose prose-lg max-w-none dark:prose-invert{% endif %}">
                 {% if block.block_type == 'text' %}
                     {{ block.text|safe }}
                 {% elif block.block_type == 'image' and block.image %}
@@ -123,7 +122,7 @@
                         <img src="{{ block.image.url }}" alt="Block Image {{ forloop.counter }}" 
                              class="w-full max-w-2xl mx-auto rounded-lg shadow-md">
                         {% if block.text %}
-                        <p class="text-gray-600 mt-2 text-sm">{{ block.text|safe }}</p>
+                        <p class="text-gray-600 dark:text-gray-300 mt-2 text-sm">{{ block.text|safe }}</p>
                         {% endif %}
                     </div>
                 {% endif %}
@@ -191,13 +190,11 @@
                 </script>
             </div>
         </div>
-        {% else %}
-      
         {% endif %}
         
         <!-- المشاركة -->
-        <div class="mb-12 p-8 bg-gradient-to-r from-gray-50 to-white rounded-2xl shadow-lg">
-            <h3 class="text-xl font-bold text-gray-800 mb-6 text-center">
+        <div class="mb-12 p-8 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-6 text-center">
                 <i class="fas fa-share-alt mr-2"></i> شارك هذا المنشور
             </h3>
             <div class="flex justify-center space-x-4 space-x-reverse">
@@ -213,7 +210,7 @@
                 <button onclick="shareOnLinkedIn()" class="w-14 h-14 bg-blue-800 rounded-full flex items-center justify-center text-white hover:bg-blue-900 transition transform hover:-translate-y-1 shadow-lg">
                     <i class="fab fa-linkedin-in text-xl"></i>
                 </button>
-                <button onclick="copyLink()" class="w-14 h-14 bg-gray-800 rounded-full flex items-center justify-center text-white hover:bg-gray-900 transition transform hover:-translate-y-1 shadow-lg">
+                <button onclick="copyLink()" class="w-14 h-14 bg-gray-800 dark:bg-gray-700 rounded-full flex items-center justify-center text-white hover:bg-gray-900 dark:hover:bg-gray-600 transition transform hover:-translate-y-1 shadow-lg">
                     <i class="fas fa-link text-xl"></i>
                 </button>
             </div>
@@ -222,7 +219,7 @@
         <!-- التعليقات -->
         <div class="mb-12" id="comments">
             <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl font-bold text-gray-800">
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">
                     <i class="fas fa-comments mr-2"></i> التعليقات ({{ comments.count }})
                 </h3>
                 
@@ -232,22 +229,22 @@
             </div>
             
             <!-- نموذج إضافة تعليق -->
-            <div class="bg-white p-8 rounded-2xl shadow-lg mb-8 border border-gray-100" id="commentForm">
-                <h4 class="text-lg font-bold text-gray-800 mb-6">أضف تعليقك</h4>
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg mb-8 border border-gray-100 dark:border-gray-700" id="commentForm">
+                <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-6">أضف تعليقك</h4>
                 <form method="post">
                     {% csrf_token %}
                     <input type="hidden" name="comment_form" value="1">
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label class="block text-gray-700 mb-3 font-medium">الاسم *</label>
+                            <label class="block text-gray-700 dark:text-gray-300 mb-3 font-medium">الاسم *</label>
                             {{ comment_form.name }}
                             {% if comment_form.name.errors %}
                             <p class="text-red-500 text-sm mt-1">{{ comment_form.name.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label class="block text-gray-700 mb-3 font-medium">البريد الإلكتروني *</label>
+                            <label class="block text-gray-700 dark:text-gray-300 mb-3 font-medium">البريد الإلكتروني *</label>
                             {{ comment_form.email }}
                             {% if comment_form.email.errors %}
                             <p class="text-red-500 text-sm mt-1">{{ comment_form.email.errors.0 }}</p>
@@ -256,7 +253,7 @@
                     </div>
                     
                     <div class="mb-6">
-                        <label class="block text-gray-700 mb-3 font-medium">التعليق *</label>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-3 font-medium">التعليق *</label>
                         {{ comment_form.content }}
                         {% if comment_form.content.errors %}
                         <p class="text-red-500 text-sm mt-1">{{ comment_form.content.errors.0 }}</p>
@@ -264,7 +261,7 @@
                     </div>
                     
                     <div class="flex items-center justify-between">
-                        <p class="text-gray-500 text-sm">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">
                             <i class="fas fa-info-circle ml-1"></i> سيظهر تعليقك بعد المراجعة
                         </p>
                         <button type="submit" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-3 rounded-lg hover:opacity-90 font-medium shadow-lg transform hover:-translate-y-0.5 transition">
@@ -278,7 +275,7 @@
             {% if comments %}
             <div class="space-y-6">
                 {% for comment in comments %}
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition" id="comment-{{ comment.id }}">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition" id="comment-{{ comment.id }}">
                     <div class="flex items-start">
                         <div class="w-14 h-14 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow ml-4 flex-shrink-0">
                             {{ comment.name|first|upper }}
@@ -286,11 +283,11 @@
                         <div class="flex-grow">
                             <div class="flex justify-between items-start mb-3">
                                 <div>
-                                    <h5 class="font-bold text-gray-800">{{ comment.name }}</h5>
-                                    <p class="text-gray-500 text-sm mt-1">{{ comment.email }}</p>
+                                    <h5 class="font-bold text-gray-800 dark:text-white">{{ comment.name }}</h5>
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ comment.email }}</p>
                                 </div>
                                 <div class="flex items-center">
-                                    <span class="text-gray-500 text-sm ml-4">{{ comment.created_at|timesince }}</span>
+                                    <span class="text-gray-500 dark:text-gray-400 text-sm ml-4">{{ comment.created_at|timesince }}</span>
                                     {% if comment.is_approved %}
                                     <span class="text-green-500 text-sm mr-4">
                                         <i class="fas fa-check-circle"></i>
@@ -298,17 +295,17 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <p class="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">{{ comment.content|linebreaks }}</p>
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">{{ comment.content|linebreaks }}</p>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="text-center py-12 bg-gradient-to-r from-gray-50 to-white rounded-2xl border-2 border-dashed border-gray-200">
-                <i class="fas fa-comment-slash text-gray-300 text-5xl mb-4"></i>
-                <h4 class="text-xl font-bold text-gray-600 mb-2">لا توجد تعليقات بعد</h4>
-                <p class="text-gray-500 mb-6">كن أول من يعلق على هذا المنشور!</p>
+            <div class="text-center py-12 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                <i class="fas fa-comment-slash text-gray-300 dark:text-gray-600 text-5xl mb-4"></i>
+                <h4 class="text-xl font-bold text-gray-600 dark:text-gray-400 mb-2">لا توجد تعليقات بعد</h4>
+                <p class="text-gray-500 dark:text-gray-500 mb-6">كن أول من يعلق على هذا المنشور!</p>
                 <button onclick="scrollToCommentForm()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium">
                     <i class="fas fa-comment-plus mr-2"></i> أضف تعليقك الآن
                 </button>
@@ -319,14 +316,14 @@
         <!-- منشورات مشابهة -->
         {% if similar_posts %}
         <div class="mb-12">
-            <h3 class="text-2xl font-bold text-gray-800 mb-8">
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-8">
                 <i class="fas fa-th-large mr-2"></i> منشورات مشابهة
             </h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {% for similar in similar_posts %}
                 <a href="{% url 'post_detail' similar.slug %}" 
-                   class="group bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                   class="group bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                     {% if similar.thumbnail %}
                     <img src="{{ similar.thumbnail.url }}" alt="{{ similar.title }}" 
                          class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
@@ -343,12 +340,12 @@
                     {% endif %}
                     
                     <div class="p-5">
-                        <h5 class="font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition line-clamp-2">
+                        <h5 class="font-bold text-gray-800 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-2">
                             {{ similar.title }}
                         </h5>
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ similar.excerpt|default:similar.content|truncatechars:80 }}</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">{{ similar.excerpt|default:similar.content|truncatechars:80 }}</p>
                         
-                        <div class="flex items-center justify-between text-gray-500 text-sm pt-4 border-t border-gray-100">
+                        <div class="flex items-center justify-between text-gray-500 dark:text-gray-500 text-sm pt-4 border-t border-gray-100 dark:border-gray-700">
                             <div class="flex items-center">
                                 <i class="fas fa-calendar ml-1"></i>
                                 <span>{{ similar.publish_date|date:"Y/m/d" }}</span>
@@ -366,6 +363,145 @@
         {% endif %}
     </div>
 </article>
+
+<style>
+    /* تخصيص الخطوط والمحتوى */
+    .post-content {
+        color: #374151;
+        line-height: 1.8;
+        font-size: 1.125rem;
+    }
+
+    .dark-mode .post-content {
+        color: #d1d5db;
+    }
+
+    .post-content h2 {
+        color: #1f2937;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        border-right: 4px solid #3b82f6;
+        padding-right: 1rem;
+    }
+
+    .dark-mode .post-content h2 {
+        color: #e5e7eb;
+        border-right: 4px solid #60a5fa;
+    }
+
+    .post-content h3 {
+        color: #374151;
+        font-weight: 600;
+        font-size: 1.25rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .dark-mode .post-content h3 {
+        color: #d1d5db;
+    }
+
+    .post-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    .post-content ul, .post-content ol {
+        margin-right: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .post-content li {
+        margin-bottom: 0.5rem;
+    }
+
+    .post-content blockquote {
+        border-right: 4px solid #e5e7eb;
+        padding-right: 1rem;
+        font-style: italic;
+        color: #6b7280;
+    }
+
+    .dark-mode .post-content blockquote {
+        border-right: 4px solid #4b5563;
+        color: #9ca3af;
+    }
+
+    .post-content a {
+        color: #3b82f6;
+        text-decoration: underline;
+    }
+
+    .post-content a:hover {
+        color: #1d4ed8;
+    }
+
+    .dark-mode .post-content a {
+        color: #60a5fa;
+    }
+
+    .dark-mode .post-content a:hover {
+        color: #3b82f6;
+    }
+
+    /* حل مشكلة &nbsp; */
+    .post-content {
+        white-space: normal;
+        word-wrap: break-word;
+    }
+
+    .post-content * {
+        max-width: 100%;
+    }
+
+    /* تأثيرات متحركة */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    article > div > * {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    article > div > *:nth-child(2) { animation-delay: 0.1s; }
+    article > div > *:nth-child(3) { animation-delay: 0.2s; }
+    article > div > *:nth-child(4) { animation-delay: 0.3s; }
+
+    /* قص النص */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* تنسيق حقول النموذج */
+    input, textarea {
+        background-color: white;
+        color: #374151;
+        border: 1px solid #d1d5db;
+    }
+
+    .dark-mode input, .dark-mode textarea {
+        background-color: #374151;
+        color: #d1d5db;
+        border: 1px solid #4b5563;
+    }
+
+    .dark-mode input:focus, .dark-mode textarea:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+    }
+</style>
 
 <script>
     // وظائف المشاركة
@@ -411,113 +547,11 @@
     document.addEventListener('DOMContentLoaded', function() {
         const inputs = document.querySelectorAll('input, textarea');
         inputs.forEach(input => {
-            input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'rounded-lg', 
-                            'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500',
-                            'transition');
+            input.classList.add('w-full', 'px-4', 'py-3', 'border', 'border-gray-300', 'dark:border-gray-600', 
+                            'rounded-lg', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 
+                            'focus:border-blue-500', 'dark:bg-gray-700', 'dark:text-white',
+                            'transition', 'duration-200');
         });
     });
 </script>
-
-<style>
-    /* تخصيص الخطوط والمحتوى */
-    .prose {
-        color: #374151;
-        line-height: 1.8;
-        font-size: 1.125rem;
-    }
-
-    .prose h2 {
-        color: #1f2937;
-        font-weight: 700;
-        font-size: 1.5rem;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-        border-right: 4px solid #3b82f6;
-        padding-right: 1rem;
-    }
-
-    .prose h3 {
-        color: #374151;
-        font-weight: 600;
-        font-size: 1.25rem;
-        margin-top: 1.5rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .prose p {
-        margin-bottom: 1.5rem;
-    }
-
-    .prose ul, .prose ol {
-        margin-right: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .prose li {
-        margin-bottom: 0.5rem;
-    }
-
-    .prose blockquote {
-        border-right: 4px solid #e5e7eb;
-        padding-right: 1rem;
-        font-style: italic;
-        color: #6b7280;
-    }
-
-    .prose a {
-        color: #3b82f6;
-        text-decoration: underline;
-    }
-
-    .prose a:hover {
-        color: #1d4ed8;
-    }
-
-    /* تأثيرات متحركة */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    article > div > * {
-        animation: fadeIn 0.5s ease-out forwards;
-    }
-
-    article > div > *:nth-child(2) { animation-delay: 0.1s; }
-    article > div > *:nth-child(3) { animation-delay: 0.2s; }
-    article > div > *:nth-child(4) { animation-delay: 0.3s; }
-
-    /* قص النص */
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .line-clamp-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    /* تخصيص شريط التمرير */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 5px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-</style>
 {% endblock %}

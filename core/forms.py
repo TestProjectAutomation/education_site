@@ -11,13 +11,19 @@ from .models import *
 
 # ======== وظيفة مساعدة للتنسيق التلقائي ========
 def apply_field_styling(field, field_type, label=None):
-    """تطبيق تنسيق تلقائي على حقل"""
+    """تطبيق تنسيق تلقائي على حقل مع دعم Dark Mode"""
     if not field.widget.attrs:
         field.widget.attrs = {}
     
-    # إضافة class عام
+    # إضافة class عام مع دعم Dark Mode
+    base_classes = 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200'
+    dark_classes = ' dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:ring-blue-400 dark:focus:border-blue-400'
+    
     if 'class' not in field.widget.attrs:
-        field.widget.attrs['class'] = 'form-control'
+        field.widget.attrs['class'] = base_classes + dark_classes
+    else:
+        if 'w-full' not in field.widget.attrs['class']:
+            field.widget.attrs['class'] = base_classes + ' ' + field.widget.attrs['class'] + dark_classes
     
     # حسب نوع الحقل
     if field_type in ['CharField', 'EmailField', 'URLField', 'SlugField']:
@@ -27,6 +33,7 @@ def apply_field_styling(field, field_type, label=None):
     elif field_type == 'TextField':
         if not field.widget.attrs.get('rows'):
             field.widget.attrs['rows'] = 4
+        field.widget.attrs['class'] += ' resize-y'
     
     elif field_type == 'IntegerField':
         field.widget.attrs['type'] = 'number'
@@ -38,7 +45,10 @@ def apply_field_styling(field, field_type, label=None):
         field.widget.attrs['type'] = 'datetime-local'
     
     elif field_type == 'BooleanField':
-        field.widget.attrs['class'] = 'form-check-input'
+        field.widget.attrs['class'] = 'form-check-input dark:bg-gray-700'
+    
+    elif field_type == 'ChoiceField':
+        field.widget.attrs['class'] += ' cursor-pointer'
     
     return field
 
@@ -175,6 +185,102 @@ class UserUpdateForm(forms.ModelForm):
 
 # ======== فورم المنشورات ========
 class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = [
+            'title', 'category', 'content', 
+            'image', 'featured_image',
+            'excerpt', 'link', 'link_delay', 'status',
+            'seo_title', 'seo_description', 'seo_keywords',
+            'publish_date'
+        ]
+        
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'placeholder': 'أدخل عنوان المنشور',
+                'required': True,
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'category': forms.Select(attrs={
+                'required': True,
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'content': forms.Textarea(attrs={
+                'rows': 10,
+                'id': 'post_content_field',
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'image': forms.FileInput(attrs={
+                'accept': 'image/*',
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'featured_image': forms.FileInput(attrs={
+                'accept': 'image/*',
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'excerpt': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'ملخص مختصر للمنشور',
+                'maxlength': '300',
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'link': forms.URLInput(attrs={
+                'placeholder': 'https://example.com',
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'link_delay': forms.NumberInput(attrs={
+                'min': 0,
+                'max': 300,
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'seo_title': forms.TextInput(attrs={
+                'placeholder': 'عنوان لمحركات البحث',
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'seo_description': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'وصف لمحركات البحث',
+                'maxlength': '300',
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'seo_keywords': forms.TextInput(attrs={
+                'placeholder': 'كلمات مفتاحية مفصولة بفواصل',
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+            'publish_date': forms.DateTimeInput(attrs={
+                'type': 'datetime-local',
+                'class': 'form-control dark:bg-gray-800 dark:text-white dark:border-gray-600'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # تطبيق التنسيق التلقائي مع دعم Dark Mode
+        for field_name, field in self.fields.items():
+            field_type = type(field).__name__
+            label = field.label or field_name.replace('_', ' ').title()
+            field = apply_field_styling(field, field_type, label)
+            
+            # إضافة classes خاصة للوضع الداكن إذا لم تكن موجودة
+            if 'class' in field.widget.attrs:
+                if 'dark:' not in field.widget.attrs['class']:
+                    field.widget.attrs['class'] += ' dark:bg-gray-800 dark:text-white dark:border-gray-600'
+        
+        # إعدادات خاصة
+        if not self['category'].value():
+            self.fields['category'].empty_label = "-- اختر الفئة --"
+        
+        self.fields['title'].required = True
+        self.fields['category'].required = True
+        
+        # إضافة أخطاء مخصصة للملخص
+        self.fields['excerpt'].error_messages = {
+            'max_length': 'الملخص لا يمكن أن يتجاوز 300 حرف.'
+        }
     class Meta:
         model = Post
         fields = [

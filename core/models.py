@@ -11,6 +11,8 @@ import os
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 import datetime
+from ckeditor.fields import RichTextField
+
 
 class Category(models.Model):
     CATEGORY_TYPES = [
@@ -52,7 +54,7 @@ class Post(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts', verbose_name="المؤلف")
 
     # المحتوى
-    content = models.TextField(verbose_name="المحتوى")
+    content = RichTextField(verbose_name="المحتوى")
     
     # الصور (القديم والجديد معاً)
     image = models.ImageField(upload_to='posts/featured/%Y/%m/%d/', blank=True, verbose_name="الصورة القديمة")
