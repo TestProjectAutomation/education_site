@@ -20,11 +20,11 @@ class Category(models.Model):
         ('books', 'الكتب والملخصات'),
     ]
     
-    name = models.CharField(max_length=100)
-    category_type = models.CharField(max_length=20, choices=CATEGORY_TYPES)
-    description = models.TextField(blank=True)
-    icon = models.CharField(max_length=50, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=100, verbose_name="الاسم")
+    category_type = models.CharField(max_length=20, choices=CATEGORY_TYPES, verbose_name="نوع الفئة")
+    description = models.TextField(blank=True, verbose_name="الوصف")
+    icon = models.CharField(max_length=50, blank=True, verbose_name="الأيقونة")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
     
     class Meta:
         verbose_name = 'القسم'
@@ -35,48 +35,49 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        # رابط البحث مع فلتر حسب نوع القسم
         return f"{reverse('search')}?category={self.category_type}"
 
-class Post(models.Model):
 
+class Post(models.Model):
     class Status(models.TextChoices):
         DRAFT = 'draft', 'مسودة'
         PUBLISHED = 'published', 'منشور'
         PRIVATE = 'private', 'خاص'
         ARCHIVED = 'archived', 'مؤرشف'
 
-    title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=250, unique=True)
+    # المعلومات الأساسية
+    title = models.CharField(max_length=200, verbose_name="العنوان")
+    slug = models.SlugField(max_length=250, unique=True, verbose_name="الرابط")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts', verbose_name="الفئة")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts', verbose_name="المؤلف")
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts')
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
+    # المحتوى
+    content = models.TextField(verbose_name="المحتوى")
+    
+    # الصور (القديم والجديد معاً)
+    image = models.ImageField(upload_to='posts/featured/%Y/%m/%d/', blank=True, verbose_name="الصورة القديمة")
+    featured_image = models.ImageField(upload_to='posts/featured/%Y/%m/', blank=True, verbose_name="الصورة الرئيسية")
+    thumbnail = models.ImageField(upload_to='posts/thumbnails/%Y/%m/', blank=True, verbose_name="الصورة المصغرة")
 
-    # القديم
-    content = models.TextField(blank=True)
-    image = models.ImageField(upload_to='posts/featured/%Y/%m/%d/', blank=True)
+    excerpt = models.TextField(max_length=300, blank=True, verbose_name="الملخص")
 
-    # الجديد
-    featured_image = models.ImageField(upload_to='posts/featured/%Y/%m/', blank=True)
-    thumbnail = models.ImageField(upload_to='posts/thumbnails/%Y/%m/', blank=True)
+    # الروابط
+    link = models.URLField(blank=True, null=True, verbose_name="رابط خارجي")
+    link_delay = models.IntegerField(default=30, blank=True, null=True, verbose_name="تأخير الرابط")
 
-    excerpt = models.TextField(max_length=300, blank=True)
+    # الإحصائيات
+    views = models.PositiveIntegerField(default=0, verbose_name="المشاهدات")
 
-    link = models.URLField(blank=True, null=True)
-    link_delay = models.IntegerField(default=30, blank=True, null=True)
-
-    views = models.PositiveIntegerField(default=0)
-
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
-
-    publish_date = models.DateTimeField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # حالة النشر
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT, verbose_name="الحالة")
+    publish_date = models.DateTimeField(blank=True, null=True, verbose_name="تاريخ النشر")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
 
     # SEO
-    seo_title = models.CharField(max_length=200, blank=True)
-    seo_description = models.TextField(max_length=300, blank=True)
-    seo_keywords = models.CharField(max_length=200, blank=True)
+    seo_title = models.CharField(max_length=200, blank=True, verbose_name="عنوان SEO")
+    seo_description = models.TextField(max_length=300, blank=True, verbose_name="وصف SEO")
+    seo_keywords = models.CharField(max_length=200, blank=True, verbose_name="كلمات مفتاحية SEO")
 
     class Meta:
         verbose_name = 'منشور'
@@ -86,8 +87,8 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
-    # slug ذكي بدون كسر القديم
     def save(self, *args, **kwargs):
+        # إنشاء slug تلقائياً إذا لم يكن موجوداً
         if not self.slug:
             base = slugify(self.title, allow_unicode=True) or "post"
             slug = base
@@ -96,40 +97,41 @@ class Post(models.Model):
                 slug = f"{base}-{i}"
                 i += 1
             self.slug = slug
-        super().save(*args, **kwargs)
-
+        
         # نشر تلقائي
         if self.status == self.Status.PUBLISHED and not self.publish_date:
             self.publish_date = timezone.now()
-
+        
         super().save(*args, **kwargs)
-
-        # إنشاء thumbnail تلقائي
+        
+        # إنشاء thumbnail تلقائياً إذا كانت featured_image موجودة
         if self.featured_image and not self.thumbnail:
             self.create_thumbnail()
 
     def create_thumbnail(self):
+        """إنشاء صورة مصغرة من الصورة الرئيسية"""
         if not self.featured_image:
             return
+        
+        try:
+            image = Image.open(self.featured_image.path)
+            image.thumbnail((400, 300), Image.Resampling.LANCZOS)
+            
+            thumb_path = self.featured_image.path.replace("featured", "thumbnails")
+            os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
+            image.save(thumb_path)
+            
+            self.thumbnail.name = thumb_path.split("media/")[-1]
+            self.save(update_fields=["thumbnail"])
+        except Exception as e:
+            print(f"خطأ في إنشاء الصورة المصغرة: {e}")
 
-        image = Image.open(self.featured_image.path)
-        image.thumbnail((400, 300), Image.Resampling.LANCZOS)
-
-        thumb_path = self.featured_image.path.replace("featured", "thumbnails")
-        os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
-        image.save(thumb_path)
-
-        self.thumbnail.name = thumb_path.split("media/")[-1]
-        super().save(update_fields=["thumbnail"])
-
-    # روابط وعدادات
     def get_absolute_url(self):
         return reverse("post_detail", kwargs={"slug": self.slug})
 
     def increment_views(self):
         Post.objects.filter(pk=self.pk).update(views=models.F("views") + 1)
 
-    # عرض ذكي
     @property
     def display_title(self):
         return self.seo_title or self.title
@@ -137,6 +139,11 @@ class Post(models.Model):
     @property
     def display_description(self):
         return self.seo_description or self.excerpt or self.content[:160]
+    
+    @property
+    def get_main_image(self):
+        """الحصول على الصورة الرئيسية (الأفضلية للصورة الجديدة ثم القديمة)"""
+        return self.featured_image or self.image
 
 
 class PostBlock(models.Model):
@@ -144,37 +151,28 @@ class PostBlock(models.Model):
         TEXT = 'text', _('نص')
         IMAGE = 'image', _('صورة')
 
-    post = models.ForeignKey(
-        Post,
-        on_delete=models.CASCADE,
-        related_name='blocks',
-        verbose_name=_("المقال")
-    )
-
-    block_type = models.CharField(
-        max_length=10,
-        choices=BlockType.choices,
-        verbose_name=_("نوع البلوك")
-    )
-
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='blocks', verbose_name=_("المنشور"))
+    block_type = models.CharField(max_length=10, choices=BlockType.choices, verbose_name=_("نوع البلوك"))
     text = RichTextField(blank=True, null=True, verbose_name=_("النص"))
     image = models.ImageField(upload_to='blog/blocks/%Y/%m/', blank=True, null=True, verbose_name=_("الصورة"))
-
     order = models.PositiveIntegerField(default=0, verbose_name=_("الترتيب"))
 
     class Meta:
         ordering = ['order']
+        verbose_name = _("بلوك المحتوى")
+        verbose_name_plural = _("بلوكات المحتوى")
 
     def __str__(self):
-        return f"{self.post.title} - {self.block_type} ({self.order})"
+        return f"{self.post.title} - {self.get_block_type_display()} ({self.order})"
+
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-    content = models.TextField()
-    is_approved = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', verbose_name="المنشور")
+    name = models.CharField(max_length=100, verbose_name="الاسم")
+    email = models.EmailField(verbose_name="البريد الإلكتروني")
+    content = models.TextField(verbose_name="المحتوى")
+    is_approved = models.BooleanField(default=False, verbose_name="معتمد")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
     
     class Meta:
         verbose_name = 'تعليق'
@@ -187,28 +185,28 @@ class Comment(models.Model):
 
 class SiteSettings(models.Model):
     """إعدادات الموقع"""
-    site_name = models.CharField(max_length=200, default='موقع التعليم')
-    site_description = models.TextField(blank=True, null=True)
-    site_logo = models.ImageField(upload_to='site/', blank=True, null=True)
+    site_name = models.CharField(max_length=200, default='موقع التعليم', verbose_name="اسم الموقع")
+    site_description = models.TextField(blank=True, null=True, verbose_name="وصف الموقع")
+    site_logo = models.ImageField(upload_to='site/', blank=True, null=True, verbose_name="شعار الموقع")
     
     # إعدادات المحتوى
-    default_link_delay = models.IntegerField(default=30, help_text='التأخير الافتراضي بالثواني')
-    allow_comments = models.BooleanField(default=True)
-    require_comment_approval = models.BooleanField(default=True)
+    default_link_delay = models.IntegerField(default=30, help_text='التأخير الافتراضي بالثواني', verbose_name="تأخير الرابط الافتراضي")
+    allow_comments = models.BooleanField(default=True, verbose_name="السماح بالتعليقات")
+    require_comment_approval = models.BooleanField(default=True, verbose_name="يتطلب موافقة على التعليقات")
     
     # إعدادات النظام
-    maintenance_mode = models.BooleanField(default=False)
-    contact_email = models.EmailField(default='contact@example.com')
+    maintenance_mode = models.BooleanField(default=False, verbose_name="وضع الصيانة")
+    contact_email = models.EmailField(default='contact@example.com', verbose_name="البريد الإلكتروني للتواصل")
     
     # وسائل التواصل الاجتماعي
-    facebook_url = models.URLField(blank=True, null=True)
-    twitter_url = models.URLField(blank=True, null=True)
-    instagram_url = models.URLField(blank=True, null=True)
-    youtube_url = models.URLField(blank=True, null=True)
+    facebook_url = models.URLField(blank=True, null=True, verbose_name="رابط الفيسبوك")
+    twitter_url = models.URLField(blank=True, null=True, verbose_name="رابط تويتر")
+    instagram_url = models.URLField(blank=True, null=True, verbose_name="رابط إنستغرام")
+    youtube_url = models.URLField(blank=True, null=True, verbose_name="رابط يوتيوب")
     
     # التواريخ
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
     
     def __str__(self):
         return self.site_name
@@ -216,6 +214,7 @@ class SiteSettings(models.Model):
     class Meta:
         verbose_name = 'إعدادات الموقع'
         verbose_name_plural = 'إعدادات الموقع'
+
 
 class SystemLog(models.Model):
     """سجلات النظام"""
@@ -226,13 +225,12 @@ class SystemLog(models.Model):
         ('security', 'أمني'),
     )
     
-    log_type = models.CharField(max_length=20, choices=LOG_TYPES, default='info')
-    message = models.TextField()
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
-    user_agent = models.TextField(blank=True, null=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
+    log_type = models.CharField(max_length=20, choices=LOG_TYPES, default='info', verbose_name="نوع السجل")
+    message = models.TextField(verbose_name="الرسالة")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="المستخدم")
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="عنوان IP")
+    user_agent = models.TextField(blank=True, null=True, verbose_name="معلومات المتصفح")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
     
     def __str__(self):
         return f"{self.get_log_type_display()} - {self.message[:50]}"
@@ -242,14 +240,14 @@ class SystemLog(models.Model):
         verbose_name = 'سجل النظام'
         verbose_name_plural = 'سجلات النظام'
 
-# تحديث نموذج UserProfile الموجود
+
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    full_name = models.CharField(max_length=255, blank=True)
-    bio = models.TextField(blank=True, null=True)
-    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    birth_date = models.DateField(blank=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile', verbose_name="المستخدم")
+    full_name = models.CharField(max_length=255, blank=True, verbose_name="الاسم الكامل")
+    bio = models.TextField(blank=True, null=True, verbose_name="السيرة الذاتية")
+    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True, verbose_name="صورة الملف الشخصي")
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="الهاتف")
+    birth_date = models.DateField(blank=True, null=True, verbose_name="تاريخ الميلاد")
     
     # الصلاحيات
     is_content_editor = models.BooleanField(default=False, verbose_name='محرر محتوى')
@@ -257,11 +255,11 @@ class UserProfile(models.Model):
     can_manage_categories = models.BooleanField(default=False, verbose_name='يمكنه إدارة الأقسام')
 
     # الإحصائيات
-    posts_count = models.IntegerField(default=0)
-    comments_count = models.IntegerField(default=0)
-    last_active = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    posts_count = models.IntegerField(default=0, verbose_name="عدد المنشورات")
+    comments_count = models.IntegerField(default=0, verbose_name="عدد التعليقات")
+    last_active = models.DateTimeField(auto_now=True, verbose_name="آخر نشاط")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
     
     def __str__(self):
         return f'{self.user.username} Profile'
@@ -270,6 +268,13 @@ class UserProfile(models.Model):
         verbose_name = 'ملف المستخدم'
         verbose_name_plural = 'ملفات المستخدمين'
 
+    def update_stats(self):
+        """تحديث إحصائيات المستخدم"""
+        self.posts_count = self.user.posts.count()
+        self.comments_count = Comment.objects.filter(post__author=self.user).count()
+        self.save(update_fields=['posts_count', 'comments_count'])
+
+
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
@@ -277,4 +282,5 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    if hasattr(instance, 'profile'):
+        instance.profile.save()

@@ -77,12 +77,10 @@ urlpatterns = [
     # لوحة تحكم المحتوى
     path('content/dashboard/', views.content_dashboard, name='content_dashboard'),
     path('my-posts/comments/', views.view_comments_on_my_posts, name='my_comments'),
-    path('my-posts/edit/<int:post_id>/', views.edit_my_post, name='edit_my_post'),
     
     # إدارة الأدمن
     path('admin/settings/', views.admin_settings, name='admin_settings'),
     path('admin/users/', views.manage_users, name='manage_users'),
-    # path('admin/users/<int:user_id>/edit-role/', views.edit_user_role, name='edit_user_role'),
     path('admin/logs/', views.system_logs, name='system_logs'),
     
     # لوحة تحكم Staff
